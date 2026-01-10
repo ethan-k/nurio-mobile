@@ -2,7 +2,11 @@ package io.nurio.mobile
 
 import android.os.Bundle
 import android.view.View
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import dev.hotwire.navigation.activities.HotwireActivity
 import dev.hotwire.navigation.navigator.NavigatorConfiguration
@@ -13,11 +17,14 @@ class MainActivity : HotwireActivity() {
     private var currentTabId = R.id.nav_home
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen()
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         setupBottomNavigation()
+        setupEdgeToEdge()
+        setupBackNavigation()
     }
 
     private fun setupBottomNavigation() {
@@ -30,6 +37,29 @@ class MainActivity : HotwireActivity() {
             }
             true
         }
+    }
+
+    private fun setupEdgeToEdge() {
+        ViewCompat.setOnApplyWindowInsetsListener(bottomNavigation) { view, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.setPadding(0, 0, 0, systemBars.bottom)
+            insets
+        }
+    }
+
+    private fun setupBackNavigation() {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                // If not on home tab, go to home tab
+                if (currentTabId != R.id.nav_home) {
+                    bottomNavigation.selectedItemId = R.id.nav_home
+                } else {
+                    // On home tab, let the system handle it (exit app)
+                    isEnabled = false
+                    onBackPressedDispatcher.onBackPressed()
+                }
+            }
+        })
     }
 
     private fun switchTab(tabId: Int) {
