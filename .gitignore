@@ -11,6 +11,11 @@ android/.cxx/
 android/*.apk
 android/*.aab
 
+# Signing
+android/keystore.properties
+android/*.keystore
+android/*.jks
+
 # iOS
 ios/build/
 ios/DerivedData/
