@@ -19,7 +19,7 @@ android {
 
     buildTypes {
         debug {
-            buildConfigField("String", "BASE_URL", "\"https://nurio.io\"")
+            buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:3000\"")
             buildConfigField("Boolean", "DEBUG_LOGGING", "true")
         }
         release {
@@ -29,7 +29,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            buildConfigField("String", "BASE_URL", "\"https://nurio.io\"")
+            buildConfigField("String", "BASE_URL", "\"https://nurio.kr\"")
             buildConfigField("Boolean", "DEBUG_LOGGING", "false")
         }
     }
