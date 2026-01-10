@@ -2,4 +2,7 @@
 <resources>
     <string name="app_name">Nurio</string>
     <string name="app_name_korean">누리오</string>
+    <string name="nav_home">Home</string>
+    <string name="nav_events">Events</string>
+    <string name="nav_profile">Profile</string>
 </resources>
