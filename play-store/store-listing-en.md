@@ -42,7 +42,7 @@ Receive important notifications about new events, registration confirmations, an
 
 Download Nurio now and experience moments where language flows naturally!
 
-Contact: support@nurio.kr
+Contact: nurio_official@naver.com
 Website: https://nurio.kr
 
 ## Tags/Keywords

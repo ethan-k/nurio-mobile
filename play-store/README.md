@@ -27,7 +27,7 @@
 | Target Age | 13+ |
 | Privacy Policy | https://nurio.kr/privacy_policy |
 | Terms of Service | https://nurio.kr/terms_of_service |
-| Support Email | support@nurio.kr |
+| Support Email | nurio_official@naver.com |
 | Website | https://nurio.kr |
 
 ### Screenshot Requirements
