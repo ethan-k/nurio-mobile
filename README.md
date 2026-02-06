@@ -33,7 +33,7 @@ nurio-mobile/
 
 ### Development Server
 
-The app connects to `https://nurio.io` by default. For local development:
+The app connects to `https://nurio.kr` by default. For local development:
 
 1. Update `BASE_URL` in `android/app/build.gradle.kts`
 2. Ensure your Rails server is running with `bin/dev`
