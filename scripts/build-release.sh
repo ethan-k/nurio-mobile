@@ -7,6 +7,22 @@ GRADLE_FILE="$PROJECT_ROOT/android/app/build.gradle.kts"
 ANDROID_DIR="$PROJECT_ROOT/android"
 OUTPUT_DIR="$ANDROID_DIR/app/build/outputs/bundle/release"
 
+# Use Android Studio JBR to avoid JDK compatibility issues
+ANDROID_STUDIO_JBR="/Users/ws/Applications/Android Studio.app/Contents/jbr/Contents/Home"
+if [ -d "$ANDROID_STUDIO_JBR" ]; then
+    export JAVA_HOME="$ANDROID_STUDIO_JBR"
+fi
+
+# Verify keystore exists
+if [ ! -f "$ANDROID_DIR/keystore.properties" ]; then
+    echo "ERROR: android/keystore.properties not found. Create it with:"
+    echo "  storePassword=YOUR_PASSWORD"
+    echo "  keyPassword=YOUR_PASSWORD"
+    echo "  keyAlias=nurio"
+    echo "  storeFile=../nurio-release.jks"
+    exit 1
+fi
+
 # Read current versionCode and versionName
 CURRENT_CODE=$(sed -n 's/.*versionCode = \([0-9]*\)/\1/p' "$GRADLE_FILE")
 CURRENT_NAME=$(sed -n 's/.*versionName = "\([^"]*\)"/\1/p' "$GRADLE_FILE")

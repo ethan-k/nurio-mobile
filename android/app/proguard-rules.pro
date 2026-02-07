@@ -19,3 +19,6 @@
 # Kotlin serialization
 -keepattributes *Annotation*, InnerClasses
 -dontnote kotlinx.serialization.AnnotationsKt
+
+# Suppress warnings for missing classes
+-dontwarn javax.lang.model.element.Modifier
