@@ -25,8 +25,8 @@
 | App Category | Social |
 | Content Rating | Everyone |
 | Target Age | 13+ |
-| Privacy Policy | https://nurio.kr/privacy_policy |
-| Terms of Service | https://nurio.kr/terms_of_service |
+| Privacy Policy | https://nurio.kr/privacy-policy |
+| Terms of Service | https://nurio.kr/terms-of-service |
 | Support Email | nurio_official@naver.com |
 | Website | https://nurio.kr |
 
