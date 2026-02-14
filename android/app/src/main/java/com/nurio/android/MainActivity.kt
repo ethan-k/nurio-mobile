@@ -1,4 +1,4 @@
-package io.nurio.mobile
+package com.nurio.android
 
 import android.os.Bundle
 import android.view.View

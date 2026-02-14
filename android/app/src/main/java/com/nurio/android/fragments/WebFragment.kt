@@ -1,4 +1,4 @@
-package io.nurio.mobile.fragments
+package com.nurio.android.fragments
 
 import android.os.Bundle
 import android.view.View

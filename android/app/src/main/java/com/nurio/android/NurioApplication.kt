@@ -1,12 +1,12 @@
-package io.nurio.mobile
+package com.nurio.android
 
 import android.app.Application
 import dev.hotwire.core.config.Hotwire
 import dev.hotwire.core.turbo.config.PathConfiguration
 import dev.hotwire.navigation.config.defaultFragmentDestination
 import dev.hotwire.navigation.config.registerFragmentDestinations
-import io.nurio.mobile.fragments.WebFragment
-import io.nurio.mobile.fragments.WebModalFragment
+import com.nurio.android.fragments.WebFragment
+import com.nurio.android.fragments.WebModalFragment
 
 class NurioApplication : Application() {
     override fun onCreate() {

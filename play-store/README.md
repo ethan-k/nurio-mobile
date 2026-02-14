@@ -21,7 +21,7 @@
 
 | Field | Value |
 |-------|-------|
-| Package Name | io.nurio.mobile |
+| Package Name | com.nurio.android |
 | App Category | Social |
 | Content Rating | Everyone |
 | Target Age | 13+ |
