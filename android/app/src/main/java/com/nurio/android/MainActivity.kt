@@ -14,7 +14,7 @@ import dev.hotwire.navigation.navigator.NavigatorConfiguration
 class MainActivity : HotwireActivity() {
 
     private lateinit var bottomNavigation: BottomNavigationView
-    private var currentTabId = R.id.nav_home
+    private var currentTabId = R.id.nav_events
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
@@ -37,6 +37,10 @@ class MainActivity : HotwireActivity() {
             }
             true
         }
+
+        // Start mobile users on the events list instead of the web landing page.
+        switchTab(currentTabId)
+        bottomNavigation.selectedItemId = currentTabId
     }
 
     private fun setupEdgeToEdge() {
