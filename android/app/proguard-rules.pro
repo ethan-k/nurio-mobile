@@ -7,6 +7,10 @@
 # Keep Bridge Components
 -keep class * extends dev.hotwire.core.bridge.BridgeComponent { *; }
 
+# Keep app Hotwire destinations and their annotations for runtime fragment routing.
+-keep class com.nurio.android.fragments.** { *; }
+-keep @dev.hotwire.navigation.destinations.HotwireDestinationDeepLink class com.nurio.android.fragments.** { *; }
+
 # Keep WebView JavaScript interfaces
 -keepclassmembers class * {
     @android.webkit.JavascriptInterface <methods>;

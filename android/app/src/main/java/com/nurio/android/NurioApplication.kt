@@ -29,8 +29,7 @@ class NurioApplication : Application() {
         Hotwire.loadPathConfiguration(
             context = this,
             location = PathConfiguration.Location(
-                assetFilePath = "json/path-configuration.json",
-                remoteFileUrl = "${BuildConfig.BASE_URL}/hotwire/android/path-configuration.json"
+                assetFilePath = "json/path-configuration.json"
             )
         )
     }

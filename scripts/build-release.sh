@@ -7,11 +7,8 @@ GRADLE_FILE="$PROJECT_ROOT/android/app/build.gradle.kts"
 ANDROID_DIR="$PROJECT_ROOT/android"
 OUTPUT_DIR="$ANDROID_DIR/app/build/outputs/bundle/release"
 
-# Use Android Studio JBR to avoid JDK compatibility issues
-ANDROID_STUDIO_JBR="/Users/ws/Applications/Android Studio.app/Contents/jbr/Contents/Home"
-if [ -d "$ANDROID_STUDIO_JBR" ]; then
-    export JAVA_HOME="$ANDROID_STUDIO_JBR"
-fi
+# Keep the current JAVA_HOME. Gradle daemon JVM is pinned in
+# android/gradle/gradle-daemon-jvm.properties.
 
 # Verify keystore exists
 if [ ! -f "$ANDROID_DIR/keystore.properties" ]; then

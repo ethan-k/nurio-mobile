@@ -39,12 +39,14 @@ android {
 
     buildTypes {
         debug {
-            buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:3000\"")
+            buildConfigField("String", "BASE_URL", "\"https://nurio.kr\"")
             buildConfigField("Boolean", "DEBUG_LOGGING", "true")
         }
         release {
-            isMinifyEnabled = true
-            isShrinkResources = true
+            // Temporary stability guard: AGP 8.7.3 + Kotlin 2.3 can trigger R8 metadata issues.
+            // Re-enable after upgrading AGP/R8 to a Kotlin 2.3-compatible version.
+            isMinifyEnabled = false
+            isShrinkResources = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
