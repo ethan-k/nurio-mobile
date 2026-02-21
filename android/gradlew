@@ -115,6 +115,13 @@ case "$( uname )" in                #(
   NONSTOP* )        nonstop=true ;;
 esac
 
+# On macOS, DYLD_* paths can prepend non-JDK libzip dylibs (for example Homebrew),
+# which breaks Java/Kotlin with UnsatisfiedLinkError on Inflater/Deflater init.
+if "$darwin" ; then
+    unset DYLD_LIBRARY_PATH
+    unset DYLD_FALLBACK_LIBRARY_PATH
+fi
+
 CLASSPATH=$APP_HOME/gradle/wrapper/gradle-wrapper.jar
 
 
