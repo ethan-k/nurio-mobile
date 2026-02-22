@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
 
+import '../../../l10n/l10n.dart';
 import '../../auth/presentation/auth_controller.dart';
 
 enum ProfileSettingDestination {
@@ -51,6 +52,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final auth = widget.authController;
 
     if (auth.isInitializing) {
@@ -62,7 +64,7 @@ class _ProfilePageState extends State<ProfilePage> {
         padding: const EdgeInsets.fromLTRB(16, 20, 16, 24),
         children: [
           Text(
-            'Profile & Settings',
+            l10n.profileTitle,
             style: Theme.of(
               context,
             ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
@@ -78,7 +80,7 @@ class _ProfilePageState extends State<ProfilePage> {
             const SizedBox(height: 16),
             GFButton(
               onPressed: () => auth.logout(),
-              text: 'Sign Out',
+              text: l10n.signOut,
               color: const Color(0xFFEF4444),
               fullWidthButton: true,
             ),
@@ -97,6 +99,8 @@ class _AccountCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     if (!authController.isAuthenticated) {
       return Card(
         child: Padding(
@@ -104,13 +108,11 @@ class _AccountCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text(
-                'Sign in to access tickets, wallet credits, and payment history.',
-              ),
+              Text(l10n.profileSignedOutDescription),
               const SizedBox(height: 10),
               GFButton(
                 onPressed: () => onOpenLogin(),
-                text: 'Sign In',
+                text: l10n.signIn,
                 fullWidthButton: true,
               ),
             ],
@@ -129,7 +131,7 @@ class _AccountCard extends StatelessWidget {
           children: [
             Text(
               account.displayName.isEmpty
-                  ? 'Nurio Member'
+                  ? l10n.profileAccountFallbackName
                   : account.displayName,
               style: Theme.of(
                 context,
@@ -154,40 +156,30 @@ class _SettingsList extends StatelessWidget {
   Widget build(BuildContext context) {
     final items = <_SettingItem>[
       const _SettingItem(
-        'Edit Profile',
         ProfileSettingDestination.editProfile,
         Icons.person_outline,
       ),
       const _SettingItem(
-        'Notifications',
         ProfileSettingDestination.notifications,
         Icons.notifications_none,
       ),
       const _SettingItem(
-        'Tickets',
         ProfileSettingDestination.tickets,
         Icons.confirmation_num_outlined,
       ),
       const _SettingItem(
-        'Payment History',
         ProfileSettingDestination.payments,
         Icons.credit_card_outlined,
       ),
       const _SettingItem(
-        'Wallet Credits',
         ProfileSettingDestination.walletCredits,
         Icons.account_balance_wallet_outlined,
       ),
       const _SettingItem(
-        'Referrals',
         ProfileSettingDestination.referrals,
         Icons.group_outlined,
       ),
-      const _SettingItem(
-        'Event History',
-        ProfileSettingDestination.eventHistory,
-        Icons.history,
-      ),
+      const _SettingItem(ProfileSettingDestination.eventHistory, Icons.history),
     ];
 
     return Card(
@@ -196,7 +188,7 @@ class _SettingsList extends StatelessWidget {
           for (var i = 0; i < items.length; i++)
             ListTile(
               leading: Icon(items[i].icon),
-              title: Text(items[i].title),
+              title: Text(_titleFor(context, items[i].destination)),
               trailing: const Icon(Icons.chevron_right),
               enabled: enabled,
               onTap: enabled ? () => onOpenSetting(items[i].destination) : null,
@@ -205,12 +197,34 @@ class _SettingsList extends StatelessWidget {
       ),
     );
   }
+
+  String _titleFor(
+    BuildContext context,
+    ProfileSettingDestination destination,
+  ) {
+    final l10n = context.l10n;
+    switch (destination) {
+      case ProfileSettingDestination.editProfile:
+        return l10n.settingEditProfile;
+      case ProfileSettingDestination.notifications:
+        return l10n.settingNotifications;
+      case ProfileSettingDestination.tickets:
+        return l10n.settingTickets;
+      case ProfileSettingDestination.payments:
+        return l10n.settingPaymentHistory;
+      case ProfileSettingDestination.walletCredits:
+        return l10n.settingWalletCredits;
+      case ProfileSettingDestination.referrals:
+        return l10n.settingReferrals;
+      case ProfileSettingDestination.eventHistory:
+        return l10n.settingEventHistory;
+    }
+  }
 }
 
 class _SettingItem {
-  const _SettingItem(this.title, this.destination, this.icon);
+  const _SettingItem(this.destination, this.icon);
 
-  final String title;
   final ProfileSettingDestination destination;
   final IconData icon;
 }

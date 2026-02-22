@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
 
+import '../../../l10n/l10n.dart';
 import '../../shared/presentation/api_gap_card.dart';
 
 class PassPackagesPage extends StatelessWidget {
@@ -8,18 +9,37 @@ class PassPackagesPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final packages = <_SamplePackage>[
+      _SamplePackage(
+        name: l10n.passPackageOneName,
+        description: l10n.passPackageOneDescription,
+        price: l10n.passPackageOnePrice,
+      ),
+      _SamplePackage(
+        name: l10n.passPackageThreeName,
+        description: l10n.passPackageThreeDescription,
+        price: l10n.passPackageThreePrice,
+      ),
+      _SamplePackage(
+        name: l10n.passPackageFiveName,
+        description: l10n.passPackageFiveDescription,
+        price: l10n.passPackageFivePrice,
+      ),
+    ];
+
     return Scaffold(
-      appBar: GFAppBar(title: const Text('Pass Packages'), centerTitle: false),
+      appBar: GFAppBar(title: Text(l10n.passPackagesTitle), centerTitle: false),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
             Text(
-              'Choose the pass package that fits your event plans.',
+              l10n.passPackagesIntro,
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: 12),
-            ..._samplePackages.map((pkg) {
+            ...packages.map((pkg) {
               return Padding(
                 padding: const EdgeInsets.only(bottom: 10),
                 child: Card(
@@ -49,7 +69,7 @@ class PassPackagesPage extends StatelessWidget {
               );
             }),
             ApiGapCard(
-              featureLabel: 'Pass Package Purchase',
+              featureLabel: l10n.passPackagePurchaseFeatureLabel,
               legacyRoutes: const [
                 'GET /pass_packages',
                 'POST /pass_packages/:id/purchase',
@@ -67,14 +87,10 @@ class PassPackagesPage extends StatelessWidget {
             GFButton(
               onPressed: () {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                      'Pass purchase API is not exposed yet for mobile.',
-                    ),
-                  ),
+                  SnackBar(content: Text(l10n.passPackagesApiNotExposed)),
                 );
               },
-              text: 'Purchase Pass Package',
+              text: l10n.passPackagesPurchaseButton,
               fullWidthButton: true,
             ),
           ],
@@ -95,21 +111,3 @@ class _SamplePackage {
   final String description;
   final String price;
 }
-
-const List<_SamplePackage> _samplePackages = <_SamplePackage>[
-  _SamplePackage(
-    name: '1-Event Pass',
-    description: 'Single event entry for flexible scheduling.',
-    price: 'KRW 7,000',
-  ),
-  _SamplePackage(
-    name: '3-Event Bundle',
-    description: 'Lower per-event price for regular attendees.',
-    price: 'KRW 18,000',
-  ),
-  _SamplePackage(
-    name: '5-Event Bundle',
-    description: 'Best value bundle for frequent participation.',
-    price: 'KRW 28,000',
-  ),
-];

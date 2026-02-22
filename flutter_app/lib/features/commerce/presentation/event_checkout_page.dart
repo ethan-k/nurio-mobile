@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:intl/intl.dart';
 
+import '../../../l10n/l10n.dart';
 import '../../events/models/event_summary.dart';
 import '../../shared/presentation/api_gap_card.dart';
 
@@ -21,12 +22,15 @@ class EventCheckoutPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localeName = Localizations.localeOf(context).toString();
     final startsAt = DateFormat(
       'EEE, MMM d • h:mm a',
+      localeName,
     ).format(event.scheduledAt.toLocal());
+    final l10n = context.l10n;
 
     return Scaffold(
-      appBar: GFAppBar(title: const Text('Checkout'), centerTitle: false),
+      appBar: GFAppBar(title: Text(l10n.checkoutTitle), centerTitle: false),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(16),
@@ -50,13 +54,11 @@ class EventCheckoutPage extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      const Text(
-                        'Sign in is required before creating an order or paying.',
-                      ),
+                      Text(l10n.checkoutSignInRequired),
                       const SizedBox(height: 10),
                       GFButton(
                         onPressed: () => onOpenLogin(),
-                        text: 'Sign In',
+                        text: l10n.signIn,
                         fullWidthButton: true,
                       ),
                     ],
@@ -66,7 +68,7 @@ class EventCheckoutPage extends StatelessWidget {
               const SizedBox(height: 12),
             ],
             ApiGapCard(
-              featureLabel: 'Checkout and Payment',
+              featureLabel: l10n.checkoutFeatureLabel,
               legacyRoutes: const [
                 'GET /orders/new',
                 'POST /orders',
@@ -85,21 +87,23 @@ class EventCheckoutPage extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             GFButton(
-              onPressed: () => _showBackendGap(context, 'wallet payment'),
-              text: 'Pay with Wallet Credits',
+              onPressed: () =>
+                  _showBackendGap(context, l10n.checkoutPaymentMethodWallet),
+              text: l10n.checkoutWalletButton,
               fullWidthButton: true,
             ),
             const SizedBox(height: 10),
             GFButton(
-              onPressed: () => _showBackendGap(context, 'PortOne card payment'),
-              text: 'Pay with Card (PortOne)',
+              onPressed: () =>
+                  _showBackendGap(context, l10n.checkoutPaymentMethodCard),
+              text: l10n.checkoutCardButton,
               type: GFButtonType.outline,
               fullWidthButton: true,
             ),
             const SizedBox(height: 10),
             GFButton(
               onPressed: onOpenPassPackages,
-              text: 'Browse Pass Packages',
+              text: l10n.checkoutBrowsePassPackagesButton,
               type: GFButtonType.transparent,
               fullWidthButton: true,
             ),
@@ -111,12 +115,7 @@ class EventCheckoutPage extends StatelessWidget {
 
   void _showBackendGap(BuildContext context, String paymentMethod) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Cannot execute $paymentMethod yet. Mobile checkout API endpoints '
-          'must be added on the backend.',
-        ),
-      ),
+      SnackBar(content: Text(context.l10n.checkoutBackendGap(paymentMethod))),
     );
   }
 }

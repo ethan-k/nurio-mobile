@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
 
+import '../../../l10n/l10n.dart';
 import '../../shared/presentation/api_gap_card.dart';
 
 class PaymentHistoryPage extends StatelessWidget {
@@ -8,9 +9,11 @@ class PaymentHistoryPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Scaffold(
       appBar: GFAppBar(
-        title: const Text('Payment History'),
+        title: Text(l10n.paymentHistoryTitle),
         centerTitle: false,
       ),
       body: SafeArea(
@@ -22,23 +25,20 @@ class PaymentHistoryPage extends StatelessWidget {
                 padding: const EdgeInsets.all(14),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
+                  children: [
                     Text(
-                      'Payments',
-                      style: TextStyle(fontWeight: FontWeight.w700),
+                      l10n.paymentsHeader,
+                      style: const TextStyle(fontWeight: FontWeight.w700),
                     ),
-                    SizedBox(height: 6),
-                    Text(
-                      'Order and pass-package payments are presented in native '
-                      'screens once payment history endpoints are available.',
-                    ),
+                    const SizedBox(height: 6),
+                    Text(l10n.paymentsDescription),
                   ],
                 ),
               ),
             ),
             const SizedBox(height: 12),
             ApiGapCard(
-              featureLabel: 'Payment History',
+              featureLabel: l10n.paymentHistoryFeatureLabel,
               legacyRoutes: const ['GET /settings/payments', 'GET /orders/:id'],
               requiredApiEndpoints: const [
                 'GET /api/v1/payments',

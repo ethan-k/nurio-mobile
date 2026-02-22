@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
 
+import '../../../l10n/l10n.dart';
 import '../../shared/presentation/api_gap_card.dart';
 
 class TicketsPage extends StatelessWidget {
@@ -8,8 +9,10 @@ class TicketsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Scaffold(
-      appBar: GFAppBar(title: const Text('Tickets'), centerTitle: false),
+      appBar: GFAppBar(title: Text(l10n.ticketsTitle), centerTitle: false),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(16),
@@ -19,23 +22,20 @@ class TicketsPage extends StatelessWidget {
                 padding: const EdgeInsets.all(14),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
+                  children: [
                     Text(
-                      'My Tickets',
-                      style: TextStyle(fontWeight: FontWeight.w700),
+                      l10n.ticketsHeader,
+                      style: const TextStyle(fontWeight: FontWeight.w700),
                     ),
-                    SizedBox(height: 6),
-                    Text(
-                      'Tickets are linked to completed orders and refunds. '
-                      'This native view is ready and awaits customer ticket APIs.',
-                    ),
+                    const SizedBox(height: 6),
+                    Text(l10n.ticketsDescription),
                   ],
                 ),
               ),
             ),
             const SizedBox(height: 12),
             ApiGapCard(
-              featureLabel: 'Tickets',
+              featureLabel: l10n.ticketsFeatureLabel,
               legacyRoutes: const [
                 'GET /settings/tickets',
                 'POST /settings/tickets/:id/refund',

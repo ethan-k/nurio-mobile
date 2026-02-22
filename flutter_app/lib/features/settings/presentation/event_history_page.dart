@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
 
+import '../../../l10n/l10n.dart';
 import '../../shared/presentation/api_gap_card.dart';
 
 class EventHistoryPage extends StatelessWidget {
@@ -8,8 +9,10 @@ class EventHistoryPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Scaffold(
-      appBar: GFAppBar(title: const Text('Event History'), centerTitle: false),
+      appBar: GFAppBar(title: Text(l10n.eventHistoryTitle), centerTitle: false),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(16),
@@ -19,23 +22,20 @@ class EventHistoryPage extends StatelessWidget {
                 padding: const EdgeInsets.all(14),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
+                  children: [
                     Text(
-                      'Attendance History',
-                      style: TextStyle(fontWeight: FontWeight.w700),
+                      l10n.eventHistoryHeader,
+                      style: const TextStyle(fontWeight: FontWeight.w700),
                     ),
-                    SizedBox(height: 6),
-                    Text(
-                      'Past events, attendance records, and review links will '
-                      'appear here once mobile history APIs are available.',
-                    ),
+                    const SizedBox(height: 6),
+                    Text(l10n.eventHistoryDescription),
                   ],
                 ),
               ),
             ),
             const SizedBox(height: 12),
             ApiGapCard(
-              featureLabel: 'Event History',
+              featureLabel: l10n.eventHistoryFeatureLabel,
               legacyRoutes: const ['GET /settings/event_history'],
               requiredApiEndpoints: const ['GET /api/v1/event_history'],
             ),

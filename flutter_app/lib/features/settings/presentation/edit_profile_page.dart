@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
 
+import '../../../l10n/l10n.dart';
 import '../../auth/models/account_summary.dart';
 import '../../shared/presentation/api_gap_card.dart';
 
@@ -38,9 +39,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
   @override
   Widget build(BuildContext context) {
     final account = widget.account;
+    final l10n = context.l10n;
 
     return Scaffold(
-      appBar: GFAppBar(title: const Text('Edit Profile'), centerTitle: false),
+      appBar: GFAppBar(title: Text(l10n.editProfileTitle), centerTitle: false),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(16),
@@ -52,11 +54,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      const Text('Sign in is required to edit your profile.'),
+                      Text(l10n.editProfileSignInRequired),
                       const SizedBox(height: 10),
                       GFButton(
                         onPressed: () => widget.onOpenLogin(),
-                        text: 'Sign In',
+                        text: l10n.signIn,
                         fullWidthButton: true,
                       ),
                     ],
@@ -68,18 +70,18 @@ class _EditProfilePageState extends State<EditProfilePage> {
             TextField(
               controller: _displayNameController,
               enabled: account != null,
-              decoration: const InputDecoration(
-                labelText: 'Display Name',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: l10n.displayNameLabel,
+                border: const OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 12),
             TextField(
               enabled: false,
               decoration: InputDecoration(
-                labelText: 'Email',
+                labelText: l10n.emailLabel,
                 border: const OutlineInputBorder(),
-                hintText: account?.email ?? 'Sign in required',
+                hintText: account?.email ?? l10n.editProfileSignInHint,
               ),
             ),
             const SizedBox(height: 12),
@@ -88,19 +90,17 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   ? null
                   : () {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'Profile update API is not exposed yet for mobile.',
-                          ),
+                        SnackBar(
+                          content: Text(l10n.profileUpdateApiNotExposed),
                         ),
                       );
                     },
-              text: 'Save Profile',
+              text: l10n.saveProfile,
               fullWidthButton: true,
             ),
             const SizedBox(height: 12),
             ApiGapCard(
-              featureLabel: 'Profile Editing',
+              featureLabel: l10n.profileEditingFeatureLabel,
               legacyRoutes: const [
                 'GET /settings/profile/edit',
                 'PATCH /settings/profile',

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/l10n.dart';
+
 class ApiGapCard extends StatelessWidget {
   const ApiGapCard({
     super.key,
@@ -15,6 +17,7 @@ class ApiGapCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final l10n = context.l10n;
 
     return Card(
       color: const Color(0xFFFFF7ED),
@@ -24,7 +27,7 @@ class ApiGapCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Native $featureLabel',
+              l10n.apiGapNativeFeature(featureLabel),
               style: textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w700,
                 color: const Color(0xFF9A3412),
@@ -32,16 +35,14 @@ class ApiGapCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'This screen is implemented natively and intentionally does not '
-              'fall back to WebView. The backend still needs mobile JSON '
-              'endpoints for full data and mutation support.',
+              l10n.apiGapBody,
               style: textTheme.bodySmall?.copyWith(
                 color: const Color(0xFF9A3412),
               ),
             ),
             const SizedBox(height: 10),
             Text(
-              'Legacy web routes',
+              l10n.apiGapLegacyRoutesTitle,
               style: textTheme.labelLarge?.copyWith(
                 fontWeight: FontWeight.w700,
               ),
@@ -51,7 +52,7 @@ class ApiGapCard extends StatelessWidget {
               Text('- $route', style: textTheme.bodySmall),
             const SizedBox(height: 10),
             Text(
-              'Required mobile API endpoints',
+              l10n.apiGapRequiredApiTitle,
               style: textTheme.labelLarge?.copyWith(
                 fontWeight: FontWeight.w700,
               ),

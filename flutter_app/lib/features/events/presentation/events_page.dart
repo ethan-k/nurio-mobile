@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../../l10n/l10n.dart';
 import '../models/event_summary.dart';
 import 'events_controller.dart';
 
@@ -76,6 +77,7 @@ class _EventsPageState extends State<EventsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final controller = widget.controller;
 
     return SafeArea(
@@ -86,7 +88,7 @@ class _EventsPageState extends State<EventsPage> {
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: 'Search events, location, host',
+                hintText: l10n.eventsSearchHint,
                 prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -121,7 +123,7 @@ class _EventsPageState extends State<EventsPage> {
     }
 
     if (controller.events.isEmpty) {
-      return const Center(child: Text('No events found.'));
+      return Center(child: Text(context.l10n.eventsNoResults));
     }
 
     return ListView.separated(
@@ -154,8 +156,10 @@ class _EventCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final formatter = DateFormat('EEE, MMM d • h:mm a');
+    final localeName = Localizations.localeOf(context).toString();
+    final formatter = DateFormat('EEE, MMM d • h:mm a', localeName);
     final scheduledLocal = event.scheduledAt.toLocal();
+    final l10n = context.l10n;
 
     return InkWell(
       onTap: onTap,
@@ -241,8 +245,8 @@ class _EventCard extends StatelessWidget {
                       _ChipLabel(text: event.eventTypeName),
                       _ChipLabel(
                         text: event.isFull
-                            ? 'Full'
-                            : '${event.availableSpots} spots left',
+                            ? l10n.eventsStatusFull
+                            : l10n.eventsSpotsLeft(event.availableSpots),
                         color: event.isFull
                             ? const Color(0xFFEF4444)
                             : const Color(0xFF10B981),
@@ -312,9 +316,9 @@ class _PaginationFooter extends StatelessWidget {
     }
 
     if (!hasMore) {
-      return const Padding(
-        padding: EdgeInsets.symmetric(vertical: 16),
-        child: Center(child: Text('You reached the end.')),
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        child: Center(child: Text(context.l10n.eventsReachedEnd)),
       );
     }
 
@@ -353,7 +357,7 @@ class _ErrorState extends StatelessWidget {
             const SizedBox(height: 10),
             Text(message, textAlign: TextAlign.center),
             const SizedBox(height: 12),
-            ElevatedButton(onPressed: onRetry, child: const Text('Retry')),
+            ElevatedButton(onPressed: onRetry, child: Text(context.l10n.retry)),
           ],
         ),
       ),

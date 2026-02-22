@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
 
+import '../../../l10n/l10n.dart';
 import 'auth_controller.dart';
 
 class LoginPage extends StatefulWidget {
@@ -44,16 +45,18 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
-    final error = widget.authController.errorMessage ?? 'Login failed';
+    final error =
+        widget.authController.errorMessage ?? context.l10n.loginFailed;
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error)));
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final isLoading = widget.authController.isLoading;
 
     return Scaffold(
-      appBar: GFAppBar(title: const Text('Sign In'), centerTitle: false),
+      appBar: GFAppBar(title: Text(l10n.loginTitle), centerTitle: false),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -63,7 +66,7 @@ class _LoginPageState extends State<LoginPage> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  'Sign in to use tickets, payments, and profile features.',
+                  l10n.loginDescription,
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 const SizedBox(height: 20),
@@ -71,14 +74,14 @@ class _LoginPageState extends State<LoginPage> {
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                   autofillHints: const [AutofillHints.email],
-                  decoration: const InputDecoration(
-                    labelText: 'Email',
+                  decoration: InputDecoration(
+                    labelText: l10n.loginEmailLabel,
                     border: OutlineInputBorder(),
                   ),
                   validator: (value) {
                     final text = value?.trim() ?? '';
                     if (text.isEmpty || !text.contains('@')) {
-                      return 'Enter a valid email';
+                      return l10n.loginEmailInvalid;
                     }
                     return null;
                   },
@@ -88,13 +91,13 @@ class _LoginPageState extends State<LoginPage> {
                   controller: _passwordController,
                   obscureText: true,
                   autofillHints: const [AutofillHints.password],
-                  decoration: const InputDecoration(
-                    labelText: 'Password',
+                  decoration: InputDecoration(
+                    labelText: l10n.loginPasswordLabel,
                     border: OutlineInputBorder(),
                   ),
                   validator: (value) {
                     if ((value ?? '').isEmpty) {
-                      return 'Enter your password';
+                      return l10n.loginPasswordRequired;
                     }
                     return null;
                   },
@@ -102,12 +105,12 @@ class _LoginPageState extends State<LoginPage> {
                 const SizedBox(height: 16),
                 GFButton(
                   onPressed: isLoading ? null : _submit,
-                  text: isLoading ? 'Signing in...' : 'Sign In',
+                  text: isLoading ? l10n.loginSigningIn : l10n.signIn,
                   fullWidthButton: true,
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'This Flutter app is native-only and does not fall back to WebView.',
+                  l10n.loginNativeOnlyNote,
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ],

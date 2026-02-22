@@ -34,6 +34,14 @@ Current mobile JSON APIs in Nurio backend are available for auth and event brows
 
 - Uses `getwidget` (`GFAppBar`, `GFButton`, `GFIconButton`) for shared UI components.
 
+## Internationalization
+
+- Flutter localization (`gen-l10n`) is enabled.
+- Supported locales: English (`en`) and Korean (`ko`).
+- Localization sources:
+  - `lib/l10n/app_en.arb`
+  - `lib/l10n/app_ko.arb`
+
 ## Run
 
 ```bash

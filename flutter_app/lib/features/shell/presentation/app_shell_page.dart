@@ -4,6 +4,7 @@ import 'package:getwidget/getwidget.dart';
 import '../../../config/app_config.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/storage/auth_token_storage.dart';
+import '../../../l10n/l10n.dart';
 import '../../auth/data/auth_repository.dart';
 import '../../auth/presentation/auth_controller.dart';
 import '../../auth/presentation/login_page.dart';
@@ -216,6 +217,8 @@ class _AppShellPageState extends State<AppShellPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     final body = switch (_tab) {
       ShellTab.home => HomePage(
         account: _authController.account,
@@ -243,7 +246,7 @@ class _AppShellPageState extends State<AppShellPage> {
 
     return Scaffold(
       appBar: GFAppBar(
-        title: const Text('Nurio'),
+        title: Text(widget.config.appTitle),
         centerTitle: false,
         actions: [
           GFIconButton(
@@ -253,7 +256,9 @@ class _AppShellPageState extends State<AppShellPage> {
                   : Icons.login_outlined,
             ),
             onPressed: _authController.isAuthenticated ? null : _openLogin,
-            tooltip: _authController.isAuthenticated ? 'Signed in' : 'Sign in',
+            tooltip: _authController.isAuthenticated
+                ? l10n.tooltipSignedIn
+                : l10n.tooltipSignIn,
             type: GFButtonType.transparent,
           ),
         ],
@@ -266,15 +271,18 @@ class _AppShellPageState extends State<AppShellPage> {
             _tab = ShellTab.values[index];
           });
         },
-        destinations: const [
-          NavigationDestination(icon: Icon(Icons.home_outlined), label: 'Home'),
+        destinations: [
           NavigationDestination(
-            icon: Icon(Icons.event_outlined),
-            label: 'Events',
+            icon: const Icon(Icons.home_outlined),
+            label: l10n.tabHome,
           ),
           NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            label: 'Profile',
+            icon: const Icon(Icons.event_outlined),
+            label: l10n.tabEvents,
+          ),
+          NavigationDestination(
+            icon: const Icon(Icons.person_outline),
+            label: l10n.tabProfile,
           ),
         ],
       ),

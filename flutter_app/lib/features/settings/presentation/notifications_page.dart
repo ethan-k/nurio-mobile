@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
 
+import '../../../l10n/l10n.dart';
 import '../../shared/presentation/api_gap_card.dart';
 
 class NotificationsPage extends StatefulWidget {
@@ -17,17 +18,20 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Scaffold(
-      appBar: GFAppBar(title: const Text('Notifications'), centerTitle: false),
+      appBar: GFAppBar(
+        title: Text(l10n.notificationsTitle),
+        centerTitle: false,
+      ),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
             SwitchListTile(
-              title: const Text('Event reminders'),
-              subtitle: const Text(
-                'Upcoming event reminders and check-in notices.',
-              ),
+              title: Text(l10n.notificationsEventRemindersTitle),
+              subtitle: Text(l10n.notificationsEventRemindersSubtitle),
               value: _eventReminders,
               onChanged: (value) {
                 setState(() {
@@ -36,10 +40,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
               },
             ),
             SwitchListTile(
-              title: const Text('Payment updates'),
-              subtitle: const Text(
-                'Order/payment completion and refund updates.',
-              ),
+              title: Text(l10n.notificationsPaymentUpdatesTitle),
+              subtitle: Text(l10n.notificationsPaymentUpdatesSubtitle),
               value: _paymentUpdates,
               onChanged: (value) {
                 setState(() {
@@ -48,8 +50,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
               },
             ),
             SwitchListTile(
-              title: const Text('Marketing updates'),
-              subtitle: const Text('Campaigns and pass-package promotions.'),
+              title: Text(l10n.notificationsMarketingTitle),
+              subtitle: Text(l10n.notificationsMarketingSubtitle),
               value: _marketing,
               onChanged: (value) {
                 setState(() {
@@ -61,19 +63,15 @@ class _NotificationsPageState extends State<NotificationsPage> {
             GFButton(
               onPressed: () {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                      'Notification preference sync API is not exposed yet.',
-                    ),
-                  ),
+                  SnackBar(content: Text(l10n.notificationsSyncApiNotExposed)),
                 );
               },
-              text: 'Save Preferences',
+              text: l10n.savePreferences,
               fullWidthButton: true,
             ),
             const SizedBox(height: 12),
             ApiGapCard(
-              featureLabel: 'Notification Preferences',
+              featureLabel: l10n.notificationPreferencesFeatureLabel,
               legacyRoutes: const [
                 'GET /settings/notifications',
                 'GET /account_notifications',

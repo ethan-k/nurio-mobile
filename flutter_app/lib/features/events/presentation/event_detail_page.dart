@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:intl/intl.dart';
 
+import '../../../l10n/l10n.dart';
 import '../models/event_summary.dart';
 
 class EventDetailPage extends StatelessWidget {
@@ -18,13 +19,19 @@ class EventDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localeName = Localizations.localeOf(context).toString();
     final starts = DateFormat(
       'EEE, MMM d • h:mm a',
+      localeName,
     ).format(event.scheduledAt.toLocal());
-    final ends = DateFormat('h:mm a').format(event.endsAt.toLocal());
+    final ends = DateFormat(
+      'h:mm a',
+      localeName,
+    ).format(event.endsAt.toLocal());
+    final l10n = context.l10n;
 
     return Scaffold(
-      appBar: GFAppBar(title: const Text('Event Details'), centerTitle: false),
+      appBar: GFAppBar(title: Text(l10n.eventDetailTitle), centerTitle: false),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(16),
@@ -58,8 +65,8 @@ class EventDetailPage extends StatelessWidget {
             _InfoRow(
               icon: Icons.event_available,
               label: event.isFull
-                  ? 'This event is currently full'
-                  : '${event.availableSpots} spots remaining',
+                  ? l10n.eventDetailStatusFull
+                  : l10n.eventDetailSpotsRemaining(event.availableSpots),
             ),
             const SizedBox(height: 16),
             Wrap(
@@ -73,20 +80,19 @@ class EventDetailPage extends StatelessWidget {
             const SizedBox(height: 24),
             GFButton(
               onPressed: onOpenCheckout,
-              text: 'Get Tickets / Continue to Payment',
+              text: l10n.eventDetailCheckoutButton,
               fullWidthButton: true,
             ),
             const SizedBox(height: 10),
             GFButton(
               onPressed: onOpenPassPackages,
-              text: 'View Pass Packages',
+              text: l10n.eventDetailPassPackagesButton,
               type: GFButtonType.outline,
               fullWidthButton: true,
             ),
             const SizedBox(height: 10),
             Text(
-              'Checkout and payment run natively in Flutter. '
-              'No WebView fallback is used in this app.',
+              l10n.eventDetailNativeOnlyNote,
               style: Theme.of(
                 context,
               ).textTheme.bodySmall?.copyWith(color: Colors.black54),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
 
+import '../../../l10n/l10n.dart';
 import '../../auth/models/account_summary.dart';
 import '../../events/models/event_summary.dart';
 
@@ -26,23 +27,24 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final greetingName = account?.displayName.isNotEmpty == true
         ? account!.displayName
-        : 'Guest';
+        : l10n.homeGuestName;
 
     return SafeArea(
       child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 20, 16, 24),
         children: [
           Text(
-            'Welcome, $greetingName',
+            l10n.homeWelcome(greetingName),
             style: Theme.of(
               context,
             ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 4),
           Text(
-            'Explore events, manage your tickets, and continue checkout.',
+            l10n.homeSubtitle,
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           const SizedBox(height: 18),
@@ -57,18 +59,18 @@ class HomePage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Upcoming Events',
+                l10n.homeUpcomingEvents,
                 style: Theme.of(
                   context,
                 ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
               ),
-              TextButton(onPressed: onOpenEvents, child: const Text('See all')),
+              TextButton(onPressed: onOpenEvents, child: Text(l10n.homeSeeAll)),
             ],
           ),
           if (events.isEmpty)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 24),
-              child: Center(child: Text('No events loaded yet.')),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              child: Center(child: Text(l10n.homeNoEventsLoaded)),
             )
           else
             ...events
@@ -162,6 +164,8 @@ class _QuickActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return GridView.count(
       crossAxisCount: 2,
       shrinkWrap: true,
@@ -172,22 +176,22 @@ class _QuickActions extends StatelessWidget {
       children: [
         _ActionButton(
           icon: Icons.event,
-          title: 'Browse Events',
+          title: l10n.homeActionBrowseEvents,
           onTap: onOpenEvents,
         ),
         _ActionButton(
           icon: Icons.local_activity_outlined,
-          title: 'Pass Packages',
+          title: l10n.homeActionPassPackages,
           onTap: onOpenPassPackages,
         ),
         _ActionButton(
           icon: Icons.receipt_long_outlined,
-          title: 'Tickets',
+          title: l10n.homeActionTickets,
           onTap: onOpenTickets,
         ),
         _ActionButton(
           icon: Icons.credit_card_outlined,
-          title: 'Payments',
+          title: l10n.homeActionPayments,
           onTap: onOpenPayments,
         ),
       ],
