@@ -1,34 +1,38 @@
 # Nurio Flutter App
 
-Customer-facing mobile app for Nurio, implemented as a full Flutter app with native feature modules and web fallback for unsupported backend APIs.
+Customer-facing Nurio mobile app implemented as a native Flutter application.
 
 ## Scope
 
 Included:
-- Native customer shell, auth, events browsing, event details, and profile/settings hub
-- Hybrid web fallback for orders, pass purchases, wallet flows, and PortOne completion redirects
-- Profile/settings deep links for tickets, payment history, wallet credits, referrals, event history
+- Native app shell, auth, events browsing, event detail, and profile/settings hub
+- Native customer modules for checkout, pass packages, tickets, payments, wallet credits, referrals, and event history
+- Customer-only coverage (admin and tutor scopes excluded)
 
 Excluded:
 - Admin routes/features
 - Tutor/tutoring routes/features
+- WebView fallback flows
 
-## Core Files
+## Native Architecture
 
-- `lib/features/shell/presentation/app_shell_page.dart`: main native app shell
+Core entry points:
+- `lib/features/shell/presentation/app_shell_page.dart`: main app shell and tab navigation
 - `lib/features/events/`: native events models/repository/controller/pages
-- `lib/features/auth/`: native API auth + login
-- `lib/features/profile/`: native profile/settings hub
-- `lib/features/home/`: native dashboard and quick actions
-- `lib/features/web/presentation/web_flow_page.dart`: web fallback wrapper
-- `lib/ui/nurio_shell_page.dart`: hardened in-app web flow (deep links, modals, redirects, payment app handling)
-- `lib/navigation/customer_route_policy.dart`: route allow/block policy and legacy modal parity
+- `lib/features/auth/`: native API auth and login
+- `lib/features/commerce/`: native checkout/payment/tickets/passes modules
+- `lib/features/settings/`: native settings/profile/referrals/history modules
+- `lib/features/shared/presentation/api_gap_card.dart`: native API-gap status component
 - `lib/core/network/api_client.dart`: API transport
 - `lib/core/storage/auth_token_storage.dart`: token persistence
 
+## Backend Constraints
+
+Current mobile JSON APIs in Nurio backend are available for auth and event browsing. Additional customer APIs (orders/payment/tickets/wallet/settings history) are still required for full data/mutation support in native screens.
+
 ## UI Framework
 
-- Uses `getwidget` (`GFAppBar`, `GFButton`, `GFIconButton`) to simplify shared UI component management.
+- Uses `getwidget` (`GFAppBar`, `GFButton`, `GFIconButton`) for shared UI components.
 
 ## Run
 
@@ -48,4 +52,5 @@ flutter run --dart-define=NURIO_BASE_URL=https://nurio.kr
 ```bash
 flutter analyze
 flutter test
+flutter build apk --debug
 ```

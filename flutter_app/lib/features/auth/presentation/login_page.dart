@@ -107,7 +107,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'If you use social login, continue from web auth screen in this app.',
+                  'This Flutter app is native-only and does not fall back to WebView.',
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ],

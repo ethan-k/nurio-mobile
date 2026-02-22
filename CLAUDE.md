@@ -1,28 +1,31 @@
 # CLAUDE.md
 
 ## Mission
-Migrate and maintain Nurio mobile as a Flutter customer app while preserving existing customer behavior from the Rails web product.
+Migrate and maintain Nurio mobile as a Flutter customer app with native screens for customer features.
 
 ## Hard Constraints
 - Customer-facing scope only.
 - Exclude all admin surfaces.
 - Exclude all tutor/tutoring surfaces.
-- Prioritize end-to-end customer flows (event discovery, registration, ticket/pass purchase, payment completion, profile/settings).
+- Native-only implementation: no WebView fallback.
 
 ## Implementation Guidance
 - Flutter app location: `flutter_app/`.
-- Keep the web-compatible Flutter shell robust (deep links, external payment redirects, file upload/camera/mic permissions, pull-to-refresh, back navigation).
-- Never remove route guards that prevent admin/tutor navigation.
-- Preserve legacy path presentation behavior (modal paths from Hotwire path configuration) while in Flutter.
+- Prioritize end-to-end customer journeys in native Flutter modules:
+  - event discovery
+  - event detail
+  - checkout/payment entry points
+  - tickets/pass packages/history/settings hubs
+- If backend mobile endpoints are missing, keep the screen native and surface clear API dependency messaging.
 
-## Feature Parity Standard
-A change is incomplete if it breaks any of these user flows:
-1. Browse events and open event detail.
-2. Register/attend and create order.
-3. Complete wallet or PortOne card payment.
-4. Access tickets/pass packages/history in settings.
-5. Edit user profile/preferences.
+## Scope Guard
+Never implement or expose:
+- `/admin/*`
+- `/tutoring*`
+- `/tutors*`
+- tutoring API namespaces
 
 ## Verification
 - `flutter analyze`
 - `flutter test`
+- `flutter build apk --debug`

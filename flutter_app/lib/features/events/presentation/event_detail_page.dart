@@ -2,15 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:intl/intl.dart';
 
-import '../../../config/app_config.dart';
-import '../../web/presentation/web_flow_page.dart';
 import '../models/event_summary.dart';
 
 class EventDetailPage extends StatelessWidget {
-  const EventDetailPage({super.key, required this.event, required this.config});
+  const EventDetailPage({
+    super.key,
+    required this.event,
+    required this.onOpenCheckout,
+    required this.onOpenPassPackages,
+  });
 
   final EventSummary event;
-  final AppConfig config;
+  final VoidCallback onOpenCheckout;
+  final VoidCallback onOpenPassPackages;
 
   @override
   Widget build(BuildContext context) {
@@ -68,53 +72,27 @@ class EventDetailPage extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             GFButton(
-              onPressed: () => _openEventWeb(context),
-              text: 'Open Event Page',
+              onPressed: onOpenCheckout,
+              text: 'Get Tickets / Continue to Payment',
               fullWidthButton: true,
             ),
             const SizedBox(height: 10),
             GFButton(
-              onPressed: () => _openTicketFlow(context),
-              text: 'Get Tickets / Continue to Payment',
+              onPressed: onOpenPassPackages,
+              text: 'View Pass Packages',
               type: GFButtonType.outline,
               fullWidthButton: true,
             ),
             const SizedBox(height: 10),
-            GFButton(
-              onPressed: () => _openPasses(context),
-              text: 'View Pass Packages',
-              type: GFButtonType.transparent,
-              fullWidthButton: true,
+            Text(
+              'Checkout and payment run natively in Flutter. '
+              'No WebView fallback is used in this app.',
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: Colors.black54),
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  void _openEventWeb(BuildContext context) {
-    final uri = config.resolvePath('/events/${event.id}');
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => WebFlowPage(config: config, initialUri: uri),
-      ),
-    );
-  }
-
-  void _openTicketFlow(BuildContext context) {
-    final uri = config.resolvePath('/events/${event.id}');
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => WebFlowPage(config: config, initialUri: uri),
-      ),
-    );
-  }
-
-  void _openPasses(BuildContext context) {
-    final uri = config.resolvePath('/pass_packages');
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => WebFlowPage(config: config, initialUri: uri),
       ),
     );
   }

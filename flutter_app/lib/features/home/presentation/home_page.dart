@@ -11,14 +11,18 @@ class HomePage extends StatelessWidget {
     required this.events,
     required this.onOpenEvents,
     required this.onOpenEvent,
-    required this.onOpenWebPath,
+    required this.onOpenPassPackages,
+    required this.onOpenTickets,
+    required this.onOpenPayments,
   });
 
   final AccountSummary? account;
   final List<EventSummary> events;
   final VoidCallback onOpenEvents;
   final ValueChanged<EventSummary> onOpenEvent;
-  final ValueChanged<String> onOpenWebPath;
+  final VoidCallback onOpenPassPackages;
+  final VoidCallback onOpenTickets;
+  final VoidCallback onOpenPayments;
 
   @override
   Widget build(BuildContext context) {
@@ -43,8 +47,10 @@ class HomePage extends StatelessWidget {
           ),
           const SizedBox(height: 18),
           _QuickActions(
-            onOpenWebPath: onOpenWebPath,
             onOpenEvents: onOpenEvents,
+            onOpenPassPackages: onOpenPassPackages,
+            onOpenTickets: onOpenTickets,
+            onOpenPayments: onOpenPayments,
           ),
           const SizedBox(height: 22),
           Row(
@@ -143,12 +149,16 @@ class HomePage extends StatelessWidget {
 
 class _QuickActions extends StatelessWidget {
   const _QuickActions({
-    required this.onOpenWebPath,
     required this.onOpenEvents,
+    required this.onOpenPassPackages,
+    required this.onOpenTickets,
+    required this.onOpenPayments,
   });
 
-  final ValueChanged<String> onOpenWebPath;
   final VoidCallback onOpenEvents;
+  final VoidCallback onOpenPassPackages;
+  final VoidCallback onOpenTickets;
+  final VoidCallback onOpenPayments;
 
   @override
   Widget build(BuildContext context) {
@@ -168,17 +178,17 @@ class _QuickActions extends StatelessWidget {
         _ActionButton(
           icon: Icons.local_activity_outlined,
           title: 'Pass Packages',
-          onTap: () => onOpenWebPath('/pass_packages'),
+          onTap: onOpenPassPackages,
         ),
         _ActionButton(
           icon: Icons.receipt_long_outlined,
           title: 'Tickets',
-          onTap: () => onOpenWebPath('/settings/tickets'),
+          onTap: onOpenTickets,
         ),
         _ActionButton(
           icon: Icons.credit_card_outlined,
           title: 'Payments',
-          onTap: () => onOpenWebPath('/settings/payments'),
+          onTap: onOpenPayments,
         ),
       ],
     );

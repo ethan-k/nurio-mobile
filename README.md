@@ -4,19 +4,33 @@ Flutter migration of the Nurio customer mobile app.
 
 ## Repository Structure
 
-- `flutter_app/`: new Flutter app (active migration target)
-- `android/`: legacy Hotwire Native Android shell (reference)
-- `shared/path-configuration.json`: legacy route presentation config (reference)
+- `flutter_app/`: native Flutter app (active customer app)
+- `android/`: legacy Hotwire Native Android shell (reference only)
+- `shared/path-configuration.json`: legacy route config (reference only)
 
 ## Scope
 
-This migration supports customer-facing features from Nurio web routes (events, onboarding, profile/settings, orders, passes, payments).
+This migration targets customer-facing features only.
+
+Included customer domains:
+- Events discovery and detail
+- Checkout/payment entry points
+- Pass packages, tickets, payments, wallet credits
+- Profile/settings, referrals, event history
 
 Out of scope:
 - Admin features (`/admin/*`)
 - Tutor/tutoring features (`/tutoring*`, `/tutors*`, `tutors.*`)
 
-See `FEATURE_MIGRATION_MATRIX.md` for the detailed route inventory and coverage.
+## Native-Only Constraint
+
+The Flutter app is native-only.
+
+- No WebView fallback
+- No in-app browser shell
+- Unsupported backend mobile APIs are surfaced with native API-gap states
+
+See `FEATURE_MIGRATION_MATRIX.md` for the route inventory and migration status.
 
 ## Run Flutter App
 
@@ -44,6 +58,7 @@ that have incomplete NDK metadata.
 cd flutter_app
 flutter analyze
 flutter test
+flutter build apk --debug
 ```
 
 ## Flutter Release Build

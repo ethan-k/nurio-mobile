@@ -3,99 +3,73 @@
 ## Investigation Sources
 - `/Users/ws/es/business/nurioworkspace/nurio/config/routes.rb`
 - `/Users/ws/es/business/nurioworkspace/nurio/app/controllers/orders_controller.rb`
+- `/Users/ws/es/business/nurioworkspace/nurio/app/controllers/pass_packages_controller.rb`
 - `/Users/ws/es/business/nurioworkspace/nurio/app/controllers/payments/portone_controller.rb`
 - `/Users/ws/es/business/nurioworkspace/nurio/app/javascript/controllers/portone_payment_controller.js`
 
 ## Scope Decision
-- Included: customer-facing product routes and flows.
-- Excluded: admin namespace and tutoring/tutor product surfaces.
+- Included: customer-facing routes and flows.
+- Excluded: admin and tutoring/tutor surfaces.
+- Native-only constraint: no WebView fallback.
 
-## Covered in Flutter (`flutter_app/`)
-Coverage strategy: customer routes are supported through the in-app Flutter WebView shell, with explicit route guards blocking out-of-scope routes.
+## Backend API Reality (Current)
+Available mobile JSON API endpoints:
+- `POST /api/v1/auth/login`
+- `POST /api/v1/auth/refresh`
+- `GET /api/v1/auth/me`
+- `DELETE /api/v1/auth/logout`
+- `GET /api/v1/events`
 
-### Legacy Hotwire Navigation Parity
-- Modal presentation behavior from `shared/path-configuration.json` is implemented in Flutter for:
-  - auth/signup flows
-  - onboarding wizard
-  - order/pass purchase + payment summary routes
-  - new/edit and review-creation routes
-- Pull-to-refresh remains enabled for customer routes and disabled for blocked scopes.
-- `window.open` and external payment app redirects are handled via popup interception and external app launch with `intent://` fallback URL support.
+Not yet available as customer mobile JSON APIs:
+- Orders, payment summary, wallet/split payment, PortOne completion
+- Pass package listing/purchase for customer flows
+- Tickets, payment history, wallet credits, referrals, event history, notification preferences, profile update
 
-### Discovery and Core Navigation
-- `GET /`
-- `GET /home`
-- `GET /events`, `GET /events/:id`, `GET /events/:id/ical`
-- `GET /event_series`, `GET /event_series/:id`
+## Flutter Coverage (`flutter_app/`)
 
-### Auth and Onboarding
-- `POST /google_one_tap/callback`
-- Rodauth auth endpoints under `/auth/*`
-- `GET /signup`
-- `GET/PATCH /onboarding`
-- `GET/PATCH/POST /onboardings/wizard`
-- `GET /onboardings/completion`
+### Implemented Native + API Ready
+- Auth session lifecycle (login/refresh/me/logout)
+- Event browsing with search and pagination
+- Event detail presentation
+- Customer tab shell (home/events/profile)
 
-### Event Participation
-- `POST /events/:event_id/attendance/attend`
-- `POST /events/:event_id/attendance/attend_with_pass`
-- `DELETE /events/:event_id/attendance/cancel`
-- `POST /events/:event_id/registrations`
-- `POST /events/:event_id/attendance/check_in`
-- `POST /events/:event_id/attendance/check_out`
-- Participant summary and learning-note routes under `/events/:event_id/participant_summary` and `/events/:event_id/learning_note`
+### Implemented Native + API Gap State
+- Event checkout/payment entry (`EventCheckoutPage`)
+- Pass packages screen (`PassPackagesPage`)
+- Tickets screen (`TicketsPage`)
+- Payment history screen (`PaymentHistoryPage`)
+- Wallet credits screen (`WalletCreditsPage`)
+- Edit profile screen (`EditProfilePage`)
+- Notifications screen (`NotificationsPage`)
+- Referrals screen (`ReferralsPage`)
+- Event history screen (`EventHistoryPage`)
 
-### Orders and Payments
-- `GET /orders/new`, `POST /orders`, `GET /orders/:id`
-- `GET /orders/:id/payment_summary`
-- `POST /orders/:id/pay_with_wallet`
-- `POST /orders/:id/reserve_wallet_for_split`
-- `GET|POST /payments/portone/complete`
-- Ticket confirmation: `GET /tickets/:id/confirmation`
+API-gap states are explicit in-app via `ApiGapCard` and do not use WebView fallback.
 
-### Passes and Wallet-Backed Flows
-- `GET /pass_packages`
-- `POST /pass_packages/:id/purchase`
-- `GET /pass_packages/:id/payment_summary`
-- `POST /pass_packages/:id/pay_with_wallet`
-- `POST /pass_packages/:id/reserve_wallet_for_split`
-
-### Social and Progress Features
-- `POST/DELETE /saved_events`
-- `GET/POST/DELETE /saved_locations`
-- `GET /connections` (+ patch actions)
-- `GET /learning_notes`
-- `POST/GET /voice_checks`
-- `GET/POST /ai_practice`
-
-### Profile and Settings
-- `GET /profile`, `PATCH /profile`
-- `GET/PATCH /settings/profile`
-- `GET /settings/notifications`
-- `GET /settings/payment_methods`
-- `GET /settings/payments`
-- `GET /settings/tickets` (+ refund action)
-- `GET /settings/wallet_credits`
-- `GET /settings/referrals`
-- `GET /settings/event_history`
-- `GET/DELETE /settings/account`
-- `GET /settings/passkeys`
-
-### Notifications and Push
-- `POST/DELETE/GET /push_subscriptions`
-- `GET/PATCH /account_notifications`
-
-### Public Policy/Info Pages
-- `/study-sessions`, `/refund-policy`, `/terms-of-service`, `/privacy-policy`, `/faq`
-
-## Explicitly Blocked in Flutter
+## Explicitly Blocked from Migration
 - `/admin/*`
 - `/tutoring*`, `/tutors*`, `tutors.<domain>`
-- Tutoring API namespace routes under `/api/v1/tutors*`, `/api/v1/bookings*`, `/api/v1/slot_holds*`, `/api/v1/credits*`, `/api/v1/tutor*`
+- tutoring API namespace routes (`/api/v1/tutors*`, `/api/v1/bookings*`, `/api/v1/slot_holds*`, `/api/v1/credits*`, `/api/v1/tutor*`)
 
-## Flutter Implementation Points
-- Route guard: `flutter_app/lib/navigation/customer_route_policy.dart`
-- Shell web container: `flutter_app/lib/ui/nurio_shell_page.dart`
-- Platform permissions + app links:
-  - `flutter_app/android/app/src/main/AndroidManifest.xml`
-  - `flutter_app/ios/Runner/Info.plist`
+## Removed Legacy WebView Components
+- `flutter_app/lib/ui/nurio_shell_page.dart`
+- `flutter_app/lib/features/web/presentation/web_flow_page.dart`
+- `flutter_app/lib/navigation/customer_route_policy.dart`
+- `flutter_app/lib/navigation/nav_destination.dart`
+
+## Next Backend Requirements for Full Payment Completion
+Required customer mobile APIs to move from native placeholders to full native execution:
+- `POST /api/v1/orders`
+- `GET /api/v1/orders/:id/payment_summary`
+- `POST /api/v1/orders/:id/pay_with_wallet`
+- `POST /api/v1/orders/:id/reserve_wallet_for_split`
+- `POST /api/v1/payments/portone/complete`
+- `GET /api/v1/pass_packages`
+- `POST /api/v1/pass_packages/:id/orders`
+- `GET /api/v1/tickets`
+- `GET /api/v1/payments`
+- `GET /api/v1/wallet_credits`
+- `GET /api/v1/referrals`
+- `GET /api/v1/event_history`
+- `PATCH /api/v1/profile`
+- `GET /api/v1/settings/notifications`

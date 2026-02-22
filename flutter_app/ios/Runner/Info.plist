@@ -45,21 +45,5 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
-	<key>NSCameraUsageDescription</key>
-	<string>Nurio uses camera access for profile photos and event-related uploads.</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>Nurio uses microphone access for voice checks and speaking practice features.</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Nurio uses location access to improve nearby event and venue experiences.</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Nurio uses your photo library so you can upload profile and event images.</string>
-	<key>LSApplicationQueriesSchemes</key>
-	<array>
-		<string>kakaotalk</string>
-		<string>ispmobile</string>
-		<string>payco</string>
-		<string>kftc-bankpay</string>
-		<string>market</string>
-	</array>
 </dict>
 </plist>

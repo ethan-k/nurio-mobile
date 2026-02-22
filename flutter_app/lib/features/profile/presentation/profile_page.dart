@@ -3,17 +3,27 @@ import 'package:getwidget/getwidget.dart';
 
 import '../../auth/presentation/auth_controller.dart';
 
+enum ProfileSettingDestination {
+  editProfile,
+  notifications,
+  tickets,
+  payments,
+  walletCredits,
+  referrals,
+  eventHistory,
+}
+
 class ProfilePage extends StatefulWidget {
   const ProfilePage({
     super.key,
     required this.authController,
     required this.onOpenLogin,
-    required this.onOpenWebPath,
+    required this.onOpenSetting,
   });
 
   final AuthController authController;
   final Future<void> Function() onOpenLogin;
-  final ValueChanged<String> onOpenWebPath;
+  final ValueChanged<ProfileSettingDestination> onOpenSetting;
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
@@ -62,7 +72,7 @@ class _ProfilePageState extends State<ProfilePage> {
           const SizedBox(height: 14),
           _SettingsList(
             enabled: auth.isAuthenticated,
-            onOpenWebPath: widget.onOpenWebPath,
+            onOpenSetting: widget.onOpenSetting,
           ),
           if (auth.isAuthenticated) ...[
             const SizedBox(height: 16),
@@ -135,47 +145,47 @@ class _AccountCard extends StatelessWidget {
 }
 
 class _SettingsList extends StatelessWidget {
-  const _SettingsList({required this.enabled, required this.onOpenWebPath});
+  const _SettingsList({required this.enabled, required this.onOpenSetting});
 
   final bool enabled;
-  final ValueChanged<String> onOpenWebPath;
+  final ValueChanged<ProfileSettingDestination> onOpenSetting;
 
   @override
   Widget build(BuildContext context) {
     final items = <_SettingItem>[
       const _SettingItem(
         'Edit Profile',
-        '/settings/profile/edit',
+        ProfileSettingDestination.editProfile,
         Icons.person_outline,
       ),
       const _SettingItem(
         'Notifications',
-        '/settings/notifications',
+        ProfileSettingDestination.notifications,
         Icons.notifications_none,
       ),
       const _SettingItem(
         'Tickets',
-        '/settings/tickets',
+        ProfileSettingDestination.tickets,
         Icons.confirmation_num_outlined,
       ),
       const _SettingItem(
         'Payment History',
-        '/settings/payments',
+        ProfileSettingDestination.payments,
         Icons.credit_card_outlined,
       ),
       const _SettingItem(
         'Wallet Credits',
-        '/settings/wallet_credits',
+        ProfileSettingDestination.walletCredits,
         Icons.account_balance_wallet_outlined,
       ),
       const _SettingItem(
         'Referrals',
-        '/settings/referrals',
+        ProfileSettingDestination.referrals,
         Icons.group_outlined,
       ),
       const _SettingItem(
         'Event History',
-        '/settings/event_history',
+        ProfileSettingDestination.eventHistory,
         Icons.history,
       ),
     ];
@@ -189,7 +199,7 @@ class _SettingsList extends StatelessWidget {
               title: Text(items[i].title),
               trailing: const Icon(Icons.chevron_right),
               enabled: enabled,
-              onTap: enabled ? () => onOpenWebPath(items[i].path) : null,
+              onTap: enabled ? () => onOpenSetting(items[i].destination) : null,
             ),
         ],
       ),
@@ -198,9 +208,9 @@ class _SettingsList extends StatelessWidget {
 }
 
 class _SettingItem {
-  const _SettingItem(this.title, this.path, this.icon);
+  const _SettingItem(this.title, this.destination, this.icon);
 
   final String title;
-  final String path;
+  final ProfileSettingDestination destination;
   final IconData icon;
 }
