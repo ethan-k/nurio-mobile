@@ -45,3 +45,17 @@ cd flutter_app
 flutter analyze
 flutter test
 ```
+
+## Flutter Release Build
+
+Use the Flutter-only release script:
+
+```bash
+./scripts/build-release-flutter.sh
+```
+
+Or via Task:
+
+```bash
+task flutter:release
+```

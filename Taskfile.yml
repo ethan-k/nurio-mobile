@@ -49,6 +49,11 @@ tasks:
     cmds:
       - flutter build appbundle --release
 
+  flutter:release:
+    desc: Bump Flutter version and build release AAB
+    cmds:
+      - ./scripts/build-release-flutter.sh
+
   flutter:clean:
     desc: Clean Flutter build artifacts
     dir: "{{.FLUTTER_DIR}}"
