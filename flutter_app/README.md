@@ -19,6 +19,10 @@ Excluded:
 - `lib/navigation/customer_route_policy.dart`: route allow/block policy
 - `lib/config/app_config.dart`: base URL and app config
 
+## UI Framework
+
+- Uses `getwidget` (`GFAppBar`, `GFButton`, `GFIconButton`) to simplify shared UI component management.
+
 ## Run
 
 ```bash

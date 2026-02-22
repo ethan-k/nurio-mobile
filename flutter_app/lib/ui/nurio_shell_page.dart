@@ -4,6 +4,7 @@ import 'package:app_links/app_links.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:getwidget/getwidget.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -361,13 +362,17 @@ class _NurioShellPageState extends State<NurioShellPage> {
         }
       },
       child: Scaffold(
-        appBar: AppBar(
+        appBar: GFAppBar(
+          backgroundColor: Theme.of(context).colorScheme.surface,
+          elevation: 0,
           title: Text(widget.config.appTitle),
           centerTitle: false,
           actions: [
-            IconButton(
+            GFIconButton(
               tooltip: 'Refresh',
               onPressed: () => _controller?.reload(),
+              type: GFButtonType.transparent,
+              color: Theme.of(context).colorScheme.primary,
               icon: const Icon(Icons.refresh),
             ),
           ],
@@ -532,11 +537,13 @@ class _NurioShellPageState extends State<NurioShellPage> {
                                 style: const TextStyle(fontSize: 12),
                               ),
                             ),
-                            TextButton(
+                            GFButton(
+                              size: GFSize.SMALL,
+                              color: Theme.of(context).colorScheme.primary,
                               onPressed: () {
                                 _controller?.reload();
                               },
-                              child: const Text('Retry'),
+                              text: 'Retry',
                             ),
                           ],
                         ),
@@ -664,10 +671,12 @@ class _ModalWebViewSheetState extends State<_ModalWebViewSheet> {
             ),
             child: Row(
               children: [
-                IconButton(
+                GFIconButton(
                   icon: const Icon(Icons.close),
                   onPressed: () => Navigator.of(context).pop(),
                   tooltip: 'Close',
+                  type: GFButtonType.transparent,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
                 const SizedBox(width: 4),
                 const Expanded(
@@ -682,10 +691,12 @@ class _ModalWebViewSheetState extends State<_ModalWebViewSheet> {
                     child: LinearProgressIndicator(value: _progress),
                   )
                 else
-                  IconButton(
+                  GFIconButton(
                     icon: const Icon(Icons.refresh),
                     onPressed: () => _controller?.reload(),
                     tooltip: 'Refresh',
+                    type: GFButtonType.transparent,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
               ],
             ),
