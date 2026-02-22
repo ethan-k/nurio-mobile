@@ -1,56 +1,47 @@
 # Nurio Mobile
 
-Native mobile apps for Nurio using Hotwire Native.
+Flutter migration of the Nurio customer mobile app.
 
-## Structure
+## Repository Structure
 
+- `flutter_app/`: new Flutter app (active migration target)
+- `android/`: legacy Hotwire Native Android shell (reference)
+- `shared/path-configuration.json`: legacy route presentation config (reference)
+
+## Scope
+
+This migration supports customer-facing features from Nurio web routes (events, onboarding, profile/settings, orders, passes, payments).
+
+Out of scope:
+- Admin features (`/admin/*`)
+- Tutor/tutoring features (`/tutoring*`, `/tutors*`, `tutors.*`)
+
+See `FEATURE_MIGRATION_MATRIX.md` for the detailed route inventory and coverage.
+
+## Run Flutter App
+
+```bash
+cd flutter_app
+flutter pub get
+flutter run
 ```
-nurio-mobile/
-├── android/          # Android app (Kotlin)
-├── ios/              # iOS app (Swift) - coming soon
-└── shared/           # Shared configuration
-    └── path-configuration.json
+
+Optional base URL override:
+
+```bash
+flutter run --dart-define=NURIO_BASE_URL=https://nurio.kr
 ```
 
-## Requirements
+## Android Build Note
 
-### Android
-- Android Studio Ladybug (2024.2) or later
-- JDK 17+
-- Android SDK 28+ (target: 35)
+The Flutter Android module pins `ndkVersion` to `27.0.12077973` in
+`flutter_app/android/app/build.gradle.kts` to avoid local SDK installations
+that have incomplete NDK metadata.
 
-### iOS (coming soon)
-- Xcode 15+
-- iOS 15+
+## Quality Checks
 
-## Getting Started
-
-### Android
-
-1. Open `android/` folder in Android Studio
-2. Sync Gradle dependencies
-3. Run on emulator or device
-
-### Development Server
-
-The app connects to `https://nurio.kr` by default. For local development:
-
-1. Update `BASE_URL` in `android/app/build.gradle.kts`
-2. Ensure your Rails server is running with `bin/dev`
-
-## Hotwire Native Version
-
-- Android: 1.2.5
-- iOS: 1.2.2 (planned)
-
-## Path Configuration
-
-Path rules are defined in `shared/path-configuration.json` and control:
-- Modal vs default presentation
-- Pull-to-refresh behavior
-- Navigation context
-
-## Bridge Components
-
-Bridge components enable communication between web and native code.
-(To be implemented as needed)
+```bash
+cd flutter_app
+flutter analyze
+flutter test
+```
