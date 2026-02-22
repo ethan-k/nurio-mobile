@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'config/app_config.dart';
-import 'ui/nurio_shell_page.dart';
+import 'features/shell/presentation/app_shell_page.dart';
 
 class NurioApp extends StatelessWidget {
   const NurioApp({super.key, required this.config});
@@ -23,7 +23,7 @@ class NurioApp extends StatelessWidget {
         useMaterial3: true,
         scaffoldBackgroundColor: Colors.white,
       ),
-      home: NurioShellPage(config: config),
+      home: AppShellPage(config: config),
     );
   }
 }

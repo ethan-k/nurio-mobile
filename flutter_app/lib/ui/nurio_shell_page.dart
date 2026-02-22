@@ -13,9 +13,16 @@ import '../navigation/customer_route_policy.dart';
 import '../navigation/nav_destination.dart';
 
 class NurioShellPage extends StatefulWidget {
-  const NurioShellPage({super.key, required this.config});
+  const NurioShellPage({
+    super.key,
+    required this.config,
+    this.initialUri,
+    this.showBottomNavigation = true,
+  });
 
   final AppConfig config;
+  final Uri? initialUri;
+  final bool showBottomNavigation;
 
   @override
   State<NurioShellPage> createState() => _NurioShellPageState();
@@ -39,14 +46,16 @@ class _NurioShellPageState extends State<NurioShellPage> {
     super.initState();
 
     _routePolicy = CustomerRoutePolicy(baseUri: widget.config.baseUri);
-    _selectedDestination = _routePolicy.destinationFor(widget.config.startUri);
+    _selectedDestination = _routePolicy.destinationFor(_startUri);
 
     _pullToRefreshController = PullToRefreshController(
       settings: PullToRefreshSettings(color: Colors.black87),
       onRefresh: _handlePullToRefresh,
     );
 
-    unawaited(_initDeepLinks());
+    if (widget.showBottomNavigation) {
+      unawaited(_initDeepLinks());
+    }
   }
 
   @override
@@ -54,6 +63,8 @@ class _NurioShellPageState extends State<NurioShellPage> {
     _deepLinkSubscription?.cancel();
     super.dispose();
   }
+
+  Uri get _startUri => widget.initialUri ?? widget.config.startUri;
 
   Future<void> _initDeepLinks() async {
     try {
@@ -393,9 +404,7 @@ class _NurioShellPageState extends State<NurioShellPage> {
                   useShouldOverrideUrlLoading: true,
                   useOnDownloadStart: true,
                 ),
-                initialUrlRequest: URLRequest(
-                  url: WebUri.uri(widget.config.startUri),
-                ),
+                initialUrlRequest: URLRequest(url: WebUri.uri(_startUri)),
                 pullToRefreshController: _pullToRefreshController,
                 onWebViewCreated: (controller) {
                   _controller = controller;
@@ -554,21 +563,23 @@ class _NurioShellPageState extends State<NurioShellPage> {
             ],
           ),
         ),
-        bottomNavigationBar: NavigationBar(
-          selectedIndex: _selectedDestination.index,
-          destinations: NavDestination.values
-              .map(
-                (destination) => NavigationDestination(
-                  icon: Icon(destination.icon),
-                  label: destination.label,
-                ),
+        bottomNavigationBar: widget.showBottomNavigation
+            ? NavigationBar(
+                selectedIndex: _selectedDestination.index,
+                destinations: NavDestination.values
+                    .map(
+                      (destination) => NavigationDestination(
+                        icon: Icon(destination.icon),
+                        label: destination.label,
+                      ),
+                    )
+                    .toList(),
+                onDestinationSelected: (index) {
+                  final destination = NavDestination.values[index];
+                  unawaited(_onDestinationTapped(destination));
+                },
               )
-              .toList(),
-          onDestinationSelected: (index) {
-            final destination = NavDestination.values[index];
-            unawaited(_onDestinationTapped(destination));
-          },
-        ),
+            : null,
       ),
     );
   }

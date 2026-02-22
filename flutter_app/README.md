@@ -1,13 +1,13 @@
 # Nurio Flutter App
 
-Customer-facing mobile app for Nurio, implemented as a Flutter shell over existing web product routes.
+Customer-facing mobile app for Nurio, implemented as a full Flutter app with native feature modules and web fallback for unsupported backend APIs.
 
 ## Scope
 
 Included:
-- Customer event discovery and attendance flows
-- Orders, pass purchases, wallet flows, payment summary and PortOne completion redirects
-- Profile/settings, tickets, payment history, wallet credits, referrals, event history
+- Native customer shell, auth, events browsing, event details, and profile/settings hub
+- Hybrid web fallback for orders, pass purchases, wallet flows, and PortOne completion redirects
+- Profile/settings deep links for tickets, payment history, wallet credits, referrals, event history
 
 Excluded:
 - Admin routes/features
@@ -15,9 +15,16 @@ Excluded:
 
 ## Core Files
 
-- `lib/ui/nurio_shell_page.dart`: primary WebView shell, deep links, external redirects, permissions, bottom navigation
-- `lib/navigation/customer_route_policy.dart`: route allow/block policy
-- `lib/config/app_config.dart`: base URL and app config
+- `lib/features/shell/presentation/app_shell_page.dart`: main native app shell
+- `lib/features/events/`: native events models/repository/controller/pages
+- `lib/features/auth/`: native API auth + login
+- `lib/features/profile/`: native profile/settings hub
+- `lib/features/home/`: native dashboard and quick actions
+- `lib/features/web/presentation/web_flow_page.dart`: web fallback wrapper
+- `lib/ui/nurio_shell_page.dart`: hardened in-app web flow (deep links, modals, redirects, payment app handling)
+- `lib/navigation/customer_route_policy.dart`: route allow/block policy and legacy modal parity
+- `lib/core/network/api_client.dart`: API transport
+- `lib/core/storage/auth_token_storage.dart`: token persistence
 
 ## UI Framework
 
