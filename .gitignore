@@ -37,3 +37,7 @@ Thumbs.db
 *.swo
 *~
 .vscode/
+
+# Keep repository-level guidance documents tracked.
+!AGENTS.md
+!CLAUDE.md

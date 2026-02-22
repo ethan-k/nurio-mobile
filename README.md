@@ -1,56 +1,76 @@
 # Nurio Mobile
 
-Native mobile apps for Nurio using Hotwire Native.
+Flutter migration of the Nurio customer mobile app.
 
-## Structure
+## Repository Structure
 
+- `flutter_app/`: native Flutter app (active customer app)
+- `android/`: legacy Hotwire Native Android shell (reference only)
+- `shared/path-configuration.json`: legacy route config (reference only)
+
+## Scope
+
+This migration targets customer-facing features only.
+
+Included customer domains:
+- Events discovery and detail
+- Checkout/payment entry points
+- Pass packages, tickets, payments, wallet credits
+- Profile/settings, referrals, event history
+
+Out of scope:
+- Admin features (`/admin/*`)
+- Tutor/tutoring features (`/tutoring*`, `/tutors*`, `tutors.*`)
+
+## Native-Only Constraint
+
+The Flutter app is native-only.
+
+- No WebView fallback
+- No in-app browser shell
+- Unsupported backend mobile APIs are surfaced with native API-gap states
+
+See `FEATURE_MIGRATION_MATRIX.md` for the route inventory and migration status.
+
+## Run Flutter App
+
+```bash
+cd flutter_app
+flutter pub get
+flutter run
 ```
-nurio-mobile/
-├── android/          # Android app (Kotlin)
-├── ios/              # iOS app (Swift) - coming soon
-└── shared/           # Shared configuration
-    └── path-configuration.json
+
+Optional base URL override:
+
+```bash
+flutter run --dart-define=NURIO_BASE_URL=https://nurio.kr
 ```
 
-## Requirements
+## Android Build Note
 
-### Android
-- Android Studio Ladybug (2024.2) or later
-- JDK 17+
-- Android SDK 28+ (target: 35)
+The Flutter Android module pins `ndkVersion` to `27.0.12077973` in
+`flutter_app/android/app/build.gradle.kts` to avoid local SDK installations
+that have incomplete NDK metadata.
 
-### iOS (coming soon)
-- Xcode 15+
-- iOS 15+
+## Quality Checks
 
-## Getting Started
+```bash
+cd flutter_app
+flutter analyze
+flutter test
+flutter build apk --debug
+```
 
-### Android
+## Flutter Release Build
 
-1. Open `android/` folder in Android Studio
-2. Sync Gradle dependencies
-3. Run on emulator or device
+Use the Flutter-only release script:
 
-### Development Server
+```bash
+./scripts/build-release-flutter.sh
+```
 
-The app connects to `https://nurio.kr` by default. For local development:
+Or via Task:
 
-1. Update `BASE_URL` in `android/app/build.gradle.kts`
-2. Ensure your Rails server is running with `bin/dev`
-
-## Hotwire Native Version
-
-- Android: 1.2.5
-- iOS: 1.2.2 (planned)
-
-## Path Configuration
-
-Path rules are defined in `shared/path-configuration.json` and control:
-- Modal vs default presentation
-- Pull-to-refresh behavior
-- Navigation context
-
-## Bridge Components
-
-Bridge components enable communication between web and native code.
-(To be implemented as needed)
+```bash
+task flutter:release
+```

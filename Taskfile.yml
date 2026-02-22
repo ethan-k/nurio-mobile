@@ -1,10 +1,11 @@
 version: "3"
 
 vars:
-  ANDROID_DIR: "{{.ROOT_DIR}}/android"
-  GRADLE_FILE: "{{.ANDROID_DIR}}/app/build.gradle.kts"
-  AAB_OUTPUT: "{{.ANDROID_DIR}}/app/build/outputs/bundle/release/app-release.aab"
-  APK_OUTPUT: "{{.ANDROID_DIR}}/app/build/outputs/apk/debug/app-debug.apk"
+  FLUTTER_DIR: "{{.ROOT_DIR}}/flutter_app"
+  LEGACY_ANDROID_DIR: "{{.ROOT_DIR}}/android"
+  LEGACY_GRADLE_FILE: "{{.LEGACY_ANDROID_DIR}}/app/build.gradle.kts"
+  LEGACY_AAB_OUTPUT: "{{.LEGACY_ANDROID_DIR}}/app/build/outputs/bundle/release/app-release.aab"
+  LEGACY_APK_OUTPUT: "{{.LEGACY_ANDROID_DIR}}/app/build/outputs/apk/debug/app-debug.apk"
 
 tasks:
   default:
@@ -12,38 +13,80 @@ tasks:
     cmds:
       - task --list
 
-  build:
-    desc: Build debug APK
-    dir: "{{.ANDROID_DIR}}"
+  flutter:pub:
+    desc: Install Flutter dependencies
+    dir: "{{.FLUTTER_DIR}}"
+    cmds:
+      - flutter pub get
+
+  flutter:analyze:
+    desc: Run Flutter static analysis
+    dir: "{{.FLUTTER_DIR}}"
+    cmds:
+      - flutter analyze
+
+  flutter:test:
+    desc: Run Flutter tests
+    dir: "{{.FLUTTER_DIR}}"
+    cmds:
+      - flutter test
+
+  flutter:run:
+    desc: Run Flutter app
+    dir: "{{.FLUTTER_DIR}}"
+    cmds:
+      - flutter run
+
+  flutter:build:apk:
+    desc: Build Flutter Android APK (release)
+    dir: "{{.FLUTTER_DIR}}"
+    cmds:
+      - flutter build apk --release
+
+  flutter:build:aab:
+    desc: Build Flutter Android App Bundle (release)
+    dir: "{{.FLUTTER_DIR}}"
+    cmds:
+      - flutter build appbundle --release
+
+  flutter:release:
+    desc: Bump Flutter version and build release AAB
+    cmds:
+      - ./scripts/build-release-flutter.sh
+
+  flutter:clean:
+    desc: Clean Flutter build artifacts
+    dir: "{{.FLUTTER_DIR}}"
+    cmds:
+      - flutter clean
+
+  legacy:build:
+    desc: Build debug APK for legacy Hotwire Android app
+    dir: "{{.LEGACY_ANDROID_DIR}}"
     cmds:
       - ./gradlew assembleDebug
-      - echo "Debug APK -> {{.APK_OUTPUT}}"
+      - echo "Debug APK -> {{.LEGACY_APK_OUTPUT}}"
 
-  build:release:
-    desc: Build release AAB (no version bump)
-    dir: "{{.ANDROID_DIR}}"
+  legacy:build:release:
+    desc: Build release AAB for legacy Hotwire Android app
+    dir: "{{.LEGACY_ANDROID_DIR}}"
     preconditions:
-      - sh: test -f {{.ANDROID_DIR}}/keystore.properties
+      - sh: test -f {{.LEGACY_ANDROID_DIR}}/keystore.properties
         msg: "keystore.properties not found. See scripts/build-release.sh for format."
     cmds:
       - ./gradlew bundleRelease
-      - echo "Release AAB -> {{.AAB_OUTPUT}}"
+      - echo "Release AAB -> {{.LEGACY_AAB_OUTPUT}}"
 
-  release:
-    desc: Bump version and build release AAB
-    cmds:
-      - ./scripts/build-release.sh
-
-  version:
-    desc: Show current version
+  legacy:version:
+    desc: Show legacy Hotwire Android version
     cmds:
       - |
-        CODE=$(sed -n 's/.*versionCode = \([0-9]*\)/\1/p' {{.GRADLE_FILE}})
-        NAME=$(sed -n 's/.*versionName = "\([^"]*\)"/\1/p' {{.GRADLE_FILE}})
+        CODE=$(sed -n 's/.*versionCode = \([0-9]*\)/\1/p' {{.LEGACY_GRADLE_FILE}})
+        NAME=$(sed -n 's/.*versionName = "\([^"]*\)"/\1/p' {{.LEGACY_GRADLE_FILE}})
         echo "Version: $NAME (code: $CODE)"
 
-  clean:
-    desc: Clean build outputs
-    dir: "{{.ANDROID_DIR}}"
+  legacy:clean:
+    desc: Clean legacy Hotwire Android build outputs
+    dir: "{{.LEGACY_ANDROID_DIR}}"
     cmds:
       - ./gradlew clean
