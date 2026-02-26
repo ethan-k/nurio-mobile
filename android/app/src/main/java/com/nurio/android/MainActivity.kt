@@ -1,5 +1,6 @@
 package com.nurio.android
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -14,6 +15,18 @@ class MainActivity : HotwireActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         delegate.setCurrentNavigator(navigatorConfigurations().first())
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+
+        intent.data?.let { uri ->
+            if (uri.scheme == "nurio" && uri.host == "auth-callback") {
+                val token = uri.getQueryParameter("token") ?: return@let
+                val tokenAuthUrl = "${BuildConfig.BASE_URL}/auth/native/token_auth?token=$token"
+                delegate.currentNavigator?.route(tokenAuthUrl)
+            }
+        }
     }
 
     override fun navigatorConfigurations() = listOf(

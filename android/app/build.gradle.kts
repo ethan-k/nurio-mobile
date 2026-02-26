@@ -4,6 +4,7 @@ import java.io.FileInputStream
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 val keystorePropertiesFile = rootProject.file("keystore.properties")
@@ -85,6 +86,8 @@ dependencies {
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.splashscreen)
+    implementation(libs.androidx.browser)
+    implementation(libs.kotlinx.serialization.json)
 
     implementation(libs.hotwire.core)
     implementation(libs.hotwire.navigation.fragments)
