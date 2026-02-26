@@ -43,10 +43,7 @@ android {
             buildConfigField("Boolean", "DEBUG_LOGGING", "true")
         }
         release {
-            // Temporary stability guard: AGP 8.7.3 + Kotlin 2.3 can trigger R8 metadata issues.
-            // Re-enable after upgrading AGP/R8 to a Kotlin 2.3-compatible version.
             isMinifyEnabled = false
-            isShrinkResources = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -72,6 +69,12 @@ android {
 
     buildFeatures {
         buildConfig = true
+    }
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
     }
 }
 
