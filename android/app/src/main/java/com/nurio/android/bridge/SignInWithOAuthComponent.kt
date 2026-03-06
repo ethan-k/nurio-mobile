@@ -15,21 +15,37 @@ class SignInWithOAuthComponent(
     name: String,
     private val delegate: BridgeDelegate<HotwireDestination>
 ) : BridgeComponent<HotwireDestination>(name, delegate) {
+    companion object {
+        private const val TAG = "OAuthComponent"
+    }
 
     override fun onReceive(message: Message) {
         when (message.event) {
             "click" -> handleClick(message)
-            else -> Log.w("OAuthComponent", "Unknown event: ${message.event}")
+            else -> Log.w(TAG, "Unknown event: ${message.event}")
         }
     }
 
     private fun handleClick(message: Message) {
         val data = message.data<ClickData>() ?: return
-        val baseUrl = BuildConfig.BASE_URL
-        val fullUrl = "$baseUrl${data.startPath}"
+        if (data.startPath.isBlank()) {
+            Log.w(TAG, "Missing OAuth start path")
+            return
+        }
+
+        val fullUrl = if (data.startPath.startsWith("http://") || data.startPath.startsWith("https://")) {
+            data.startPath
+        } else {
+            "${BuildConfig.BASE_URL.trimEnd('/')}/${data.startPath.trimStart('/')}"
+        }
+        val activity = delegate.destination.fragment.activity
+
+        if (activity == null) {
+            Log.w(TAG, "Cannot launch OAuth because the fragment is not attached")
+            return
+        }
 
         val customTabsIntent = CustomTabsIntent.Builder().build()
-        val activity = delegate.destination.fragment.requireActivity()
         customTabsIntent.launchUrl(activity, Uri.parse(fullUrl))
     }
 
