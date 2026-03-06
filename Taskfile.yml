@@ -68,13 +68,22 @@ tasks:
       - echo "Debug APK -> {{.LEGACY_APK_OUTPUT}}"
 
   legacy:build:release:
-    desc: Build release AAB for legacy Hotwire Android app
-    dir: "{{.LEGACY_ANDROID_DIR}}"
+    desc: Bump legacy Hotwire Android version and build release AAB
     preconditions:
       - sh: test -f {{.LEGACY_ANDROID_DIR}}/keystore.properties
         msg: "keystore.properties not found. See scripts/build-release.sh for format."
     cmds:
-      - ./gradlew bundleRelease
+      - ./scripts/build-release.sh
+
+  legacy:build:release:raw:
+    desc: Build release AAB for legacy Hotwire Android app without bumping version
+    preconditions:
+      - sh: test -f {{.LEGACY_ANDROID_DIR}}/keystore.properties
+        msg: "keystore.properties not found. See scripts/build-release.sh for format."
+    cmds:
+      - |
+        cd {{.LEGACY_ANDROID_DIR}}
+        ./gradlew bundleRelease
       - echo "Release AAB -> {{.LEGACY_AAB_OUTPUT}}"
 
   legacy:version:
