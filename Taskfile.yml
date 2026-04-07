@@ -1,17 +1,40 @@
 version: "3"
 
 vars:
+  IOS_DIR: "{{.ROOT_DIR}}/ios"
   FLUTTER_DIR: "{{.ROOT_DIR}}/flutter_app"
   LEGACY_ANDROID_DIR: "{{.ROOT_DIR}}/android"
+  TUTORS_ANDROID_DIR: "{{.ROOT_DIR}}/tutors-nurio-mobile/android"
   LEGACY_GRADLE_FILE: "{{.LEGACY_ANDROID_DIR}}/app/build.gradle.kts"
+  TUTORS_GRADLE_FILE: "{{.TUTORS_ANDROID_DIR}}/app/build.gradle.kts"
   LEGACY_AAB_OUTPUT: "{{.LEGACY_ANDROID_DIR}}/app/build/outputs/bundle/release/app-release.aab"
   LEGACY_APK_OUTPUT: "{{.LEGACY_ANDROID_DIR}}/app/build/outputs/apk/debug/app-debug.apk"
+  TUTORS_RELEASE_APK_OUTPUT: "{{.TUTORS_ANDROID_DIR}}/app/build/outputs/apk/release/app-release.apk"
+  TUTORS_DEBUG_APK_OUTPUT: "{{.TUTORS_ANDROID_DIR}}/app/build/outputs/apk/debug/app-debug.apk"
+  IOS_PROJECT: "{{.IOS_DIR}}/Nurio.xcodeproj"
+  IOS_SCHEME: "Nurio"
+  IOS_DESTINATION: "platform=iOS Simulator,name=iPhone 16,OS=18.2"
 
 tasks:
   default:
     desc: List available tasks
     cmds:
       - task --list
+
+  ios:open:
+    desc: Open the standalone Hotwire Native iOS project in Xcode
+    cmds:
+      - open {{.IOS_PROJECT}}
+
+  ios:build:
+    desc: Build the standalone Hotwire Native iOS shell for the default simulator
+    cmds:
+      - xcodebuild -project {{.IOS_PROJECT}} -scheme {{.IOS_SCHEME}} -destination '{{.IOS_DESTINATION}}' build
+
+  ios:test:
+    desc: Run the standalone Hotwire Native iOS shell unit tests
+    cmds:
+      - xcodebuild -project {{.IOS_PROJECT}} -scheme {{.IOS_SCHEME}} -destination '{{.IOS_DESTINATION}}' test
 
   flutter:pub:
     desc: Install Flutter dependencies
@@ -97,5 +120,42 @@ tasks:
   legacy:clean:
     desc: Clean legacy Hotwire Android build outputs
     dir: "{{.LEGACY_ANDROID_DIR}}"
+    cmds:
+      - ./gradlew clean
+
+  tutors:build:
+    desc: Build debug APK for the tutors Hotwire Android app
+    dir: "{{.TUTORS_ANDROID_DIR}}"
+    cmds:
+      - ./gradlew assembleDebug
+      - echo "Debug APK -> {{.TUTORS_DEBUG_APK_OUTPUT}}"
+
+  tutors:lint:
+    desc: Run lint for the tutors Hotwire Android app
+    dir: "{{.TUTORS_ANDROID_DIR}}"
+    cmds:
+      - ./gradlew lintDebug
+
+  tutors:build:release:
+    desc: Build release APK for the tutors Hotwire Android app
+    dir: "{{.TUTORS_ANDROID_DIR}}"
+    preconditions:
+      - sh: test -f {{.TUTORS_ANDROID_DIR}}/keystore.properties
+        msg: "keystore.properties not found. Copy tutors-nurio-mobile/android/keystore.properties.example first."
+    cmds:
+      - ./gradlew assembleRelease
+      - echo "Release APK -> {{.TUTORS_RELEASE_APK_OUTPUT}}"
+
+  tutors:version:
+    desc: Show tutors Hotwire Android version
+    cmds:
+      - |
+        CODE=$(sed -n 's/.*versionCode = \([0-9]*\)/\1/p' {{.TUTORS_GRADLE_FILE}})
+        NAME=$(sed -n 's/.*versionName = "\([^"]*\)"/\1/p' {{.TUTORS_GRADLE_FILE}})
+        echo "Version: $NAME (code: $CODE)"
+
+  tutors:clean:
+    desc: Clean tutors Hotwire Android build outputs
+    dir: "{{.TUTORS_ANDROID_DIR}}"
     cmds:
       - ./gradlew clean
