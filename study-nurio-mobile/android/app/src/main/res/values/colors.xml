@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary">#F64060</color>
+    <color name="primary_dark">#D73854</color>
+    <color name="primary_light">#FF8093</color>
+    <color name="accent">#1A1A1A</color>
+    <color name="background">#FFFFFF</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="on_primary">#FFFFFF</color>
+    <color name="on_background">#1A1A1A</color>
+    <color name="on_surface">#1A1A1A</color>
+
+    <color name="bottom_nav_background">#FFFFFF</color>
+    <color name="bottom_nav_selected">#F64060</color>
+    <color name="bottom_nav_unselected">#9CA3AF</color>
+</resources>
