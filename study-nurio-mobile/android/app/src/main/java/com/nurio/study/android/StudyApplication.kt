@@ -1,4 +1,4 @@
-package com.nurio.study
+package com.nurio.study.android
 
 import android.app.Application
 import dev.hotwire.core.bridge.BridgeComponentFactory
@@ -11,10 +11,10 @@ import dev.hotwire.navigation.config.registerRouteDecisionHandlers
 import dev.hotwire.navigation.routing.AppNavigationRouteDecisionHandler
 import dev.hotwire.navigation.routing.BrowserTabRouteDecisionHandler
 import dev.hotwire.navigation.routing.SystemNavigationRouteDecisionHandler
-import com.nurio.study.bridge.SignInWithOAuthComponent
-import com.nurio.study.fragments.WebFragment
-import com.nurio.study.fragments.WebModalFragment
-import com.nurio.study.routing.OAuthRouteDecisionHandler
+import com.nurio.study.android.bridge.SignInWithOAuthComponent
+import com.nurio.study.android.fragments.WebFragment
+import com.nurio.study.android.fragments.WebModalFragment
+import com.nurio.study.android.routing.OAuthRouteDecisionHandler
 
 class StudyApplication : Application() {
     override fun onCreate() {
