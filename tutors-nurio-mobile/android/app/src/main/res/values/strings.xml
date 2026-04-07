@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Nurio Tutors</string>
+    <string name="app_name_korean">누리오 튜터즈</string>
+    <string name="nav_home">튜터</string>
+    <string name="nav_events">예약</string>
+    <string name="nav_profile">크레딧</string>
+</resources>
