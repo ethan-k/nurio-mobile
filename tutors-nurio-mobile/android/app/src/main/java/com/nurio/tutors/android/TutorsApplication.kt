@@ -1,4 +1,4 @@
-package com.nurio.tutors
+package com.nurio.tutors.android
 
 import android.app.Application
 import dev.hotwire.core.bridge.BridgeComponentFactory
@@ -11,10 +11,10 @@ import dev.hotwire.navigation.config.registerRouteDecisionHandlers
 import dev.hotwire.navigation.routing.AppNavigationRouteDecisionHandler
 import dev.hotwire.navigation.routing.BrowserTabRouteDecisionHandler
 import dev.hotwire.navigation.routing.SystemNavigationRouteDecisionHandler
-import com.nurio.tutors.bridge.SignInWithOAuthComponent
-import com.nurio.tutors.fragments.WebFragment
-import com.nurio.tutors.fragments.WebModalFragment
-import com.nurio.tutors.routing.OAuthRouteDecisionHandler
+import com.nurio.tutors.android.bridge.SignInWithOAuthComponent
+import com.nurio.tutors.android.fragments.WebFragment
+import com.nurio.tutors.android.fragments.WebModalFragment
+import com.nurio.tutors.android.routing.OAuthRouteDecisionHandler
 
 class TutorsApplication : Application() {
     override fun onCreate() {

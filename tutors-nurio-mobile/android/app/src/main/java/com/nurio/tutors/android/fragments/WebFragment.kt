@@ -1,4 +1,4 @@
-package com.nurio.tutors.fragments
+package com.nurio.tutors.android.fragments
 
 import android.os.Bundle
 import android.view.View

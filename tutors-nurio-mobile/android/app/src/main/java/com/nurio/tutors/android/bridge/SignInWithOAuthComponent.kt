@@ -1,9 +1,9 @@
-package com.nurio.tutors.bridge
+package com.nurio.tutors.android.bridge
 
 import android.net.Uri
 import android.util.Log
 import androidx.browser.customtabs.CustomTabsIntent
-import com.nurio.tutors.BuildConfig
+import com.nurio.tutors.android.BuildConfig
 import dev.hotwire.core.bridge.BridgeComponent
 import dev.hotwire.core.bridge.BridgeDelegate
 import dev.hotwire.core.bridge.Message

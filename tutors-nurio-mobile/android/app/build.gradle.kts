@@ -14,11 +14,11 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace = "com.nurio.tutors"
+    namespace = "com.nurio.tutors.android"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.nurio.tutors"
+        applicationId = "com.nurio.tutors.android"
         minSdk = 28
         targetSdk = 35
         versionCode = 1

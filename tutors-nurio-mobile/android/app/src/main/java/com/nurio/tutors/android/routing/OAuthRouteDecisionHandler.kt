@@ -1,4 +1,4 @@
-package com.nurio.tutors.routing
+package com.nurio.tutors.android.routing
 
 import androidx.browser.customtabs.CustomTabColorSchemeParams
 import androidx.browser.customtabs.CustomTabsIntent

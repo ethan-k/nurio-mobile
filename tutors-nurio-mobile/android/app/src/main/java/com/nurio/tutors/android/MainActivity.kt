@@ -1,4 +1,4 @@
-package com.nurio.tutors
+package com.nurio.tutors.android
 
 import android.content.Intent
 import android.net.Uri
