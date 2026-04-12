@@ -8,6 +8,7 @@ Mobile workspace for Nurio app shells and migration tracks.
 - `flutter_app/`: native Flutter migration track for the customer app
 - `android/`: legacy Hotwire Native Android shell for the customer app
 - `tutors-nurio-mobile/android/`: standalone Hotwire Native Android shell for `https://tutors.nurio.kr`
+- `tutors-nurio-mobile/ios/`: standalone Hotwire Native iOS shell for `https://tutors.nurio.kr`
 - `study-nurio-mobile/`: sibling workspace for study product mobile shells
 - `shared/`: cross-app configuration assets
 
@@ -73,6 +74,22 @@ cd tutors-nurio-mobile/android
 ANDROID_HOME=/Users/ws/Library/Android/sdk ./gradlew :app:assembleDebug
 ANDROID_HOME=/Users/ws/Library/Android/sdk ./gradlew :app:lintDebug
 ANDROID_HOME=/Users/ws/Library/Android/sdk ./gradlew :app:assembleRelease
+```
+
+## Tutor iOS Hotwire Shell
+
+The tutor-facing iOS Hotwire shell lives in `tutors-nurio-mobile/ios`.
+
+- Start URL: `https://tutors.nurio.kr`
+- OAuth callback: `nurio://auth-callback`
+- Path configuration source: `tutors-nurio-mobile/ios/path-configuration.json`
+- Submission guide: `tutors-nurio-mobile/ios/docs/SUBMISSION.md`
+
+Build locally:
+
+```bash
+xcodebuild -project tutors-nurio-mobile/ios/NurioTutors.xcodeproj -scheme NurioTutors -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.2' build
+xcodebuild -project tutors-nurio-mobile/ios/NurioTutors.xcodeproj -scheme NurioTutors -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.2' test
 ```
 
 ## Flutter Constraint

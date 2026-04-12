@@ -1,0 +1,27 @@
+# Xcode user state
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+*.xcuserstate
+*.moved-aside
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+
+# Xcode generated workspace metadata
+*.xcodeproj/project.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist
+*.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
+
+# Build outputs
+build/
+DerivedData/
+.build/
+
+# macOS
+.DS_Store
+
+# Exceptions for shared defaults
+!default.mode1v3
+!default.mode2v3
+!default.pbxuser
+!default.perspectivev3
