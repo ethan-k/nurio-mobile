@@ -44,6 +44,12 @@ final class SceneController: UIResponder {
             navigator.start()
         }
     }
+
+    private func hideNavigationBarOnMainStack() {
+        guard let rootNav = navigator.rootViewController as? UINavigationController else { return }
+        rootNav.setNavigationBarHidden(true, animated: false)
+        rootNav.delegate = self
+    }
 }
 
 extension SceneController: UIWindowSceneDelegate {
@@ -54,6 +60,8 @@ extension SceneController: UIWindowSceneDelegate {
         window.rootViewController = navigator.rootViewController
         window.makeKeyAndVisible()
         self.window = window
+
+        hideNavigationBarOnMainStack()
 
         let launchURL = connectionOptions.urlContexts.first?.url
         startIfNeeded(with: launchURL)
@@ -84,5 +92,15 @@ extension SceneController: NavigatorDelegate {
         }
 
         presentError(error.localizedDescription)
+    }
+}
+
+extension SceneController: UINavigationControllerDelegate {
+    func navigationController(
+        _ navigationController: UINavigationController,
+        willShow viewController: UIViewController,
+        animated: Bool
+    ) {
+        navigationController.setNavigationBarHidden(true, animated: animated)
     }
 }
