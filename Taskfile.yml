@@ -64,6 +64,16 @@ tasks:
     cmds:
       - ./scripts/bump-ios-version.sh patch
 
+  ios:release:
+    desc: Build iOS archive for App Store Connect (with optional version bump)
+    cmds:
+      - ./scripts/ios-release.sh
+
+  ios:archive:
+    desc: Build iOS archive without version bump
+    cmds:
+      - xcodebuild -project {{.IOS_PROJECT}} -scheme {{.IOS_SCHEME}} -archivePath {{.IOS_DIR}}/build/Nurio.xcarchive -destination "generic/platform=iOS" archive
+
   flutter:pub:
     desc: Install Flutter dependencies
     dir: "{{.FLUTTER_DIR}}"
