@@ -36,6 +36,34 @@ tasks:
     cmds:
       - xcodebuild -project {{.IOS_PROJECT}} -scheme {{.IOS_SCHEME}} -destination '{{.IOS_DESTINATION}}' test
 
+  ios:version:
+    desc: Show iOS version (marketing and build numbers)
+    cmds:
+      - |
+        BUILD=$(grep -A 20 "buildSettings = {" {{.IOS_PROJECT}}/project.pbxproj | grep "CURRENT_PROJECT_VERSION" | head -n 1 | sed 's/.*= \([^;]*\);.*/\1/' | tr -d ' ')
+        MARKETING=$(grep -A 20 "buildSettings = {" {{.IOS_PROJECT}}/project.pbxproj | grep "MARKETING_VERSION" | head -n 1 | sed 's/.*= \([^;]*\);.*/\1/' | tr -d ' ')
+        echo "Version: $MARKETING (build: $BUILD)"
+
+  ios:version:bump:
+    desc: Bump iOS build number for App Store Connect upload
+    cmds:
+      - ./scripts/bump-ios-version.sh build
+
+  ios:version:bump:major:
+    desc: Bump iOS major version and reset build (1.0.0 -> 2.0.0)
+    cmds:
+      - ./scripts/bump-ios-version.sh major
+
+  ios:version:bump:minor:
+    desc: Bump iOS minor version and reset build (1.0.0 -> 1.1.0)
+    cmds:
+      - ./scripts/bump-ios-version.sh minor
+
+  ios:version:bump:patch:
+    desc: Bump iOS patch version and reset build (1.0.0 -> 1.0.1)
+    cmds:
+      - ./scripts/bump-ios-version.sh patch
+
   flutter:pub:
     desc: Install Flutter dependencies
     dir: "{{.FLUTTER_DIR}}"
