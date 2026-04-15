@@ -2,6 +2,23 @@ import XCTest
 @testable import Nurio
 
 final class NurioTests: XCTestCase {
+    func testAppBundleDeclaresMediaPrivacyUsageDescriptions() {
+        let appBundle = Bundle(for: AppDelegate.self)
+
+        XCTAssertEqual(
+            appBundle.object(forInfoDictionaryKey: "NSCameraUsageDescription") as? String,
+            "Nurio uses the camera so you can take a profile photo."
+        )
+        XCTAssertEqual(
+            appBundle.object(forInfoDictionaryKey: "NSPhotoLibraryUsageDescription") as? String,
+            "Nurio uses your photo library so you can choose a profile photo."
+        )
+        XCTAssertEqual(
+            appBundle.object(forInfoDictionaryKey: "NSPhotoLibraryAddUsageDescription") as? String,
+            "Nurio may save profile photos you take in the app when needed."
+        )
+    }
+
     func testTokenAuthURLFromNativeCallback() {
         let callbackURL = URL(string: "nurio://auth-callback?token=test-token&state=test-state")!
         let tokenAuthURL = NativeAuthCallback.tokenAuthURL(

@@ -35,6 +35,12 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>NSCameraUsageDescription</key>
+	<string>Nurio uses the camera so you can take a profile photo.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Nurio may save profile photos you take in the app when needed.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Nurio uses your photo library so you can choose a profile photo.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
