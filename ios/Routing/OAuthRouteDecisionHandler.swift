@@ -18,6 +18,19 @@ final class OAuthRouteDecisionHandler: RouteDecisionHandler {
     }
 
     func handle(location: URL, configuration: Navigator.Configuration, navigator: Navigator) -> Router.Decision {
+        if location.path == "/auth/apple" {
+            NativeAppleSignInCoordinator.shared.presentationAnchorProvider = { [weak navigator] in
+                navigator?.activeNavigationController.view.window
+            }
+
+            NativeAppleSignInCoordinator.shared.start { callbackURL in
+                guard let callbackURL else { return }
+                AppRouteCoordinator.shared.handleIncoming(callbackURL)
+            }
+
+            return .cancel
+        }
+
         OAuthSessionCoordinator.shared.presentationAnchorProvider = { [weak navigator] in
             navigator?.activeNavigationController.view.window
         }

@@ -15,6 +15,7 @@
 		A00000000000000000000006 /* NativeAuthCallback.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000036 /* NativeAuthCallback.swift */; };
 		A00000000000000000000007 /* OAuthSessionCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000037 /* OAuthSessionCoordinator.swift */; };
 		A00000000000000000000008 /* UIApplication+KeyWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000038 /* UIApplication+KeyWindow.swift */; };
+		A00000000000000000000012 /* NativeAppleSignInCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000043 /* NativeAppleSignInCoordinator.swift */; };
 		A00000000000000000000009 /* CustomerScopeRouteDecisionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000039 /* CustomerScopeRouteDecisionHandler.swift */; };
 		A0000000000000000000000A /* OAuthRouteDecisionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000003A /* OAuthRouteDecisionHandler.swift */; };
 		A0000000000000000000000B /* SignInWithOAuthComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000003B /* SignInWithOAuthComponent.swift */; };
@@ -46,6 +47,8 @@
 		A00000000000000000000036 /* NativeAuthCallback.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeAuthCallback.swift; sourceTree = "<group>"; };
 		A00000000000000000000037 /* OAuthSessionCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAuthSessionCoordinator.swift; sourceTree = "<group>"; };
 		A00000000000000000000038 /* UIApplication+KeyWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIApplication+KeyWindow.swift"; sourceTree = "<group>"; };
+		A00000000000000000000043 /* NativeAppleSignInCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeAppleSignInCoordinator.swift; sourceTree = "<group>"; };
+		A00000000000000000000044 /* Nurio.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Nurio.entitlements; sourceTree = "<group>"; };
 		A00000000000000000000039 /* CustomerScopeRouteDecisionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomerScopeRouteDecisionHandler.swift; sourceTree = "<group>"; };
 		A0000000000000000000003A /* OAuthRouteDecisionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAuthRouteDecisionHandler.swift; sourceTree = "<group>"; };
 		A0000000000000000000003B /* SignInWithOAuthComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInWithOAuthComponent.swift; sourceTree = "<group>"; };
@@ -121,6 +124,8 @@
 				A00000000000000000000036 /* NativeAuthCallback.swift */,
 				A00000000000000000000037 /* OAuthSessionCoordinator.swift */,
 				A00000000000000000000038 /* UIApplication+KeyWindow.swift */,
+				A00000000000000000000043 /* NativeAppleSignInCoordinator.swift */,
+				A00000000000000000000044 /* Nurio.entitlements */,
 			);
 			name = Support;
 			sourceTree = "<group>";
@@ -269,6 +274,7 @@
 				A00000000000000000000009 /* CustomerScopeRouteDecisionHandler.swift in Sources */,
 				A0000000000000000000000A /* OAuthRouteDecisionHandler.swift in Sources */,
 				A0000000000000000000000B /* SignInWithOAuthComponent.swift in Sources */,
+				A00000000000000000000012 /* NativeAppleSignInCoordinator.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -426,6 +432,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Nurio.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = M83USWXB66;
@@ -457,6 +464,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Nurio.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = M83USWXB66;

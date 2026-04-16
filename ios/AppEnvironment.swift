@@ -31,5 +31,6 @@ enum AppEnvironment {
         "/auth/google_oauth2",
         "/auth/kakao",
         "/auth/naver",
+        "/auth/apple",
     ]
 }
