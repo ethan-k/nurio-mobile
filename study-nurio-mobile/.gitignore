@@ -9,3 +9,11 @@ android/app/build/
 android/local.properties
 android/keystore.properties
 android/*.jks
+
+ios/build/
+ios/DerivedData/
+ios/*.xcworkspace/xcuserdata/
+ios/*.xcodeproj/xcuserdata/
+ios/*.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
+ios/Pods/
+ios/.build/
