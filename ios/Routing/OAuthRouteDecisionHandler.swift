@@ -1,5 +1,11 @@
 import Foundation
 import HotwireNative
+import OSLog
+
+private let authLogger = Logger(
+    subsystem: Bundle.main.bundleIdentifier ?? "com.nurio.ios",
+    category: "auth"
+)
 
 @MainActor
 final class OAuthRouteDecisionHandler: RouteDecisionHandler {
@@ -18,13 +24,19 @@ final class OAuthRouteDecisionHandler: RouteDecisionHandler {
     }
 
     func handle(location: URL, configuration: Navigator.Configuration, navigator: Navigator) -> Router.Decision {
+        authLogger.info("OAuthRouteDecisionHandler intercepting path=\(location.path, privacy: .public)")
+
         if location.path == "/auth/apple" {
             NativeAppleSignInCoordinator.shared.presentationAnchorProvider = { [weak navigator] in
                 navigator?.activeNavigationController.view.window
             }
 
             NativeAppleSignInCoordinator.shared.start { callbackURL in
-                guard let callbackURL else { return }
+                guard let callbackURL else {
+                    authLogger.error("OAuthRouteDecisionHandler native Apple flow returned no callback url")
+                    return
+                }
+                authLogger.info("OAuthRouteDecisionHandler received native Apple callback url=\(callbackURL.absoluteString, privacy: .public)")
                 AppRouteCoordinator.shared.handleIncoming(callbackURL)
             }
 
@@ -36,6 +48,7 @@ final class OAuthRouteDecisionHandler: RouteDecisionHandler {
         }
 
         OAuthSessionCoordinator.shared.start(url: location) { callbackURL in
+            authLogger.info("OAuthRouteDecisionHandler received web auth callback url=\(callbackURL.absoluteString, privacy: .public)")
             AppRouteCoordinator.shared.handleIncoming(callbackURL)
         }
 

@@ -1,8 +1,17 @@
 import Foundation
+import OSLog
+
+private let authLogger = Logger(
+    subsystem: Bundle.main.bundleIdentifier ?? "com.nurio.ios",
+    category: "auth"
+)
 
 enum NativeAuthCallback {
     static func tokenAuthURL(from callbackURL: URL, baseURL: URL) -> URL? {
-        guard isCallbackURL(callbackURL) else { return nil }
+        guard isCallbackURL(callbackURL) else {
+            authLogger.debug("NativeAuthCallback ignored non-callback url=\(callbackURL.absoluteString, privacy: .public)")
+            return nil
+        }
 
         guard
             let components = URLComponents(url: callbackURL, resolvingAgainstBaseURL: false),
@@ -11,6 +20,7 @@ enum NativeAuthCallback {
             !token.isEmpty,
             !state.isEmpty
         else {
+            authLogger.error("NativeAuthCallback missing token or state in callback url=\(callbackURL.absoluteString, privacy: .public)")
             return nil
         }
 
@@ -24,7 +34,13 @@ enum NativeAuthCallback {
             URLQueryItem(name: "state", value: state),
         ]
 
-        return tokenAuthComponents?.url
+        guard let url = tokenAuthComponents?.url else {
+            authLogger.error("NativeAuthCallback failed to construct token_auth url")
+            return nil
+        }
+
+        authLogger.info("NativeAuthCallback built token_auth url=\(url.absoluteString, privacy: .public)")
+        return url
     }
 
     static func isCallbackURL(_ url: URL) -> Bool {
