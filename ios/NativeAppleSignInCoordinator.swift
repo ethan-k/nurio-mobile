@@ -40,9 +40,7 @@ final class NativeAppleSignInCoordinator: NSObject {
     }
 
     private func finish(with url: URL?) {
-        if let url {
-            authLogger.info("NativeAppleSignInCoordinator finishing with callback url=\(url.absoluteString, privacy: .public)")
-        } else {
+        if url == nil {
             authLogger.error("NativeAppleSignInCoordinator finishing without callback url")
         }
         let completion = self.completion
@@ -58,9 +56,6 @@ final class NativeAppleSignInCoordinator: NSObject {
         email: String?
     ) {
         let endpoint = AppEnvironment.baseURL.appendingPathComponent("/auth/apple/native")
-        authLogger.info(
-            "NativeAppleSignInCoordinator posting to backend endpoint=\(endpoint.absoluteString, privacy: .public) given_name_present=\(givenName?.isEmpty == false) family_name_present=\(familyName?.isEmpty == false) email_present=\(email?.isEmpty == false) token_length=\(idToken.count)"
-        )
         var request = URLRequest(url: endpoint)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -204,9 +199,6 @@ extension NativeAppleSignInCoordinator: ASAuthorizationControllerDelegate {
         let givenName = credential.fullName?.givenName
         let familyName = credential.fullName?.familyName
         let email = credential.email
-        authLogger.info(
-            "NativeAppleSignInCoordinator authorization succeeded token_length=\(identityToken.count) given_name_present=\(givenName?.isEmpty == false) family_name_present=\(familyName?.isEmpty == false) email_present=\(email?.isEmpty == false)"
-        )
 
         postToBackend(
             idToken: identityToken,

@@ -15,12 +15,7 @@ final class SignInWithOAuthComponent: BridgeComponent {
     override func onReceive(message: Message) {
         guard message.event == "click" else { return }
         guard let data: ClickData = message.data() else { return }
-        guard let url = absoluteURL(from: data.startPath) else {
-            authLogger.error("SignInWithOAuthComponent could not resolve startPath=\(data.startPath, privacy: .public)")
-            return
-        }
-
-        authLogger.info("SignInWithOAuthComponent received url=\(url.absoluteString, privacy: .public)")
+        guard let url = absoluteURL(from: data.startPath) else { return }
 
         if url.path == "/auth/apple" {
             NativeAppleSignInCoordinator.shared.presentationAnchorProvider = { [weak self] in
@@ -32,7 +27,6 @@ final class SignInWithOAuthComponent: BridgeComponent {
                     authLogger.error("SignInWithOAuthComponent native Apple flow returned no callback url")
                     return
                 }
-                authLogger.info("SignInWithOAuthComponent received native Apple callback url=\(callbackURL.absoluteString, privacy: .public)")
                 AppRouteCoordinator.shared.handleIncoming(callbackURL)
             }
             return
@@ -43,7 +37,6 @@ final class SignInWithOAuthComponent: BridgeComponent {
         }
 
         OAuthSessionCoordinator.shared.start(url: url) { callbackURL in
-            authLogger.info("SignInWithOAuthComponent received web auth callback url=\(callbackURL.absoluteString, privacy: .public)")
             AppRouteCoordinator.shared.handleIncoming(callbackURL)
         }
     }

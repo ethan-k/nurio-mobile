@@ -16,15 +16,12 @@ final class AppRouteCoordinator {
     private init() {}
 
     func handleIncoming(_ url: URL) {
-        authLogger.info("AppRouteCoordinator received url=\(url.absoluteString, privacy: .public)")
-
         if let tokenAuthURL = NativeAuthCallback.tokenAuthURL(from: url, baseURL: AppEnvironment.baseURL) {
             guard let navigationHandler else {
                 authLogger.error("AppRouteCoordinator missing navigation handler for token auth url")
                 return
             }
 
-            authLogger.info("AppRouteCoordinator routing token auth url=\(tokenAuthURL.absoluteString, privacy: .public)")
             navigationHandler.route(tokenAuthURL)
             return
         }
@@ -34,7 +31,6 @@ final class AppRouteCoordinator {
             return
         }
 
-        authLogger.info("AppRouteCoordinator routing raw url=\(url.absoluteString, privacy: .public)")
         navigationHandler.route(url)
     }
 }

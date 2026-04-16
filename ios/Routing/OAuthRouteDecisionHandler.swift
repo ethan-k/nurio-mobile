@@ -24,8 +24,6 @@ final class OAuthRouteDecisionHandler: RouteDecisionHandler {
     }
 
     func handle(location: URL, configuration: Navigator.Configuration, navigator: Navigator) -> Router.Decision {
-        authLogger.info("OAuthRouteDecisionHandler intercepting path=\(location.path, privacy: .public)")
-
         if location.path == "/auth/apple" {
             NativeAppleSignInCoordinator.shared.presentationAnchorProvider = { [weak navigator] in
                 navigator?.activeNavigationController.view.window
@@ -36,7 +34,6 @@ final class OAuthRouteDecisionHandler: RouteDecisionHandler {
                     authLogger.error("OAuthRouteDecisionHandler native Apple flow returned no callback url")
                     return
                 }
-                authLogger.info("OAuthRouteDecisionHandler received native Apple callback url=\(callbackURL.absoluteString, privacy: .public)")
                 AppRouteCoordinator.shared.handleIncoming(callbackURL)
             }
 
@@ -48,7 +45,6 @@ final class OAuthRouteDecisionHandler: RouteDecisionHandler {
         }
 
         OAuthSessionCoordinator.shared.start(url: location) { callbackURL in
-            authLogger.info("OAuthRouteDecisionHandler received web auth callback url=\(callbackURL.absoluteString, privacy: .public)")
             AppRouteCoordinator.shared.handleIncoming(callbackURL)
         }
 
