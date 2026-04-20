@@ -129,6 +129,16 @@ Recommended review notes for this app:
 - The default landing page is `https://nurio.kr/events`.
 - OAuth sign-in uses an external authentication session and returns through `nurio://auth-callback`.
 - Admin and tutor routes are intentionally excluded from the app scope.
+- The app now requires an in-app Terms of Service and Privacy Policy acceptance step before Hotwire Native users can access user-generated community content.
+- Users can report objectionable content from posts, comments, chats, reviews, event pages, participant messages, and public profiles.
+- Users can block abusive users from those same community surfaces, and blocking removes that user's content from the shell immediately.
+- Reviewer test flow:
+  1. Launch the app and confirm the Terms acceptance screen appears before `/events`.
+  2. Accept the Terms and Privacy checkboxes and confirm the shell returns to the original page.
+  3. Open a community item and use the Report action.
+  4. Open a public profile or authored item and use Block user.
+  5. Confirm the blocked user's content disappears from the app feed/chat surface immediately.
+- Physical-device screen recording for App Review should be attached in App Store Connect Notes and should show the exact five-step flow above.
 
 ## 7. First-Submission Checklist
 
