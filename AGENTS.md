@@ -1,7 +1,9 @@
 # AGENTS.md
 
 ## Product Scope (Required)
-- This repository includes a Flutter customer app at `flutter_app/`.
+- The primary customer mobile apps in this repository are the Hotwire Native iOS and Android apps.
+- `flutter_app/` exists in the repo, but it is not the main app surface and should be treated as out of scope unless the user explicitly asks to work on Flutter.
+- Default mobile work should target the Hotwire Native clients and the Rails/Hotwire surfaces that power them.
 - Implement and maintain customer-facing features only.
 - Do not build, expose, or migrate admin features (`/admin/*`).
 - Do not build, expose, or migrate tutor features (`/tutoring*`, `/tutors*`, `tutors.<domain>`).
