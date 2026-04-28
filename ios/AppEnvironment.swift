@@ -24,7 +24,9 @@ enum AppEnvironment {
     }
 
     static var signInURL: URL {
-        baseURL.appendingPathComponent("signin")
+        baseURL
+            .appendingPathComponent("auth")
+            .appendingPathComponent("login")
     }
 
     static let oauthPaths: Set<String> = [

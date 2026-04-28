@@ -32,6 +32,13 @@ final class NurioTests: XCTestCase {
         )
     }
 
+    func testSignInURLUsesExistingAuthLoginRoute() {
+        XCTAssertEqual(
+            AppEnvironment.signInURL.absoluteString,
+            "https://nurio.kr/auth/login"
+        )
+    }
+
     func testInvalidNativeCallbackReturnsNil() {
         let callbackURL = URL(string: "nurio://auth-callback?token=test-token")!
         XCTAssertNil(
