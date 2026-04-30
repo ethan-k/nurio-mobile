@@ -1,0 +1,47 @@
+{
+  "rules": [
+    {
+      "patterns": [
+        ".*"
+      ],
+      "properties": {
+        "context": "default",
+        "pull_to_refresh_enabled": true
+      }
+    },
+    {
+      "patterns": [
+        "/new$",
+        "/edit$",
+        ".*/new$",
+        ".*/edit$",
+        "/auth/login.*",
+        "/auth/create-account.*",
+        "/auth/verify.*",
+        "/signup",
+        "/onboarding.*",
+        "/onboardings/wizard.*",
+        "/orders/new.*",
+        "/orders/.*/payment_summary.*",
+        "/pass_packages/.*/purchase.*",
+        "/pass_packages/.*/payment_summary.*",
+        "/events/.*/reviews/new.*",
+        "/event_series/.*/reviews/new.*"
+      ],
+      "properties": {
+        "context": "modal",
+        "pull_to_refresh_enabled": false
+      }
+    },
+    {
+      "patterns": [
+        "/profile/edit$",
+        "/settings.*"
+      ],
+      "properties": {
+        "context": "default",
+        "pull_to_refresh_enabled": true
+      }
+    }
+  ]
+}
