@@ -74,6 +74,16 @@ tasks:
     cmds:
       - xcodebuild -project {{.IOS_PROJECT}} -scheme {{.IOS_SCHEME}} -archivePath {{.IOS_DIR}}/build/Nurio.xcarchive -destination "generic/platform=iOS" archive
 
+  ios:upload:
+    desc: Upload iOS archive to App Store Connect (requires archive + credentials)
+    cmds:
+      - ./scripts/ios-upload.sh
+
+  ios:deploy:
+    desc: Complete deployment workflow - bump version, build archive, and upload to App Store Connect
+    cmds:
+      - ./scripts/ios-release.sh && ./scripts/ios-upload.sh
+
   flutter:pub:
     desc: Install Flutter dependencies
     dir: "{{.FLUTTER_DIR}}"
