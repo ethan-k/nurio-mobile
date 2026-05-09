@@ -11,14 +11,17 @@ import dev.hotwire.navigation.config.registerRouteDecisionHandlers
 import dev.hotwire.navigation.routing.AppNavigationRouteDecisionHandler
 import dev.hotwire.navigation.routing.BrowserTabRouteDecisionHandler
 import dev.hotwire.navigation.routing.SystemNavigationRouteDecisionHandler
+import com.nurio.android.bridge.RegisterDeviceTokenComponent
 import com.nurio.android.bridge.SignInWithOAuthComponent
 import com.nurio.android.fragments.WebFragment
 import com.nurio.android.fragments.WebModalFragment
+import com.nurio.android.notifications.NotificationChannels
 import com.nurio.android.routing.OAuthRouteDecisionHandler
 
 class NurioApplication : Application() {
     override fun onCreate() {
         super.onCreate()
+        NotificationChannels.ensureCreated(this)
         configureHotwire()
     }
 
@@ -36,6 +39,7 @@ class NurioApplication : Application() {
         )
 
         Hotwire.registerBridgeComponents(
+            BridgeComponentFactory("register-device-token", ::RegisterDeviceTokenComponent),
             BridgeComponentFactory("sign-in-with-oauth", ::SignInWithOAuthComponent)
         )
 
