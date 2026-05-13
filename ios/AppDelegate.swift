@@ -1,5 +1,8 @@
+import FirebaseCore
+import FirebaseMessaging
 import HotwireNative
 import UIKit
+import UserNotifications
 
 @main
 final class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -7,9 +10,17 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
+        configureFirebase(application)
         configureAppearance()
         configureHotwire()
         return true
+    }
+
+    func application(
+        _ application: UIApplication,
+        didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
+    ) {
+        Messaging.messaging().apnsToken = deviceToken
     }
 
     func application(
@@ -26,6 +37,23 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         UITabBar.appearance().scrollEdgeAppearance = .init()
     }
 
+    private func configureFirebase(_ application: UIApplication) {
+        FirebaseApp.configure()
+        Messaging.messaging().delegate = self
+        UNUserNotificationCenter.current().delegate = self
+
+        UNUserNotificationCenter.current().requestAuthorization(options: [ .alert, .badge, .sound ]) { granted, error in
+            if let error {
+                NSLog("Nurio push authorization failed: \(error.localizedDescription)")
+                return
+            }
+
+            NSLog("Nurio push authorization granted: \(granted)")
+        }
+
+        application.registerForRemoteNotifications()
+    }
+
     private func configureHotwire() {
         Hotwire.loadPathConfiguration(from: [
             .file(Bundle.main.url(forResource: AppEnvironment.pathConfigurationResourceName, withExtension: "json")!)
@@ -37,6 +65,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
         Hotwire.registerBridgeComponents([
             SignInWithOAuthComponent.self,
+            RegisterDeviceTokenComponent.self,
         ])
 
         Hotwire.registerRouteDecisionHandlers([
@@ -50,5 +79,24 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 #if DEBUG
         Hotwire.config.debugLoggingEnabled = true
 #endif
+    }
+}
+
+extension AppDelegate: MessagingDelegate {
+    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
+        guard let fcmToken, !fcmToken.isEmpty else { return }
+
+        NativePushTokenStore.shared.update(token: fcmToken)
+        NSLog("Nurio FCM registration token received")
+    }
+}
+
+extension AppDelegate: UNUserNotificationCenterDelegate {
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        willPresent notification: UNNotification,
+        withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
+    ) {
+        completionHandler([ .banner, .sound, .badge ])
     }
 }

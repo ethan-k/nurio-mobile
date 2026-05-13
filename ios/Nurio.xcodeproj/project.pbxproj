@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		54AD91C72FB3F8D000BF72BB /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 54AD91C62FB3F8D000BF72BB /* GoogleService-Info.plist */; };
+		54AD91CA2FB3FE0600BF72BB /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 54AD91C92FB3FE0600BF72BB /* FirebaseCore */; };
+		54AD91CC2FB3FE0600BF72BB /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 54AD91CB2FB3FE0600BF72BB /* FirebaseMessaging */; };
+		B000000000000000000000001 /* NativePushTokenStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000000000000000000000031 /* NativePushTokenStore.swift */; };
+		B000000000000000000000002 /* RegisterDeviceTokenComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000000000000000000000032 /* RegisterDeviceTokenComponent.swift */; };
 		A00000000000000000000001 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000031 /* AppDelegate.swift */; };
 		A00000000000000000000002 /* SceneController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000032 /* SceneController.swift */; };
 		A00000000000000000000003 /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000033 /* AppEnvironment.swift */; };
@@ -38,6 +43,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		54AD91C62FB3F8D000BF72BB /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		B000000000000000000000031 /* NativePushTokenStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativePushTokenStore.swift; sourceTree = "<group>"; };
+		B000000000000000000000032 /* RegisterDeviceTokenComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterDeviceTokenComponent.swift; sourceTree = "<group>"; };
 		A00000000000000000000030 /* Nurio.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Nurio.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A00000000000000000000031 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		A00000000000000000000032 /* SceneController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneController.swift; sourceTree = "<group>"; };
@@ -66,6 +74,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				54AD91CC2FB3FE0600BF72BB /* FirebaseMessaging in Frameworks */,
+				54AD91CA2FB3FE0600BF72BB /* FirebaseCore in Frameworks */,
 				A0000000000000000000000F /* HotwireNative in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -111,6 +121,7 @@
 				A0000000000000000000003C /* Assets.xcassets */,
 				A000000000000000000000A0 /* LaunchScreen.storyboard */,
 				A0000000000000000000003F /* ios_v1.json */,
+				54AD91C62FB3F8D000BF72BB /* GoogleService-Info.plist */,
 			);
 			name = Nurio;
 			sourceTree = "<group>";
@@ -125,6 +136,7 @@
 				A00000000000000000000037 /* OAuthSessionCoordinator.swift */,
 				A00000000000000000000038 /* UIApplication+KeyWindow.swift */,
 				A00000000000000000000043 /* NativeAppleSignInCoordinator.swift */,
+				B000000000000000000000031 /* NativePushTokenStore.swift */,
 				A00000000000000000000044 /* Nurio.entitlements */,
 			);
 			name = Support;
@@ -143,6 +155,7 @@
 			isa = PBXGroup;
 			children = (
 				A0000000000000000000003B /* SignInWithOAuthComponent.swift */,
+				B000000000000000000000032 /* RegisterDeviceTokenComponent.swift */,
 			);
 			path = Bridge;
 			sourceTree = "<group>";
@@ -173,6 +186,8 @@
 			name = Nurio;
 			packageProductDependencies = (
 				A000000000000000000000C1 /* HotwireNative */,
+				54AD91C92FB3FE0600BF72BB /* FirebaseCore */,
+				54AD91CB2FB3FE0600BF72BB /* FirebaseMessaging */,
 			);
 			productName = Nurio;
 			productReference = A00000000000000000000030 /* Nurio.app */;
@@ -226,6 +241,7 @@
 			mainGroup = A00000000000000000000060;
 			packageReferences = (
 				A000000000000000000000C0 /* XCRemoteSwiftPackageReference "hotwire-native-ios" */,
+				54AD91C82FB3FE0600BF72BB /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			productRefGroup = A00000000000000000000061 /* Products */;
 			projectDirPath = "";
@@ -244,6 +260,7 @@
 			files = (
 				A0000000000000000000000C /* Assets.xcassets in Resources */,
 				A0000000000000000000000D /* LaunchScreen.storyboard in Resources */,
+				54AD91C72FB3F8D000BF72BB /* GoogleService-Info.plist in Resources */,
 				A0000000000000000000000E /* ios_v1.json in Resources */,
 				A00000000000000000000011 /* PrivacyInfo.xcprivacy in Resources */,
 			);
@@ -275,6 +292,8 @@
 				A0000000000000000000000A /* OAuthRouteDecisionHandler.swift in Sources */,
 				A0000000000000000000000B /* SignInWithOAuthComponent.swift in Sources */,
 				A00000000000000000000012 /* NativeAppleSignInCoordinator.swift in Sources */,
+				B000000000000000000000001 /* NativePushTokenStore.swift in Sources */,
+				B000000000000000000000002 /* RegisterDeviceTokenComponent.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -556,6 +575,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		54AD91C82FB3FE0600BF72BB /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.13.0;
+			};
+		};
 		A000000000000000000000C0 /* XCRemoteSwiftPackageReference "hotwire-native-ios" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/hotwired/hotwire-native-ios.git";
@@ -567,6 +594,16 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		54AD91C92FB3FE0600BF72BB /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 54AD91C82FB3FE0600BF72BB /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		54AD91CB2FB3FE0600BF72BB /* FirebaseMessaging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 54AD91C82FB3FE0600BF72BB /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseMessaging;
+		};
 		A000000000000000000000C1 /* HotwireNative */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = A000000000000000000000C0 /* XCRemoteSwiftPackageReference "hotwire-native-ios" */;
