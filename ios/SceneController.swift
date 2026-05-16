@@ -50,6 +50,12 @@ final class SceneController: UIResponder {
         rootNav.setNavigationBarHidden(true, animated: false)
         rootNav.delegate = self
     }
+
+    private static func url(from userActivity: NSUserActivity) -> URL? {
+        guard userActivity.activityType == NSUserActivityTypeBrowsingWeb else { return nil }
+
+        return userActivity.webpageURL
+    }
 }
 
 extension SceneController: UIWindowSceneDelegate {
@@ -63,12 +69,18 @@ extension SceneController: UIWindowSceneDelegate {
 
         hideNavigationBarOnMainStack()
 
-        let launchURL = connectionOptions.urlContexts.first?.url
+        let launchURL = connectionOptions.urlContexts.first?.url ??
+            connectionOptions.userActivities.compactMap(Self.url(from:)).first
         startIfNeeded(with: launchURL)
     }
 
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
         guard let url = URLContexts.first?.url else { return }
+        startIfNeeded(with: url)
+    }
+
+    func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
+        guard let url = Self.url(from: userActivity) else { return }
         startIfNeeded(with: url)
     }
 }

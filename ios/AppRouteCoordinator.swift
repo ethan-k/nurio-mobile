@@ -16,21 +16,92 @@ final class AppRouteCoordinator {
     private init() {}
 
     func handleIncoming(_ url: URL) {
+        if NativeAppOpenURL.isAppOpenURL(url) {
+            route(NativeAppOpenURL.webURL(from: url, baseURL: AppEnvironment.baseURL) ?? AppEnvironment.startURL)
+            return
+        }
+
         if let tokenAuthURL = NativeAuthCallback.tokenAuthURL(from: url, baseURL: AppEnvironment.baseURL) {
-            guard let navigationHandler else {
-                authLogger.error("AppRouteCoordinator missing navigation handler for token auth url")
-                return
+            route(tokenAuthURL)
+            return
+        }
+
+        if let webURL = NativeAppOpenURL.webURL(from: url, baseURL: AppEnvironment.baseURL) {
+            route(webURL)
+            return
+        }
+
+        if NativeAppOpenURL.isBlockedWebURL(url, baseURL: AppEnvironment.baseURL) {
+            route(AppEnvironment.startURL)
+            return
+        }
+
+        route(url)
+    }
+
+    private func route(_ url: URL) {
+        guard let navigationHandler else {
+            authLogger.error("AppRouteCoordinator missing navigation handler")
+            return
+        }
+        navigationHandler.route(url)
+    }
+}
+
+enum NativeAppOpenURL {
+    static func isAppOpenURL(_ url: URL) -> Bool {
+        url.scheme?.lowercased() == AppEnvironment.callbackScheme && url.host?.lowercased() == "open"
+    }
+
+    static func webURL(from url: URL, baseURL: URL) -> URL? {
+        if isAppOpenURL(url) {
+            guard
+                let rawTarget = URLComponents(url: url, resolvingAgainstBaseURL: false)?
+                    .queryItems?
+                    .first(where: { $0.name == "url" })?
+                    .value,
+                let targetURL = URL(string: rawTarget)
+            else {
+                return baseURL.appendingPathComponent("events")
             }
 
-            navigationHandler.route(tokenAuthURL)
-            return
+            return normalizedWebURL(targetURL, baseURL: baseURL)
         }
 
-        guard let navigationHandler else {
-            authLogger.error("AppRouteCoordinator missing navigation handler for raw url")
-            return
+        return normalizedWebURL(url, baseURL: baseURL)
+    }
+
+    static func isBlockedWebURL(_ url: URL, baseURL: URL) -> Bool {
+        guard isRecognizedWebHost(url, baseURL: baseURL) else { return false }
+
+        return CustomerScopePolicy.isBlocked(url, appHost: baseURL.host?.lowercased())
+    }
+
+    private static func normalizedWebURL(_ url: URL, baseURL: URL) -> URL? {
+        guard isRecognizedWebHost(url, baseURL: baseURL) else { return nil }
+        guard !CustomerScopePolicy.isBlocked(url, appHost: baseURL.host?.lowercased()) else { return nil }
+
+        let baseHost = baseURL.host?.lowercased()
+        if url.host?.lowercased() == "www.\(baseHost ?? "")" {
+            var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
+            components?.scheme = baseURL.scheme
+            components?.host = baseHost
+            return components?.url
         }
 
-        navigationHandler.route(url)
+        return url
+    }
+
+    private static func isRecognizedWebHost(_ url: URL, baseURL: URL) -> Bool {
+        guard
+            let scheme = url.scheme?.lowercased(),
+            scheme == "http" || scheme == "https",
+            let host = url.host?.lowercased(),
+            let baseHost = baseURL.host?.lowercased()
+        else {
+            return false
+        }
+
+        return host == baseHost || host == "www.\(baseHost)"
     }
 }

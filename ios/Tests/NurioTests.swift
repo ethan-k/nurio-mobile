@@ -48,4 +48,44 @@ final class NurioTests: XCTestCase {
         XCTAssertTrue(CustomerScopePolicy.isBlocked(URL(string: "https://tutors.nurio.kr/events")!))
         XCTAssertFalse(CustomerScopePolicy.isBlocked(URL(string: "https://nurio.kr/events/42")!))
     }
+
+    func testNativeAppOpenURLRoutesToRequestedCustomerPage() {
+        let openURL = URL(string: "nurio://open?url=https%3A%2F%2Fnurio.kr%2Fevents%2F42%3Fref%3Dhome")!
+        let webURL = NativeAppOpenURL.webURL(
+            from: openURL,
+            baseURL: URL(string: "https://nurio.kr")!
+        )
+
+        XCTAssertEqual(webURL?.absoluteString, "https://nurio.kr/events/42?ref=home")
+    }
+
+    func testNativeAppOpenURLNormalizesWwwHost() {
+        let openURL = URL(string: "nurio://open?url=https%3A%2F%2Fwww.nurio.kr%2Fevents%2F42")!
+        let webURL = NativeAppOpenURL.webURL(
+            from: openURL,
+            baseURL: URL(string: "https://nurio.kr")!
+        )
+
+        XCTAssertEqual(webURL?.absoluteString, "https://nurio.kr/events/42")
+    }
+
+    func testNativeAppOpenURLRejectsBlockedCustomerPaths() {
+        let openURL = URL(string: "nurio://open?url=https%3A%2F%2Fnurio.kr%2Fadmin%2Fevents")!
+        let webURL = NativeAppOpenURL.webURL(
+            from: openURL,
+            baseURL: URL(string: "https://nurio.kr")!
+        )
+
+        XCTAssertNil(webURL)
+    }
+
+    func testNativeAppOpenURLFallsBackToEventsWhenNoURLIsProvided() {
+        let openURL = URL(string: "nurio://open")!
+        let webURL = NativeAppOpenURL.webURL(
+            from: openURL,
+            baseURL: URL(string: "https://nurio.kr")!
+        )
+
+        XCTAssertEqual(webURL?.absoluteString, "https://nurio.kr/events")
+    }
 }

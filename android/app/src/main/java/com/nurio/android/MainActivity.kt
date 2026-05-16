@@ -51,7 +51,10 @@ class MainActivity : HotwireActivity() {
     )
 
     private fun handleLaunchIntent(intent: Intent?) {
-        handleAuthCallbackIntent(intent) || handleNotificationIntent(intent)
+        handleAuthCallbackIntent(intent) ||
+            handleAppOpenIntent(intent) ||
+            handleWebLinkIntent(intent) ||
+            handleNotificationIntent(intent)
     }
 
     private fun handleAuthCallbackIntent(intent: Intent?): Boolean {
@@ -61,6 +64,34 @@ class MainActivity : HotwireActivity() {
             ?: return false
 
         routeWhenReady(authUrl)
+        return true
+    }
+
+    private fun handleAppOpenIntent(intent: Intent?): Boolean {
+        val uri = intent?.data
+            ?.takeIf { it.scheme == "nurio" && it.host == "open" }
+            ?: return false
+
+        val routeUrl = uri.getQueryParameter("url")
+            ?.takeIf { it.isNotBlank() }
+            ?.let { Uri.parse(it) }
+            ?.takeIf(::isCustomerWebUri)
+            ?.let(::normalizeAppUri)
+            ?.toString()
+            ?: "${BuildConfig.BASE_URL}/events"
+
+        routeWhenReady(routeUrl)
+        return true
+    }
+
+    private fun handleWebLinkIntent(intent: Intent?): Boolean {
+        val routeUrl = intent?.data
+            ?.takeIf(::isCustomerWebUri)
+            ?.let(::normalizeAppUri)
+            ?.toString()
+            ?: return false
+
+        routeWhenReady(routeUrl)
         return true
     }
 
@@ -96,9 +127,42 @@ class MainActivity : HotwireActivity() {
 
     private fun buildAppUrl(path: String): String {
         return if (path.startsWith("http://") || path.startsWith("https://")) {
-            path
+            Uri.parse(path)
+                .takeIf(::isCustomerWebUri)
+                ?.let(::normalizeAppUri)
+                ?.toString()
+                ?: "${BuildConfig.BASE_URL}/events"
         } else {
             "${BuildConfig.BASE_URL.trimEnd('/')}/${path.trimStart('/')}"
+        }
+    }
+
+    private fun isCustomerWebUri(uri: Uri): Boolean {
+        val scheme = uri.scheme?.lowercase()
+        if (scheme != "http" && scheme != "https") return false
+
+        val baseHost = Uri.parse(BuildConfig.BASE_URL).host?.lowercase() ?: return false
+        val host = uri.host?.lowercase() ?: return false
+        if (host != baseHost && host != "www.$baseHost") return false
+
+        val path = uri.path.orEmpty().lowercase()
+        return blockedPathPrefixes.none { prefix ->
+            path == prefix || path.startsWith("$prefix/")
+        }
+    }
+
+    private fun normalizeAppUri(uri: Uri): Uri {
+        val baseUri = Uri.parse(BuildConfig.BASE_URL)
+        val baseHost = baseUri.host?.lowercase()
+        val host = uri.host?.lowercase()
+
+        return if (baseHost != null && host == "www.$baseHost") {
+            uri.buildUpon()
+                .scheme(baseUri.scheme)
+                .authority(baseUri.authority)
+                .build()
+        } else {
+            uri
         }
     }
 
@@ -120,5 +184,11 @@ class MainActivity : HotwireActivity() {
 
     companion object {
         private const val NOTIFICATION_PERMISSION_REQUEST_CODE = 1001
+        private val blockedPathPrefixes = listOf(
+            "/admin",
+            "/tutoring",
+            "/tutors",
+            "/study_group_admin"
+        )
     }
 }
