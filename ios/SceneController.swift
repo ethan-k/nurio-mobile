@@ -37,11 +37,12 @@ final class SceneController: UIResponder {
         }
 
         hasStarted = true
+        navigator.start()
 
         if let url {
-            AppRouteCoordinator.shared.handleIncoming(url)
-        } else {
-            navigator.start()
+            DispatchQueue.main.async {
+                AppRouteCoordinator.shared.handleIncoming(url)
+            }
         }
     }
 

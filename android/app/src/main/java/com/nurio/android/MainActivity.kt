@@ -15,6 +15,7 @@ import dev.hotwire.navigation.navigator.Navigator
 import dev.hotwire.navigation.navigator.NavigatorConfiguration
 
 class MainActivity : HotwireActivity() {
+    private var navigatorReady = false
     private var pendingRouteUrl: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,6 +36,7 @@ class MainActivity : HotwireActivity() {
 
     override fun onNavigatorReady(navigator: Navigator) {
         super.onNavigatorReady(navigator)
+        navigatorReady = true
 
         pendingRouteUrl?.let { url ->
             navigator.route(url)
@@ -105,7 +107,7 @@ class MainActivity : HotwireActivity() {
     private fun routeWhenReady(url: String) {
         val navigator = delegate.currentNavigator
 
-        if (navigator != null) {
+        if (navigatorReady && navigator != null) {
             navigator.route(url)
             pendingRouteUrl = null
         } else {
