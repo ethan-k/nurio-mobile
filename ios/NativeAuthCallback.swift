@@ -47,3 +47,34 @@ enum NativeAuthCallback {
         url.scheme?.lowercased() == AppEnvironment.callbackScheme && url.host == "auth-callback"
     }
 }
+
+enum NativePaymentCallback {
+    static func completeURL(from callbackURL: URL, baseURL: URL) -> URL? {
+        guard isCallbackURL(callbackURL) else { return nil }
+        guard let callbackComponents = URLComponents(url: callbackURL, resolvingAgainstBaseURL: false) else {
+            return nil
+        }
+
+        var queryItems = callbackComponents.queryItems ?? []
+        if !queryItems.contains(where: { $0.name == "paymentId" }) {
+            guard let paymentId = queryItems.first(where: { $0.name == "payment_id" })?.value, !paymentId.isEmpty else {
+                return nil
+            }
+
+            queryItems.append(URLQueryItem(name: "paymentId", value: paymentId))
+        }
+
+        let completeURL = baseURL
+            .appendingPathComponent("payments")
+            .appendingPathComponent("portone")
+            .appendingPathComponent("complete")
+        var completeComponents = URLComponents(url: completeURL, resolvingAgainstBaseURL: false)
+        completeComponents?.queryItems = queryItems
+
+        return completeComponents?.url
+    }
+
+    static func isCallbackURL(_ url: URL) -> Bool {
+        url.scheme?.lowercased() == AppEnvironment.callbackScheme && url.host == "payment-complete"
+    }
+}

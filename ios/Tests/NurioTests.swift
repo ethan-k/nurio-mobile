@@ -42,6 +42,19 @@ final class NurioTests: XCTestCase {
         )
     }
 
+    func testPaymentCompleteURLFromNativeCallbackPreservesPortOneParams() {
+        let callbackURL = URL(string: "nurio://payment-complete?paymentId=payment-123&tx_id=tx-456&redirect_uri=%2Fevents%2F42")!
+        let completeURL = NativePaymentCallback.completeURL(
+            from: callbackURL,
+            baseURL: URL(string: "https://nurio.kr")!
+        )
+
+        XCTAssertEqual(
+            completeURL?.absoluteString,
+            "https://nurio.kr/payments/portone/complete?paymentId=payment-123&tx_id=tx-456&redirect_uri=/events/42"
+        )
+    }
+
     func testScopePolicyBlocksAdminAndTutorPaths() {
         XCTAssertTrue(CustomerScopePolicy.isBlocked(URL(string: "https://nurio.kr/admin/events")!))
         XCTAssertTrue(CustomerScopePolicy.isBlocked(URL(string: "https://nurio.kr/tutoring/sessions")!))

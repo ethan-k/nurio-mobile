@@ -21,6 +21,11 @@ final class AppRouteCoordinator {
             return
         }
 
+        if let paymentCompleteURL = NativePaymentCallback.completeURL(from: url, baseURL: AppEnvironment.baseURL) {
+            route(paymentCompleteURL)
+            return
+        }
+
         if let tokenAuthURL = NativeAuthCallback.tokenAuthURL(from: url, baseURL: AppEnvironment.baseURL) {
             route(tokenAuthURL)
             return

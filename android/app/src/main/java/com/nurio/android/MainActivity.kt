@@ -54,6 +54,7 @@ class MainActivity : HotwireActivity() {
 
     private fun handleLaunchIntent(intent: Intent?) {
         handleAuthCallbackIntent(intent) ||
+            handlePaymentCallbackIntent(intent) ||
             handleAppOpenIntent(intent) ||
             handleWebLinkIntent(intent) ||
             handleNotificationIntent(intent)
@@ -66,6 +67,16 @@ class MainActivity : HotwireActivity() {
             ?: return false
 
         routeWhenReady(authUrl)
+        return true
+    }
+
+    private fun handlePaymentCallbackIntent(intent: Intent?): Boolean {
+        val completeUrl = intent?.data
+            ?.takeIf { it.scheme == "nurio" && it.host == "payment-complete" }
+            ?.let(::buildPaymentCompleteUrl)
+            ?: return false
+
+        routeWhenReady(completeUrl)
         return true
     }
 
@@ -125,6 +136,26 @@ class MainActivity : HotwireActivity() {
             .appendQueryParameter("state", state)
             .build()
             .toString()
+    }
+
+    private fun buildPaymentCompleteUrl(callbackUri: Uri): String? {
+        val paymentId = callbackUri.getQueryParameter("paymentId")
+            ?: callbackUri.getQueryParameter("payment_id")
+            ?: return null
+        if (paymentId.isBlank()) return null
+
+        val builder = Uri.parse("${BuildConfig.BASE_URL.trimEnd('/')}/payments/portone/complete").buildUpon()
+        callbackUri.queryParameterNames.forEach { name ->
+            callbackUri.getQueryParameters(name).forEach { value ->
+                builder.appendQueryParameter(name, value)
+            }
+        }
+
+        if (!callbackUri.queryParameterNames.contains("paymentId")) {
+            builder.appendQueryParameter("paymentId", paymentId)
+        }
+
+        return builder.build().toString()
     }
 
     private fun buildAppUrl(path: String): String {
