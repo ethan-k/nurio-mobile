@@ -29,7 +29,7 @@ class NurioApplication : Application() {
         Hotwire.config.debugLoggingEnabled = BuildConfig.DEBUG_LOGGING
         Hotwire.config.webViewDebuggingEnabled = BuildConfig.DEBUG
 
-        Hotwire.config.applicationUserAgentPrefix = "Nurio Android"
+        Hotwire.config.applicationUserAgentPrefix = "Nurio Android; NurioPaymentReturn/1"
 
         Hotwire.registerRouteDecisionHandlers(
             OAuthRouteDecisionHandler(),
