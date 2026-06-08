@@ -18,6 +18,10 @@
   - `/Users/ws/es/business/nurioworkspace/nurio/app/controllers/payments/portone_controller.rb`
   - `/Users/ws/es/business/nurioworkspace/nurio/app/javascript/controllers/portone_payment_controller.js`
 
+## Store Release Versioning
+- Before building an Android artifact for Play Store submission, bump both `android/app/build.gradle.kts` values: `versionName` to the public release version and `versionCode` to a strictly higher integer than the last Play Store upload.
+- For the current Nurio Android store submission, use `versionName = "1.0.5"` and `versionCode = 6`.
+
 ## Architecture Rules
 - Keep customer scope boundaries explicit in native navigation and API integration.
 - Never add admin/tutor routes to Flutter feature navigation.
