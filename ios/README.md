@@ -38,6 +38,12 @@ Release archive command after signing is configured:
 xcodebuild -project ios/Nurio.xcodeproj -scheme Nurio -configuration Release -destination 'generic/platform=iOS' -archivePath build/Nurio.xcarchive archive
 ```
 
+## Payments
+
+The checkout → KG Inicis handoff has hard constraints (POST-only navigation,
+single reused web view). Read `docs/PAYMENT_FLOW.md` before changing anything in
+`Payments/` or checkout navigation.
+
 ## Submission
 
 For the full App Store Connect and TestFlight workflow, see `docs/SUBMISSION.md`.
