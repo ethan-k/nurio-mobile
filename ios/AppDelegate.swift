@@ -76,18 +76,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             SystemNavigationRouteDecisionHandler(),
         ])
 
-        // Run the external payment-gateway redirect in a dedicated modal so it
-        // never strands the Turbo session's web view. Our handler takes priority;
-        // the rest are the framework defaults, preserved here because registering
-        // replaces the entire policy chain.
-        Hotwire.registerWebViewPolicyDecisionHandlers([
-            PaymentFlowWebViewPolicyDecisionHandler(),
-            ReloadWebViewPolicyDecisionHandler(),
-            NewWindowWebViewPolicyDecisionHandler(),
-            ExternalNavigationWebViewPolicyDecisionHandler(),
-            LinkActivatedWebViewPolicyDecisionHandler(),
-        ])
-
 #if DEBUG
         Hotwire.config.debugLoggingEnabled = true
 #endif

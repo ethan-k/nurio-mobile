@@ -58,13 +58,7 @@ enum NativePaymentCallback {
         var queryItems = callbackComponents.queryItems ?? []
         if !queryItems.contains(where: { $0.name == "paymentId" }) {
             guard let paymentId = queryItems.first(where: { $0.name == "payment_id" })?.value, !paymentId.isEmpty else {
-                // A payment-complete callback with no payment id means the gateway
-                // returned without a payment (e.g. the user backed out). Don't strand
-                // the app on a dead deep link — send them to their tickets so they can
-                // check status or retry.
-                return baseURL
-                    .appendingPathComponent("settings")
-                    .appendingPathComponent("tickets")
+                return nil
             }
 
             queryItems.append(URLQueryItem(name: "paymentId", value: paymentId))
