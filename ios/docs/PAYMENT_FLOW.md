@@ -109,6 +109,14 @@ Run a Debug build from Xcode (`debugLoggingEnabled` is on) and watch for:
 
 ## Android
 
-Android Hotwire Native reuses sessions the same way and has not received the
-equivalent handler yet. Until it does, expect the same stuck-page and
-rapid-retry behaviour there.
+`android/.../routing/CheckoutColdBootRouteDecisionHandler.kt` is the parity
+implementation, registered before `AppNavigationRouteDecisionHandler` in
+`NurioApplication`. Android is simpler than iOS: all visit proposals flow
+through route decision handlers, and `Session.reset()` is public API that
+forces the next visit to cold-boot — so there is no equivalent of the iOS
+"reload re-visits the gateway visitable" trap (constraint 2). The handler
+clears the stuck gateway's cookies/storage and resets the session, then returns
+`NAVIGATE`. `MainActivity.buildPaymentCompleteUrl` routes paymentId-less
+`nurio://payment-complete` callbacks to `/settings/tickets`, mirroring
+`NativePaymentCallback` on iOS. Constraints 1–4 above apply to Android all the
+same.
