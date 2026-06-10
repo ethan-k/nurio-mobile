@@ -16,6 +16,7 @@ import com.nurio.android.bridge.SignInWithOAuthComponent
 import com.nurio.android.fragments.WebFragment
 import com.nurio.android.fragments.WebModalFragment
 import com.nurio.android.notifications.NotificationChannels
+import com.nurio.android.routing.CheckoutColdBootRouteDecisionHandler
 import com.nurio.android.routing.OAuthRouteDecisionHandler
 
 class NurioApplication : Application() {
@@ -32,6 +33,9 @@ class NurioApplication : Application() {
         Hotwire.config.applicationUserAgentPrefix = "Nurio Android; NurioPaymentReturn/1"
 
         Hotwire.registerRouteDecisionHandlers(
+            // Must run before AppNavigationRouteDecisionHandler so checkout
+            // re-entry can cold-boot a web view stuck on a payment gateway.
+            CheckoutColdBootRouteDecisionHandler(),
             OAuthRouteDecisionHandler(),
             AppNavigationRouteDecisionHandler(),
             BrowserTabRouteDecisionHandler(),

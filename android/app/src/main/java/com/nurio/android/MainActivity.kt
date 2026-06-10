@@ -141,8 +141,13 @@ class MainActivity : HotwireActivity() {
     private fun buildPaymentCompleteUrl(callbackUri: Uri): String? {
         val paymentId = callbackUri.getQueryParameter("paymentId")
             ?: callbackUri.getQueryParameter("payment_id")
-            ?: return null
-        if (paymentId.isBlank()) return null
+
+        // A payment-complete callback with no payment id means the gateway
+        // returned without a payment (e.g. the user backed out). Send the user
+        // to their tickets instead of dropping the deep link.
+        if (paymentId.isNullOrBlank()) {
+            return "${BuildConfig.BASE_URL.trimEnd('/')}/settings/tickets"
+        }
 
         val builder = Uri.parse("${BuildConfig.BASE_URL.trimEnd('/')}/payments/portone/complete").buildUpon()
         callbackUri.queryParameterNames.forEach { name ->
