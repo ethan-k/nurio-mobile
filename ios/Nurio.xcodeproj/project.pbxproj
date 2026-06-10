@@ -12,6 +12,7 @@
 		54AD91CC2FB3FE0600BF72BB /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 54AD91CB2FB3FE0600BF72BB /* FirebaseMessaging */; };
 		B000000000000000000000001 /* NativePushTokenStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000000000000000000000031 /* NativePushTokenStore.swift */; };
 		B000000000000000000000002 /* RegisterDeviceTokenComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000000000000000000000032 /* RegisterDeviceTokenComponent.swift */; };
+		B000000000000000000000003 /* CheckoutColdBootWebViewPolicyDecisionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000000000000000000000033 /* CheckoutColdBootWebViewPolicyDecisionHandler.swift */; };
 		A00000000000000000000001 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000031 /* AppDelegate.swift */; };
 		A00000000000000000000002 /* SceneController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000032 /* SceneController.swift */; };
 		A00000000000000000000003 /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000033 /* AppEnvironment.swift */; };
@@ -46,6 +47,7 @@
 		54AD91C62FB3F8D000BF72BB /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		B000000000000000000000031 /* NativePushTokenStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativePushTokenStore.swift; sourceTree = "<group>"; };
 		B000000000000000000000032 /* RegisterDeviceTokenComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterDeviceTokenComponent.swift; sourceTree = "<group>"; };
+		B000000000000000000000033 /* CheckoutColdBootWebViewPolicyDecisionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckoutColdBootWebViewPolicyDecisionHandler.swift; sourceTree = "<group>"; };
 		A00000000000000000000030 /* Nurio.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Nurio.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A00000000000000000000031 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		A00000000000000000000032 /* SceneController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneController.swift; sourceTree = "<group>"; };
@@ -114,6 +116,7 @@
 				A00000000000000000000063 /* Support */,
 				A00000000000000000000064 /* Routing */,
 				A00000000000000000000065 /* Bridge */,
+				B000000000000000000000040 /* Payments */,
 				A00000000000000000000031 /* AppDelegate.swift */,
 				A00000000000000000000032 /* SceneController.swift */,
 				A0000000000000000000003E /* Info.plist */,
@@ -158,6 +161,14 @@
 				B000000000000000000000032 /* RegisterDeviceTokenComponent.swift */,
 			);
 			path = Bridge;
+			sourceTree = "<group>";
+		};
+		B000000000000000000000040 /* Payments */ = {
+			isa = PBXGroup;
+			children = (
+				B000000000000000000000033 /* CheckoutColdBootWebViewPolicyDecisionHandler.swift */,
+			);
+			path = Payments;
 			sourceTree = "<group>";
 		};
 		A00000000000000000000066 /* Tests */ = {
@@ -294,6 +305,7 @@
 				A00000000000000000000012 /* NativeAppleSignInCoordinator.swift in Sources */,
 				B000000000000000000000001 /* NativePushTokenStore.swift in Sources */,
 				B000000000000000000000002 /* RegisterDeviceTokenComponent.swift in Sources */,
+				B000000000000000000000003 /* CheckoutColdBootWebViewPolicyDecisionHandler.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

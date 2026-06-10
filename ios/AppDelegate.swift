@@ -76,6 +76,17 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             SystemNavigationRouteDecisionHandler(),
         ])
 
+        // Cold-boot checkout re-entry when the modal web view is stuck on an
+        // external payment gateway. Ours runs first; the rest are the framework
+        // defaults, preserved because registering replaces the whole chain.
+        Hotwire.registerWebViewPolicyDecisionHandlers([
+            CheckoutColdBootWebViewPolicyDecisionHandler(),
+            ReloadWebViewPolicyDecisionHandler(),
+            NewWindowWebViewPolicyDecisionHandler(),
+            ExternalNavigationWebViewPolicyDecisionHandler(),
+            LinkActivatedWebViewPolicyDecisionHandler(),
+        ])
+
 #if DEBUG
         Hotwire.config.debugLoggingEnabled = true
 #endif
