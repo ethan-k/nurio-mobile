@@ -36,16 +36,29 @@ struct CheckoutColdBootWebViewPolicyDecisionHandler: WebViewPolicyDecisionHandle
     ) -> WebViewPolicyManager.Decision {
         if let url = navigationAction.request.url {
             Task { @MainActor in
-                if let modalURL = navigator.modalSession.webView.url,
-                   CheckoutNavigation.isOffOrigin(modalURL, baseURL: AppEnvironment.baseURL) {
+                let stuckGatewayURL = navigator.modalSession.webView.url.flatMap { modalURL in
+                    CheckoutNavigation.isOffOrigin(modalURL, baseURL: AppEnvironment.baseURL) ? modalURL : nil
+                }
+
+                if let stuckGatewayURL {
                     // Drop the abandoned gateway's cookies/session so the retry starts
                     // clean — Korean PGs (KG Inicis) reject a reused session with
                     // "비정상적인 접근" even when the order id is fresh.
-                    PaymentGatewayData.clear(forStuckURL: modalURL)
-                    navigator.modalSession.markContentAsStale()
+                    PaymentGatewayData.clear(forStuckURL: stuckGatewayURL)
                 }
 
                 navigator.route(url)
+
+                // Force the NEW checkout visitable to cold-boot. A JavaScript visit
+                // can't run on the gateway page (no Turbo runtime), and reloading the
+                // session would re-fetch the gateway URL as a GET — which Inicis
+                // rejects with payError.ini. Cold-booting the fresh visitable loads
+                // only the checkout URL.
+                if stuckGatewayURL != nil,
+                   let visitable = navigator.modalRootViewController.topViewController as? VisitableViewController,
+                   visitable.initialVisitableURL == url {
+                    navigator.modalSession.visit(visitable, options: VisitOptions(action: .replace), reload: true)
+                }
             }
         }
 
