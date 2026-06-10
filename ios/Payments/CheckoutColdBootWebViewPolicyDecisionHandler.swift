@@ -54,8 +54,12 @@ enum CheckoutNavigation {
     static func isCheckoutEntry(_ url: URL, baseURL: URL) -> Bool {
         guard isOnOrigin(url, baseURL: baseURL) else { return false }
 
+        // Only the checkout *entry* points — never the order confirmation page
+        // (/orders/:id) or the payment-complete return, which must navigate normally.
         let path = url.path
-        return path.hasPrefix("/orders") || path.hasPrefix("/pass_packages")
+        return path == "/orders/new" ||
+            path.hasSuffix("/payment_summary") ||
+            path.hasSuffix("/purchase")
     }
 
     static func isOnOrigin(_ url: URL, baseURL: URL) -> Bool {
