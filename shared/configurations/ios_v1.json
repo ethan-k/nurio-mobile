@@ -22,9 +22,7 @@
         "/onboarding.*",
         "/onboardings/wizard.*",
         "/orders/new.*",
-        "/orders/.*/payment_summary.*",
         "/pass_packages/.*/purchase.*",
-        "/pass_packages/.*/payment_summary.*",
         "/events/.*/reviews/new.*",
         "/event_series/.*/reviews/new.*"
       ],
