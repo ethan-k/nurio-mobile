@@ -38,6 +38,10 @@ struct CheckoutColdBootWebViewPolicyDecisionHandler: WebViewPolicyDecisionHandle
             Task { @MainActor in
                 if let modalURL = navigator.modalSession.webView.url,
                    CheckoutNavigation.isOffOrigin(modalURL, baseURL: AppEnvironment.baseURL) {
+                    // Drop the abandoned gateway's cookies/session so the retry starts
+                    // clean — Korean PGs (KG Inicis) reject a reused session with
+                    // "비정상적인 접근" even when the order id is fresh.
+                    PaymentGatewayData.clear(forStuckURL: modalURL)
                     navigator.modalSession.markContentAsStale()
                 }
 
@@ -46,6 +50,29 @@ struct CheckoutColdBootWebViewPolicyDecisionHandler: WebViewPolicyDecisionHandle
         }
 
         return .cancel
+    }
+}
+
+/// Clears web-view data for an abandoned payment gateway so a retry starts clean.
+enum PaymentGatewayData {
+    /// Removes cookies / storage / cache for the registrable domain of the gateway
+    /// page the modal web view is stuck on (e.g. `inicis.com` for
+    /// `ksmobile.inicis.com`). Leaves nurio and all other domains untouched.
+    @MainActor
+    static func clear(forStuckURL url: URL) {
+        guard let host = url.host?.lowercased() else { return }
+
+        let store = WKWebsiteDataStore.default()
+        let types = WKWebsiteDataStore.allWebsiteDataTypes()
+        store.fetchDataRecords(ofTypes: types) { records in
+            let targets = records.filter { record in
+                let name = record.displayName.lowercased()
+                return !name.isEmpty && (host == name || host.hasSuffix(".\(name)"))
+            }
+
+            guard !targets.isEmpty else { return }
+            store.removeData(ofTypes: types, for: targets) {}
+        }
     }
 }
 
