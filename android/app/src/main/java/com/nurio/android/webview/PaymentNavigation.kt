@@ -22,6 +22,13 @@ object PaymentNavigation {
         return currentLocation == null || isPaymentContext(currentLocation)
     }
 
+    fun isPaymentContext(location: String?): Boolean {
+        if (location.isNullOrBlank()) return false
+
+        val uri = location.toUri()
+        return isPaymentGatewayUrl(uri) || isCheckoutEntryUrl(uri)
+    }
+
     private fun isPaymentGatewayUrl(uri: Uri): Boolean {
         if (!isWebUrl(uri)) return false
         val host = uri.host?.lowercase() ?: return false
@@ -58,11 +65,6 @@ object PaymentNavigation {
 
         launch(context, Intent(Intent.ACTION_VIEW, uri))
         return true
-    }
-
-    private fun isPaymentContext(location: String): Boolean {
-        val uri = location.toUri()
-        return isPaymentGatewayUrl(uri) || isCheckoutEntryUrl(uri)
     }
 
     private fun isCheckoutEntryUrl(uri: Uri): Boolean {

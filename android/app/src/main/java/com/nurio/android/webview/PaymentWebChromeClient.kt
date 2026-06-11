@@ -25,6 +25,7 @@ class PaymentWebChromeClient(session: Session) : HotwireWebChromeClient(session)
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
             settings.userAgentString = webView.settings.userAgentString
+            PaymentWebViewCompatibility.configure(this)
             webViewClient = PaymentPopupWebViewClient(webView)
         }
 
@@ -49,6 +50,7 @@ private class PaymentPopupWebViewClient(
     }
 
     override fun onPageStarted(view: WebView, url: String, favicon: Bitmap?) {
+        PaymentWebViewCompatibility.injectRuntimeFallback(view, url)
         routePopupLocation(view, url)
     }
 

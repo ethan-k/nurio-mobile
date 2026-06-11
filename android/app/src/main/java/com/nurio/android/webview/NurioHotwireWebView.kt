@@ -20,7 +20,7 @@ class NurioHotwireWebView @JvmOverloads constructor(
     attrs: AttributeSet? = null
 ) : HotwireWebView(context, attrs) {
     init {
-        settings.javaScriptCanOpenWindowsAutomatically = true
+        PaymentWebViewCompatibility.configure(this)
     }
 
     override fun setWebViewClient(client: WebViewClient) {
@@ -53,6 +53,7 @@ private class PaymentAwareWebViewClient(
     }
 
     override fun onPageStarted(view: WebView, url: String, favicon: Bitmap?) {
+        PaymentWebViewCompatibility.injectRuntimeFallback(view, url)
         delegate.onPageStarted(view, url, favicon)
     }
 
