@@ -18,6 +18,7 @@ import com.nurio.android.fragments.WebModalFragment
 import com.nurio.android.notifications.NotificationChannels
 import com.nurio.android.routing.CheckoutColdBootRouteDecisionHandler
 import com.nurio.android.routing.OAuthRouteDecisionHandler
+import com.nurio.android.webview.NurioHotwireWebView
 
 class NurioApplication : Application() {
     override fun onCreate() {
@@ -29,6 +30,7 @@ class NurioApplication : Application() {
     private fun configureHotwire() {
         Hotwire.config.debugLoggingEnabled = BuildConfig.DEBUG_LOGGING
         Hotwire.config.webViewDebuggingEnabled = BuildConfig.DEBUG
+        Hotwire.config.makeCustomWebView = { context -> NurioHotwireWebView(context) }
 
         Hotwire.config.applicationUserAgentPrefix = "Nurio Android; NurioPaymentReturn/1"
 
