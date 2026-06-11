@@ -50,8 +50,7 @@ cd "$ANDROID_DIR"
 
 AAB_FILE="$OUTPUT_DIR/app-release.aab"
 if [ -f "$AAB_FILE" ]; then
-    RENAMED_AAB_FILE="$OUTPUT_DIR/nurio-android-release-v${NEW_NAME}-${NEW_CODE}.aab"
-    mv -f "$AAB_FILE" "$RENAMED_AAB_FILE"
+    RENAMED_AAB_FILE="$("$SCRIPT_DIR/rename-android-release-aab.sh")"
     SIZE=$(du -h "$RENAMED_AAB_FILE" | cut -f1)
     echo ""
     echo "=== Build Successful ==="

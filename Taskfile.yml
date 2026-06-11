@@ -131,6 +131,41 @@ tasks:
     cmds:
       - flutter clean
 
+  android:build:
+    desc: Build debug APK for the Android app
+    cmds:
+      - task: legacy:build
+
+  android:build:release:
+    desc: Bump Android version and build release AAB
+    cmds:
+      - task: legacy:build:release
+
+  android:build:release:raw:
+    desc: Build renamed release AAB for the Android app without bumping version
+    cmds:
+      - task: legacy:build:release:raw
+
+  android:build:release:apk:
+    desc: Build release APK for the Android app without bumping version
+    dir: "{{.LEGACY_ANDROID_DIR}}"
+    preconditions:
+      - sh: test -f {{.LEGACY_ANDROID_DIR}}/keystore.properties
+        msg: "keystore.properties not found. See scripts/build-release.sh for format."
+    cmds:
+      - ./gradlew assembleRelease
+      - echo "Release APK -> {{.LEGACY_ANDROID_DIR}}/app/build/outputs/apk/release/app-release.apk"
+
+  android:version:
+    desc: Show Android version
+    cmds:
+      - task: legacy:version
+
+  android:clean:
+    desc: Clean Android build outputs
+    cmds:
+      - task: legacy:clean
+
   legacy:build:
     desc: Build debug APK for legacy Hotwire Android app
     dir: "{{.LEGACY_ANDROID_DIR}}"
@@ -147,7 +182,7 @@ tasks:
       - ./scripts/build-release.sh
 
   legacy:build:release:raw:
-    desc: Build release AAB for legacy Hotwire Android app without bumping version
+    desc: Build renamed release AAB for legacy Hotwire Android app without bumping version
     preconditions:
       - sh: test -f {{.LEGACY_ANDROID_DIR}}/keystore.properties
         msg: "keystore.properties not found. See scripts/build-release.sh for format."
@@ -155,7 +190,9 @@ tasks:
       - |
         cd {{.LEGACY_ANDROID_DIR}}
         ./gradlew bundleRelease
-      - echo "Release AAB -> {{.LEGACY_AAB_OUTPUT}}"
+      - |
+        RENAMED_AAB=$(./scripts/rename-android-release-aab.sh)
+        echo "Release AAB -> $RENAMED_AAB"
 
   legacy:version:
     desc: Show legacy Hotwire Android version
