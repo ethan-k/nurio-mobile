@@ -40,6 +40,18 @@ final class OAuthRouteDecisionHandler: RouteDecisionHandler {
             return .cancel
         }
 
+        if location.path == "/auth/kakao" {
+            NativeKakaoSignInCoordinator.shared.start { callbackURL in
+                guard let callbackURL else {
+                    authLogger.error("OAuthRouteDecisionHandler native Kakao flow returned no callback url")
+                    return
+                }
+                AppRouteCoordinator.shared.handleIncoming(callbackURL)
+            }
+
+            return .cancel
+        }
+
         OAuthSessionCoordinator.shared.presentationAnchorProvider = { [weak navigator] in
             navigator?.activeNavigationController.view.window
         }

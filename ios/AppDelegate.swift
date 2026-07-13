@@ -1,8 +1,15 @@
 import FirebaseCore
 import FirebaseMessaging
 import HotwireNative
+import KakaoSDKCommon
+import OSLog
 import UIKit
 import UserNotifications
+
+private let kakaoLogger = Logger(
+    subsystem: Bundle.main.bundleIdentifier ?? "com.nurio.ios",
+    category: "kakao"
+)
 
 @main
 final class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -13,6 +20,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         configureFirebase(application)
         configureAppearance()
         configureHotwire()
+        configureKakaoSDK()
         return true
     }
 
@@ -90,6 +98,16 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 #if DEBUG
         Hotwire.config.debugLoggingEnabled = true
 #endif
+    }
+
+    private func configureKakaoSDK() {
+        guard let appKey = Bundle.main.object(forInfoDictionaryKey: "KAKAO_APP_KEY") as? String,
+              !appKey.isEmpty else {
+            kakaoLogger.error("Missing KAKAO_APP_KEY in Info.plist; skipping KakaoSDK initialization.")
+            return
+        }
+
+        KakaoSDK.initSDK(appKey: appKey)
     }
 }
 

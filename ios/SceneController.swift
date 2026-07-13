@@ -1,4 +1,5 @@
 import HotwireNative
+import KakaoSDKAuth
 import UIKit
 
 final class SceneController: UIResponder {
@@ -70,13 +71,23 @@ extension SceneController: UIWindowSceneDelegate {
 
         hideNavigationBarOnMainStack()
 
-        let launchURL = connectionOptions.urlContexts.first?.url ??
-            connectionOptions.userActivities.compactMap(Self.url(from:)).first
-        startIfNeeded(with: launchURL)
+        if let coldLaunchURL = connectionOptions.urlContexts.first?.url,
+           AuthApi.isKakaoTalkLoginUrl(coldLaunchURL) {
+            _ = AuthController.handleOpenUrl(url: coldLaunchURL)
+            startIfNeeded(with: nil)
+        } else {
+            let launchURL = connectionOptions.urlContexts.first?.url ??
+                connectionOptions.userActivities.compactMap(Self.url(from:)).first
+            startIfNeeded(with: launchURL)
+        }
     }
 
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
         guard let url = URLContexts.first?.url else { return }
+        if AuthApi.isKakaoTalkLoginUrl(url) {
+            _ = AuthController.handleOpenUrl(url: url)
+            return
+        }
         startIfNeeded(with: url)
     }
 
