@@ -124,17 +124,17 @@ Never put the Study Native app key in Rails logs or substitute it for `KAKAO_APP
 
 ## Safe verification
 
-These checks validate configuration shape without revealing credential values:
+These checks validate configuration shape while `-o` prints only the matched configuration names, not their full source lines or values:
 
 ```bash
 # Mobile source configuration
-rg -n 'nuriostudy|KAKAO_NATIVE_APP_KEY|com\.nurio\.study\.(ios|android)' \
+rg -n -o 'nuriostudy|KAKAO_NATIVE_APP_KEY|com\.nurio\.study\.(ios|android)' \
   study-nurio-mobile/ios \
   study-nurio-mobile/android/app \
   --glob '!**/build/**'
 
 # Rails provider and deployment variable names (run from the Rails repository)
-rg -n 'GOOGLE_CLIENT_(ID|SECRET)|KAKAO_(CLIENT_ID|CLIENT_SECRET|APP_ID)|NAVER_CLIENT_(ID|SECRET)' \
+rg -n -o 'GOOGLE_CLIENT_(ID|SECRET)|KAKAO_(CLIENT_ID|CLIENT_SECRET|APP_ID)|NAVER_CLIENT_(ID|SECRET)' \
   config/deploy.yml config/deploy.quiz.yml .kamal/secrets
 
 # Android unit tests, build, and lint

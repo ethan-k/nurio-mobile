@@ -37,7 +37,8 @@ NURIO_BASE_URL=https://study.nurio.kr xcodebuild -project ios/NurioStudy.xcodepr
 Release archive command after signing is configured:
 
 ```bash
-xcodebuild -project ios/NurioStudy.xcodeproj -scheme NurioStudy -configuration Release -destination 'generic/platform=iOS' -archivePath build/NurioStudy.xcarchive archive
+test -f "$NURIO_STUDY_XCCONFIG_PATH"
+xcodebuild -project ios/NurioStudy.xcodeproj -scheme NurioStudy -configuration Release -destination 'generic/platform=iOS' -xcconfig "$NURIO_STUDY_XCCONFIG_PATH" -archivePath build/NurioStudy.xcarchive archive
 ```
 
 ## Submission
