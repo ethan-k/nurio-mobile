@@ -1,3 +1,4 @@
+import AuthenticationServices
 import XCTest
 @testable import NurioStudy
 
@@ -66,6 +67,59 @@ final class NurioStudyTests: XCTestCase {
             )
         )
         XCTAssertNil(SocialAuthRoute.resolve(startPath: "/admin/events", baseURL: baseURL))
+    }
+
+    func testKakaoURLDetectionSkipsSDKWhenAppKeyIsUnconfigured() {
+        let callbackURL = URL(string: "kakao://oauth?code=test")!
+        var detectorInvocationCount = 0
+
+        let isKakaoCallback = KakaoSDKConfiguration.isKakaoTalkLoginURL(
+            callbackURL,
+            appKey: "  "
+        ) { _ in
+            detectorInvocationCount += 1
+            return true
+        }
+
+        XCTAssertFalse(isKakaoCallback)
+        XCTAssertEqual(detectorInvocationCount, 0)
+    }
+
+    @MainActor
+    func testOAuthReplacementCancelsOldExactlyOnceAndIgnoresLateCallback() async {
+        let factory = OAuthSessionFactorySpy()
+        let coordinator = OAuthSessionCoordinator(sessionFactory: factory.makeSession)
+        let oldResults = SocialAuthResultRecorder()
+        let newResults = SocialAuthResultRecorder()
+        let oldCallbackURL = URL(string: "nuriostudy://auth-callback?request=old")!
+        let newCallbackURL = URL(string: "nuriostudy://auth-callback?request=new")!
+
+        coordinator.start(url: URL(string: "https://study.nurio.kr/auth/google_oauth2")!) {
+            oldResults.record($0)
+        }
+        coordinator.start(url: URL(string: "https://study.nurio.kr/auth/naver")!) {
+            newResults.record($0)
+        }
+
+        XCTAssertEqual(factory.sessions.count, 2)
+        XCTAssertEqual(factory.sessions[0].startInvocationCount, 1)
+        XCTAssertEqual(factory.sessions[1].startInvocationCount, 1)
+        XCTAssertEqual(factory.sessions[0].cancelInvocationCount, 1)
+        XCTAssertEqual(factory.sessions[1].cancelInvocationCount, 0)
+        XCTAssertEqual(oldResults.errors, [.cancelled])
+        XCTAssertEqual(newResults.urls, [])
+
+        factory.sessions[0].complete(callbackURL: oldCallbackURL)
+        await Task.yield()
+
+        XCTAssertEqual(oldResults.errors, [.cancelled])
+        XCTAssertEqual(newResults.urls, [])
+
+        factory.sessions[1].complete(callbackURL: newCallbackURL)
+        await Task.yield()
+
+        XCTAssertEqual(oldResults.errors, [.cancelled])
+        XCTAssertEqual(newResults.urls, [newCallbackURL])
     }
 
     @MainActor
@@ -197,6 +251,65 @@ private final class OAuthSessionStarterSpy: OAuthSessionStarting {
 
     func start(url: URL, completion: @escaping SocialAuthCompletion) {
         startedURLs.append(url)
+    }
+}
+
+@MainActor
+private final class OAuthSessionFactorySpy {
+    private(set) var sessions: [OAuthSessionLifecycleSpy] = []
+
+    func makeSession(
+        url: URL,
+        callbackURLScheme: String,
+        presentationContextProvider: any ASWebAuthenticationPresentationContextProviding,
+        completion: @escaping OAuthSessionCallback
+    ) -> OAuthSessionLifecycle {
+        let session = OAuthSessionLifecycleSpy(completion: completion)
+        sessions.append(session)
+        return session.lifecycle
+    }
+}
+
+@MainActor
+private final class OAuthSessionLifecycleSpy {
+    private let completion: OAuthSessionCallback
+    private(set) var startInvocationCount = 0
+    private(set) var cancelInvocationCount = 0
+
+    init(completion: @escaping OAuthSessionCallback) {
+        self.completion = completion
+    }
+
+    var lifecycle: OAuthSessionLifecycle {
+        OAuthSessionLifecycle(
+            start: { [weak self] in
+                guard let self else { return false }
+                startInvocationCount += 1
+                return true
+            },
+            cancel: { [weak self] in
+                self?.cancelInvocationCount += 1
+            }
+        )
+    }
+
+    func complete(callbackURL: URL?, error: Error? = nil) {
+        completion(callbackURL, error)
+    }
+}
+
+@MainActor
+private final class SocialAuthResultRecorder {
+    private(set) var urls: [URL] = []
+    private(set) var errors: [SocialAuthError] = []
+
+    func record(_ result: Result<URL, SocialAuthError>) {
+        switch result {
+        case let .success(url):
+            urls.append(url)
+        case let .failure(error):
+            errors.append(error)
+        }
     }
 }
 

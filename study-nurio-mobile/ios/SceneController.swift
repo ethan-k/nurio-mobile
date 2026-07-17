@@ -57,7 +57,7 @@ extension SceneController: UIWindowSceneDelegate {
         self.window = window
 
         if let launchURL = connectionOptions.urlContexts.first?.url,
-           AuthApi.isKakaoTalkLoginUrl(launchURL) {
+           KakaoSDKConfiguration.isKakaoTalkLoginURL(launchURL) {
             _ = AuthController.handleOpenUrl(url: launchURL)
             startIfNeeded()
             return
@@ -69,7 +69,7 @@ extension SceneController: UIWindowSceneDelegate {
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
         guard let url = URLContexts.first?.url else { return }
 
-        if AuthApi.isKakaoTalkLoginUrl(url) {
+        if KakaoSDKConfiguration.isKakaoTalkLoginURL(url) {
             _ = AuthController.handleOpenUrl(url: url)
             return
         }

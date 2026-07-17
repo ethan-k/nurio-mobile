@@ -55,10 +55,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     private func configureKakaoSDK() {
-        guard let appKey = Bundle.main.object(forInfoDictionaryKey: "KAKAO_APP_KEY") as? String,
-              !appKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            return
-        }
+        guard let appKey = KakaoSDKConfiguration.appKey else { return }
 
         KakaoSDK.initSDK(appKey: appKey)
     }

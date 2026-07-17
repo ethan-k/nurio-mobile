@@ -3,6 +3,41 @@ import KakaoSDKAuth
 import KakaoSDKCommon
 import KakaoSDKUser
 
+enum KakaoSDKConfiguration {
+    static var appKey: String? {
+        normalizedAppKey(
+            Bundle.main.object(forInfoDictionaryKey: "KAKAO_APP_KEY") as? String
+        )
+    }
+
+    static var isConfigured: Bool {
+        appKey != nil
+    }
+
+    static func isKakaoTalkLoginURL(_ url: URL) -> Bool {
+        isKakaoTalkLoginURL(
+            url,
+            appKey: appKey,
+            detector: AuthApi.isKakaoTalkLoginUrl
+        )
+    }
+
+    static func isKakaoTalkLoginURL(
+        _ url: URL,
+        appKey: String?,
+        detector: (URL) -> Bool
+    ) -> Bool {
+        guard normalizedAppKey(appKey) != nil else { return false }
+        return detector(url)
+    }
+
+    private static func normalizedAppKey(_ appKey: String?) -> String? {
+        guard let appKey else { return nil }
+        let normalized = appKey.trimmingCharacters(in: .whitespacesAndNewlines)
+        return normalized.isEmpty ? nil : normalized
+    }
+}
+
 @MainActor
 final class NativeKakaoSignInCoordinator: KakaoSignInStarting {
     static let shared = NativeKakaoSignInCoordinator()
@@ -15,7 +50,7 @@ final class NativeKakaoSignInCoordinator: KakaoSignInStarting {
     }
 
     func start(completion: @escaping SocialAuthCompletion) {
-        guard Self.hasConfiguredAppKey else {
+        guard KakaoSDKConfiguration.isConfigured else {
             completion(.failure(.notConfigured))
             return
         }
@@ -42,14 +77,6 @@ final class NativeKakaoSignInCoordinator: KakaoSignInStarting {
                 }
             }
         }
-    }
-
-    private static var hasConfiguredAppKey: Bool {
-        guard let appKey = Bundle.main.object(forInfoDictionaryKey: "KAKAO_APP_KEY") as? String else {
-            return false
-        }
-
-        return !appKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
     private nonisolated static func loginResult(
