@@ -3,7 +3,7 @@ import Foundation
 enum AppEnvironment {
     private static let defaultBaseURL = URL(string: "https://study.nurio.kr")!
 
-    static let callbackScheme = "nurio"
+    static let callbackScheme = "nuriostudy"
     static let pathConfigurationResourceName = "path-configuration"
 
     static var baseURL: URL {

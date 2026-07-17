@@ -24,6 +24,8 @@
 		A0000000000000000000000F /* HotwireNative in Frameworks */ = {isa = PBXBuildFile; productRef = A000000000000000000000C1 /* HotwireNative */; };
 		A00000000000000000000010 /* NurioStudyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000041 /* NurioStudyTests.swift */; };
 		A00000000000000000000011 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000042 /* PrivacyInfo.xcprivacy */; };
+		A00000000000000000000012 /* SocialAuthRoute.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000043 /* SocialAuthRoute.swift */; };
+		A00000000000000000000013 /* NativeAuthHandoffClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000044 /* NativeAuthHandoffClient.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -56,6 +58,8 @@
 		A00000000000000000000040 /* NurioStudyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NurioStudyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A00000000000000000000041 /* NurioStudyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NurioStudyTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000042 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		A00000000000000000000043 /* SocialAuthRoute.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocialAuthRoute.swift; sourceTree = "<group>"; };
+		A00000000000000000000044 /* NativeAuthHandoffClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeAuthHandoffClient.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -116,6 +120,8 @@
 			isa = PBXGroup;
 			children = (
 				A00000000000000000000033 /* AppEnvironment.swift */,
+				A00000000000000000000043 /* SocialAuthRoute.swift */,
+				A00000000000000000000044 /* NativeAuthHandoffClient.swift */,
 				A00000000000000000000034 /* AppRouteCoordinator.swift */,
 				A00000000000000000000035 /* StudyScopePolicy.swift */,
 				A00000000000000000000036 /* NativeAuthCallback.swift */,
@@ -269,6 +275,8 @@
 				A00000000000000000000009 /* StudyScopeRouteDecisionHandler.swift in Sources */,
 				A0000000000000000000000A /* OAuthRouteDecisionHandler.swift in Sources */,
 				A0000000000000000000000B /* SignInWithOAuthComponent.swift in Sources */,
+				A00000000000000000000012 /* SocialAuthRoute.swift in Sources */,
+				A00000000000000000000013 /* NativeAuthHandoffClient.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
