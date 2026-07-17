@@ -1,16 +1,35 @@
 package com.nurio.study.android
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AlertDialog
+import androidx.browser.customtabs.CustomTabColorSchemeParams
+import androidx.browser.customtabs.CustomTabsIntent
+import androidx.core.net.toUri
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.nurio.study.android.auth.NativeAuthCallback
+import com.nurio.study.android.auth.NativeAuthHandoffClient
+import com.nurio.study.android.auth.NativeKakaoSignInCoordinator
+import com.nurio.study.android.auth.SocialAuthCoordinator
+import com.nurio.study.android.auth.SocialAuthRoute
 import dev.hotwire.navigation.activities.HotwireActivity
 import dev.hotwire.navigation.navigator.Navigator
 import dev.hotwire.navigation.navigator.NavigatorConfiguration
 
 class MainActivity : HotwireActivity() {
     private var pendingAuthUrl: String? = null
+    private var readyNavigator: Navigator? = null
+    private val socialAuthCoordinator by lazy {
+        val kakaoCoordinator = NativeKakaoSignInCoordinator(
+            activity = this,
+            handoffClient = NativeAuthHandoffClient()
+        )
+        SocialAuthCoordinator(
+            startKakao = kakaoCoordinator::start,
+            openSystemAuth = ::openSystemAuth
+        )
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
@@ -29,6 +48,7 @@ class MainActivity : HotwireActivity() {
 
     override fun onNavigatorReady(navigator: Navigator) {
         super.onNavigatorReady(navigator)
+        readyNavigator = navigator
 
         pendingAuthUrl?.let { authUrl ->
             navigator.route(authUrl)
@@ -45,12 +65,20 @@ class MainActivity : HotwireActivity() {
     )
 
     private fun handleAuthCallbackIntent(intent: Intent?) {
-        val authUrl = intent?.data
-            ?.takeIf { it.scheme == "nurio" && it.host == "auth-callback" }
-            ?.let(::buildTokenAuthUrl)
-            ?: return
+        intent?.dataString?.let(::routeNativeAuthCallback)
+    }
 
-        val navigator = delegate.currentNavigator
+    internal fun dispatchSocialAuth(route: SocialAuthRoute) {
+        socialAuthCoordinator.start(route)
+    }
+
+    internal fun routeNativeAuthCallback(callbackUrl: String) {
+        val authUrl = NativeAuthCallback.toTokenAuthUrl(
+            callbackUrl = callbackUrl,
+            baseUrl = BuildConfig.BASE_URL
+        ) ?: return
+
+        val navigator = readyNavigator
 
         if (navigator != null) {
             navigator.route(authUrl)
@@ -60,15 +88,22 @@ class MainActivity : HotwireActivity() {
         }
     }
 
-    private fun buildTokenAuthUrl(callbackUri: Uri): String? {
-        val token = callbackUri.getQueryParameter("token") ?: return null
-        val state = callbackUri.getQueryParameter("state") ?: return null
+    internal fun showSocialAuthError() {
+        AlertDialog.Builder(this)
+            .setTitle("Sign-in failed")
+            .setMessage("Please try again.")
+            .setPositiveButton("OK", null)
+            .show()
+    }
 
-        return Uri.parse("${BuildConfig.BASE_URL}/auth/native/token_auth")
-            .buildUpon()
-            .appendQueryParameter("token", token)
-            .appendQueryParameter("state", state)
+    private fun openSystemAuth(url: String) {
+        val colorParams = CustomTabColorSchemeParams.Builder().build()
+        CustomTabsIntent.Builder()
+            .setShowTitle(true)
+            .setShareState(CustomTabsIntent.SHARE_STATE_OFF)
+            .setUrlBarHidingEnabled(false)
+            .setDefaultColorSchemeParams(colorParams)
             .build()
-            .toString()
+            .launchUrl(this, url.toUri())
     }
 }

@@ -15,10 +15,14 @@ import com.nurio.study.android.bridge.SignInWithOAuthComponent
 import com.nurio.study.android.fragments.WebFragment
 import com.nurio.study.android.fragments.WebModalFragment
 import com.nurio.study.android.routing.OAuthRouteDecisionHandler
+import com.kakao.sdk.common.KakaoSdk
 
 class StudyApplication : Application() {
     override fun onCreate() {
         super.onCreate()
+        if (BuildConfig.KAKAO_NATIVE_APP_KEY.isNotBlank()) {
+            KakaoSdk.init(this, BuildConfig.KAKAO_NATIVE_APP_KEY)
+        }
         configureHotwire()
     }
 

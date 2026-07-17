@@ -9,6 +9,7 @@ constraintlayout = "2.2.1"
 hotwireNative = "1.2.6"
 splashscreen = "1.0.1"
 browser = "1.8.0"
+kakao = "2.24.0"
 junit = "4.13.2"
 
 [libraries]
@@ -19,6 +20,7 @@ androidx-activity = { group = "androidx.activity", name = "activity", version.re
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 androidx-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "splashscreen" }
 androidx-browser = { group = "androidx.browser", name = "browser", version.ref = "browser" }
+kakao-user = { module = "com.kakao.sdk:v2-user", version.ref = "kakao" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version = "1.7.3" }
 hotwire-core = { group = "dev.hotwire", name = "core", version.ref = "hotwireNative" }
 hotwire-navigation-fragments = { group = "dev.hotwire", name = "navigation-fragments", version.ref = "hotwireNative" }

@@ -1,8 +1,8 @@
 package com.nurio.study.android.routing
 
-import androidx.browser.customtabs.CustomTabColorSchemeParams
-import androidx.browser.customtabs.CustomTabsIntent
-import androidx.core.net.toUri
+import com.nurio.study.android.BuildConfig
+import com.nurio.study.android.MainActivity
+import com.nurio.study.android.auth.SocialAuthRoute
 import dev.hotwire.navigation.activities.HotwireActivity
 import dev.hotwire.navigation.navigator.NavigatorConfiguration
 import dev.hotwire.navigation.routing.Router
@@ -10,22 +10,11 @@ import dev.hotwire.navigation.routing.Router
 class OAuthRouteDecisionHandler : Router.RouteDecisionHandler {
     override val name = "oauth-browser-tab"
 
-    private val oauthPaths = setOf(
-        "/auth/google_oauth2",
-        "/auth/kakao",
-        "/auth/naver"
-    )
-
     override fun matches(
         location: String,
         configuration: NavigatorConfiguration
     ): Boolean {
-        val locationUri = location.toUri()
-        val startLocationUri = configuration.startLocation.toUri()
-
-        return startLocationUri.host == locationUri.host &&
-            (locationUri.scheme?.lowercase() == "https" || locationUri.scheme?.lowercase() == "http") &&
-            oauthPaths.contains(locationUri.path)
+        return SocialAuthRoute.resolve(location, BuildConfig.BASE_URL) != null
     }
 
     override fun handle(
@@ -33,16 +22,9 @@ class OAuthRouteDecisionHandler : Router.RouteDecisionHandler {
         configuration: NavigatorConfiguration,
         activity: HotwireActivity
     ): Router.Decision {
-        val colorParams = CustomTabColorSchemeParams.Builder()
-            .build()
-
-        CustomTabsIntent.Builder()
-            .setShowTitle(true)
-            .setShareState(CustomTabsIntent.SHARE_STATE_OFF)
-            .setUrlBarHidingEnabled(false)
-            .setDefaultColorSchemeParams(colorParams)
-            .build()
-            .launchUrl(activity, location.toUri())
+        val route = SocialAuthRoute.resolve(location, BuildConfig.BASE_URL)
+            ?: return Router.Decision.CANCEL
+        (activity as? MainActivity)?.dispatchSocialAuth(route)
 
         return Router.Decision.CANCEL
     }
