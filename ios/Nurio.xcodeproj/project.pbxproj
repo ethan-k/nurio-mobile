@@ -10,9 +10,6 @@
 		54AD91C72FB3F8D000BF72BB /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 54AD91C62FB3F8D000BF72BB /* GoogleService-Info.plist */; };
 		54AD91CA2FB3FE0600BF72BB /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 54AD91C92FB3FE0600BF72BB /* FirebaseCore */; };
 		54AD91CC2FB3FE0600BF72BB /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 54AD91CB2FB3FE0600BF72BB /* FirebaseMessaging */; };
-		C00000000000000000000005 /* KakaoSDKCommon in Frameworks */ = {isa = PBXBuildFile; productRef = C00000000000000000000002 /* KakaoSDKCommon */; };
-		C00000000000000000000006 /* KakaoSDKAuth in Frameworks */ = {isa = PBXBuildFile; productRef = C00000000000000000000003 /* KakaoSDKAuth */; };
-		C00000000000000000000007 /* KakaoSDKUser in Frameworks */ = {isa = PBXBuildFile; productRef = C00000000000000000000004 /* KakaoSDKUser */; };
 		A00000000000000000000001 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000031 /* AppDelegate.swift */; };
 		A00000000000000000000002 /* SceneController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000032 /* SceneController.swift */; };
 		A00000000000000000000003 /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000033 /* AppEnvironment.swift */; };
@@ -28,15 +25,18 @@
 		A0000000000000000000000D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A000000000000000000000A0 /* LaunchScreen.storyboard */; };
 		A0000000000000000000000E /* ios_v1.json in Resources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000003F /* ios_v1.json */; };
 		A0000000000000000000000F /* HotwireNative in Frameworks */ = {isa = PBXBuildFile; productRef = A000000000000000000000C1 /* HotwireNative */; };
-		E00000000000000000000003 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = E00000000000000000000002 /* Lottie */; };
-		E00000000000000000000005 /* nurio_splash.json in Resources */ = {isa = PBXBuildFile; fileRef = E00000000000000000000004 /* nurio_splash.json */; };
 		A00000000000000000000010 /* NurioTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000041 /* NurioTests.swift */; };
 		A00000000000000000000011 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000042 /* PrivacyInfo.xcprivacy */; };
 		A00000000000000000000012 /* NativeAppleSignInCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000043 /* NativeAppleSignInCoordinator.swift */; };
-		D00000000000000000000001 /* NativeKakaoSignInCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000031 /* NativeKakaoSignInCoordinator.swift */; };
 		B000000000000000000000001 /* NativePushTokenStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000000000000000000000031 /* NativePushTokenStore.swift */; };
 		B000000000000000000000002 /* RegisterDeviceTokenComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000000000000000000000032 /* RegisterDeviceTokenComponent.swift */; };
 		B000000000000000000000003 /* CheckoutColdBootWebViewPolicyDecisionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000000000000000000000033 /* CheckoutColdBootWebViewPolicyDecisionHandler.swift */; };
+		C00000000000000000000005 /* KakaoSDKCommon in Frameworks */ = {isa = PBXBuildFile; productRef = C00000000000000000000002 /* KakaoSDKCommon */; };
+		C00000000000000000000006 /* KakaoSDKAuth in Frameworks */ = {isa = PBXBuildFile; productRef = C00000000000000000000003 /* KakaoSDKAuth */; };
+		C00000000000000000000007 /* KakaoSDKUser in Frameworks */ = {isa = PBXBuildFile; productRef = C00000000000000000000004 /* KakaoSDKUser */; };
+		D00000000000000000000001 /* NativeKakaoSignInCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000031 /* NativeKakaoSignInCoordinator.swift */; };
+		E00000000000000000000003 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = E00000000000000000000002 /* Lottie */; };
+		E00000000000000000000005 /* nurio_splash.json in Resources */ = {isa = PBXBuildFile; fileRef = E00000000000000000000004 /* nurio_splash.json */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -67,16 +67,16 @@
 		A0000000000000000000003D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		A0000000000000000000003E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A0000000000000000000003F /* ios_v1.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = ios_v1.json; path = ../shared/configurations/ios_v1.json; sourceTree = SOURCE_ROOT; };
-		E00000000000000000000004 /* nurio_splash.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = nurio_splash.json; sourceTree = "<group>"; };
 		A00000000000000000000040 /* NurioTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NurioTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A00000000000000000000041 /* NurioTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NurioTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000042 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		A00000000000000000000043 /* NativeAppleSignInCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeAppleSignInCoordinator.swift; sourceTree = "<group>"; };
-		D00000000000000000000031 /* NativeKakaoSignInCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeKakaoSignInCoordinator.swift; sourceTree = "<group>"; };
 		A00000000000000000000044 /* Nurio.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Nurio.entitlements; sourceTree = "<group>"; };
 		B000000000000000000000031 /* NativePushTokenStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativePushTokenStore.swift; sourceTree = "<group>"; };
 		B000000000000000000000032 /* RegisterDeviceTokenComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterDeviceTokenComponent.swift; sourceTree = "<group>"; };
 		B000000000000000000000033 /* CheckoutColdBootWebViewPolicyDecisionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckoutColdBootWebViewPolicyDecisionHandler.swift; sourceTree = "<group>"; };
+		D00000000000000000000031 /* NativeKakaoSignInCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeKakaoSignInCoordinator.swift; sourceTree = "<group>"; };
+		E00000000000000000000004 /* nurio_splash.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = nurio_splash.json; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -499,7 +499,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.6;
+				MARKETING_VERSION = 1.0.8;
 				PRODUCT_BUNDLE_IDENTIFIER = com.nurio.ios;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -531,7 +531,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.6;
+				MARKETING_VERSION = 1.0.8;
 				PRODUCT_BUNDLE_IDENTIFIER = com.nurio.ios;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
