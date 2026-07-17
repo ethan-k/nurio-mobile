@@ -1,4 +1,5 @@
 import HotwireNative
+import KakaoSDKAuth
 import UIKit
 
 final class SceneController: UIResponder {
@@ -55,12 +56,24 @@ extension SceneController: UIWindowSceneDelegate {
         window.makeKeyAndVisible()
         self.window = window
 
-        let launchURL = connectionOptions.urlContexts.first?.url
-        startIfNeeded(with: launchURL)
+        if let launchURL = connectionOptions.urlContexts.first?.url,
+           AuthApi.isKakaoTalkLoginUrl(launchURL) {
+            _ = AuthController.handleOpenUrl(url: launchURL)
+            startIfNeeded()
+            return
+        }
+
+        startIfNeeded(with: connectionOptions.urlContexts.first?.url)
     }
 
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
         guard let url = URLContexts.first?.url else { return }
+
+        if AuthApi.isKakaoTalkLoginUrl(url) {
+            _ = AuthController.handleOpenUrl(url: url)
+            return
+        }
+
         startIfNeeded(with: url)
     }
 }

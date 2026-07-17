@@ -1,4 +1,5 @@
 import HotwireNative
+import KakaoSDKCommon
 import UIKit
 
 @main
@@ -9,6 +10,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     ) -> Bool {
         configureAppearance()
         configureHotwire()
+        configureKakaoSDK()
         return true
     }
 
@@ -50,5 +52,14 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 #if DEBUG
         Hotwire.config.debugLoggingEnabled = true
 #endif
+    }
+
+    private func configureKakaoSDK() {
+        guard let appKey = Bundle.main.object(forInfoDictionaryKey: "KAKAO_APP_KEY") as? String,
+              !appKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            return
+        }
+
+        KakaoSDK.initSDK(appKey: appKey)
     }
 }

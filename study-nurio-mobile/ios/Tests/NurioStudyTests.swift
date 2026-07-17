@@ -68,6 +68,47 @@ final class NurioStudyTests: XCTestCase {
         XCTAssertNil(SocialAuthRoute.resolve(startPath: "/admin/events", baseURL: baseURL))
     }
 
+    @MainActor
+    func testSocialAuthCoordinatorRoutesKakaoOnlyToNativeStarter() {
+        let kakaoStarter = KakaoSignInStarterSpy()
+        let oauthStarter = OAuthSessionStarterSpy()
+        let coordinator = SocialAuthCoordinator(
+            kakaoStarter: kakaoStarter,
+            oauthStarter: oauthStarter
+        )
+        let route = SocialAuthRoute(
+            provider: .kakao,
+            url: URL(string: "https://study.nurio.kr/auth/kakao")!
+        )
+
+        coordinator.start(route: route) { _ in }
+
+        XCTAssertEqual(kakaoStarter.startInvocationCount, 1)
+        XCTAssertEqual(oauthStarter.startedURLs, [])
+    }
+
+    @MainActor
+    func testSocialAuthCoordinatorRoutesGoogleAndNaverOnlyToOAuthInOrder() {
+        let kakaoStarter = KakaoSignInStarterSpy()
+        let oauthStarter = OAuthSessionStarterSpy()
+        let coordinator = SocialAuthCoordinator(
+            kakaoStarter: kakaoStarter,
+            oauthStarter: oauthStarter
+        )
+        let googleURL = URL(
+            string: "https://study.nurio.kr/auth/google_oauth2?platform=native"
+        )!
+        let naverURL = URL(
+            string: "https://study.nurio.kr/auth/naver?return_to=%2Fevents"
+        )!
+
+        coordinator.start(route: SocialAuthRoute(provider: .google, url: googleURL)) { _ in }
+        coordinator.start(route: SocialAuthRoute(provider: .naver, url: naverURL)) { _ in }
+
+        XCTAssertEqual(kakaoStarter.startInvocationCount, 0)
+        XCTAssertEqual(oauthStarter.startedURLs, [googleURL, naverURL])
+    }
+
     func testNativeAuthHandoffCallbackURLUsesStudySchemeAndDecodedValues() throws {
         let data = #"{"token":"signed token","state":"one/time"}"#.data(using: .utf8)!
 
@@ -138,6 +179,24 @@ final class NurioStudyTests: XCTestCase {
 
         XCTAssertNil(session)
         XCTAssertNil(delegate)
+    }
+}
+
+@MainActor
+private final class KakaoSignInStarterSpy: KakaoSignInStarting {
+    private(set) var startInvocationCount = 0
+
+    func start(completion: @escaping SocialAuthCompletion) {
+        startInvocationCount += 1
+    }
+}
+
+@MainActor
+private final class OAuthSessionStarterSpy: OAuthSessionStarting {
+    private(set) var startedURLs: [URL] = []
+
+    func start(url: URL, completion: @escaping SocialAuthCompletion) {
+        startedURLs.append(url)
     }
 }
 
