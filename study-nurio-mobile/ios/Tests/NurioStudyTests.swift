@@ -116,6 +116,29 @@ final class NurioStudyTests: XCTestCase {
         XCTAssertEqual(result.invocationCount, 1)
         XCTAssertNil(result.request)
     }
+
+    func testNativeAuthHandoffClientReleasesSessionResources() {
+        weak var session: URLSession?
+        weak var delegate: NativeAuthRedirectRejectingDelegate?
+
+        autoreleasepool {
+            let client = NativeAuthHandoffClient()
+            let resources = client.lifecycleResourcesForTesting
+            session = resources.session
+            delegate = resources.delegate
+        }
+
+        let deadline = Date(timeIntervalSinceNow: 1)
+        while (session != nil || delegate != nil) && Date() < deadline {
+            _ = RunLoop.current.run(
+                mode: .default,
+                before: Date(timeIntervalSinceNow: 0.01)
+            )
+        }
+
+        XCTAssertNil(session)
+        XCTAssertNil(delegate)
+    }
 }
 
 private final class RedirectCompletionRecorder: @unchecked Sendable {

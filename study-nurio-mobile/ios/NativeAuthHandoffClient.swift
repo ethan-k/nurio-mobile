@@ -46,6 +46,17 @@ final class NativeAuthHandoffClient {
         self.redirectDelegate = redirectDelegate
     }
 
+    var lifecycleResourcesForTesting: (
+        session: URLSession,
+        delegate: NativeAuthRedirectRejectingDelegate
+    ) {
+        (session, redirectDelegate)
+    }
+
+    deinit {
+        session.finishTasksAndInvalidate()
+    }
+
     func exchangeKakao(
         accessToken: String,
         completion: @escaping NativeAuthHandoffCompletion
