@@ -1,10 +1,17 @@
 package com.nurio.study.android.auth
 
+import com.nurio.study.android.BuildConfig
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Test
 
 class SocialAuthCoordinatorTest {
+    @Test
+    fun `Hotwire framework debug logging stays disabled for auth navigation`() {
+        assertFalse(BuildConfig.DEBUG_LOGGING)
+    }
+
     @Test
     fun `Kakao starts native auth exactly once and never opens system auth`() {
         var kakaoStartCount = 0

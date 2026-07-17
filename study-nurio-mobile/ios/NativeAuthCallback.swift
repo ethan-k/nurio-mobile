@@ -2,14 +2,11 @@ import Foundation
 
 enum NativeAuthCallback {
     static func tokenAuthURL(from callbackURL: URL, baseURL: URL) -> URL? {
-        guard isCallbackURL(callbackURL) else { return nil }
-
         guard
-            let components = URLComponents(url: callbackURL, resolvingAgainstBaseURL: false),
-            let token = components.queryItems?.first(where: { $0.name == "token" })?.value,
-            let state = components.queryItems?.first(where: { $0.name == "state" })?.value,
-            !token.isEmpty,
-            !state.isEmpty
+            let components = callbackComponents(for: callbackURL),
+            let queryItems = components.queryItems,
+            let token = singleNonblankValue(named: "token", in: queryItems),
+            let state = singleNonblankValue(named: "state", in: queryItems)
         else {
             return nil
         }
@@ -28,6 +25,40 @@ enum NativeAuthCallback {
     }
 
     static func isCallbackURL(_ url: URL) -> Bool {
-        url.scheme?.lowercased() == AppEnvironment.callbackScheme && url.host == "auth-callback"
+        callbackComponents(for: url) != nil
+    }
+
+    private static func callbackComponents(for url: URL) -> URLComponents? {
+        guard
+            let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
+            components.scheme?.lowercased() == AppEnvironment.callbackScheme,
+            let host = components.host,
+            host.caseInsensitiveCompare("auth-callback") == .orderedSame,
+            components.user == nil,
+            components.password == nil,
+            components.port == nil,
+            components.percentEncodedPath.isEmpty,
+            components.fragment == nil
+        else {
+            return nil
+        }
+
+        return components
+    }
+
+    private static func singleNonblankValue(
+        named name: String,
+        in queryItems: [URLQueryItem]
+    ) -> String? {
+        let values = queryItems.filter { $0.name == name }
+        guard
+            values.count == 1,
+            let value = values[0].value,
+            !value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        else {
+            return nil
+        }
+
+        return value
     }
 }

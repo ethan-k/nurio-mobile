@@ -148,7 +148,7 @@ For iOS, use a simulator test destination installed on the development machine:
 xcodebuild \
   -project study-nurio-mobile/ios/NurioStudy.xcodeproj \
   -scheme NurioStudy \
-  -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
+  -destination 'platform=iOS Simulator,name=iPhone 16 Pro,OS=18.2' \
   test
 ```
 

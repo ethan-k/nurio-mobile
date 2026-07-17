@@ -49,9 +49,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             SystemNavigationRouteDecisionHandler(),
         ])
 
-#if DEBUG
-        Hotwire.config.debugLoggingEnabled = true
-#endif
+        Hotwire.config.debugLoggingEnabled = AppEnvironment.hotwireDebugLoggingEnabled
     }
 
     private func configureKakaoSDK() {

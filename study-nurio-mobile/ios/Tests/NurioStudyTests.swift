@@ -17,13 +17,29 @@ final class NurioStudyTests: XCTestCase {
     }
 
     func testInvalidNativeCallbackReturnsNil() {
-        let callbackURL = URL(string: "nuriostudy://auth-callback?token=test-token")!
-        XCTAssertNil(
-            NativeAuthCallback.tokenAuthURL(
-                from: callbackURL,
-                baseURL: URL(string: "https://study.nurio.kr")!
+        let invalidCallbackURLs = [
+            "nuriostudy://auth-callback?token=test-token",
+            "nuriostudy://attacker@auth-callback?token=test-token&state=test-state",
+            "nuriostudy://auth-callback:443?token=test-token&state=test-state",
+            "nuriostudy://auth-callback/extra?token=test-token&state=test-state",
+            "nuriostudy://auth-callback?token=test-token&state=test-state#fragment",
+            "nuriostudy://auth-callback?token=first&token=second&state=test-state",
+            "nuriostudy://auth-callback?token=test-token&state=first&state=second",
+        ]
+
+        for callbackURLString in invalidCallbackURLs {
+            XCTAssertNil(
+                NativeAuthCallback.tokenAuthURL(
+                    from: URL(string: callbackURLString)!,
+                    baseURL: URL(string: "https://study.nurio.kr")!
+                ),
+                "\(callbackURLString) must be rejected"
             )
-        )
+        }
+    }
+
+    func testHotwireFrameworkDebugLoggingStaysDisabledForAuthNavigation() {
+        XCTAssertFalse(AppEnvironment.hotwireDebugLoggingEnabled)
     }
 
     func testScopePolicyBlocksAdminAndTutorPaths() {

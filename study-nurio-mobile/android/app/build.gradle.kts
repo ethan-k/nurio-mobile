@@ -66,7 +66,7 @@ android {
     buildTypes {
         debug {
             buildConfigField("String", "BASE_URL", "\"https://study.nurio.kr\"")
-            buildConfigField("Boolean", "DEBUG_LOGGING", "true")
+            buildConfigField("Boolean", "DEBUG_LOGGING", "false")
         }
         release {
             isMinifyEnabled = false
