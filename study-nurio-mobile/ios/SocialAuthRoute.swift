@@ -25,17 +25,36 @@ struct SocialAuthRoute: Equatable {
 
     static func resolve(startPath: String, baseURL: URL) -> SocialAuthRoute? {
         guard
+            let baseScheme = baseURL.scheme?.lowercased(),
+            baseScheme == "http" || baseScheme == "https",
+            let baseHost = baseURL.host,
+            baseURL.user == nil,
+            baseURL.password == nil,
             let url = URL(string: startPath, relativeTo: baseURL)?.absoluteURL,
             let scheme = url.scheme?.lowercased(),
-            scheme == "http" || scheme == "https",
+            scheme == baseScheme,
             let host = url.host,
-            let baseHost = baseURL.host,
             host.caseInsensitiveCompare(baseHost) == .orderedSame,
-            let provider = SocialAuthProvider(path: url.path)
+            effectivePort(for: url, scheme: scheme) == effectivePort(for: baseURL, scheme: baseScheme),
+            url.user == nil,
+            url.password == nil,
+            let percentEncodedPath = URLComponents(
+                url: url,
+                resolvingAgainstBaseURL: false
+            )?.percentEncodedPath,
+            let provider = SocialAuthProvider(path: percentEncodedPath)
         else {
             return nil
         }
 
         return SocialAuthRoute(provider: provider, url: url)
+    }
+
+    private static func effectivePort(for url: URL, scheme: String) -> Int {
+        if let port = url.port {
+            return port
+        }
+
+        return scheme == "http" ? 80 : 443
     }
 }

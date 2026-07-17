@@ -69,6 +69,61 @@ final class NurioStudyTests: XCTestCase {
         XCTAssertNil(SocialAuthRoute.resolve(startPath: "/admin/events", baseURL: baseURL))
     }
 
+    func testSocialAuthRouteTreatsExplicitDefaultHTTPSPortsAsConfiguredOrigin() {
+        XCTAssertEqual(
+            SocialAuthRoute.resolve(
+                startPath: "https://study.nurio.kr:443/auth/kakao?platform=native",
+                baseURL: URL(string: "https://study.nurio.kr")!
+            ),
+            SocialAuthRoute(
+                provider: .kakao,
+                url: URL(string: "https://study.nurio.kr:443/auth/kakao?platform=native")!
+            )
+        )
+        XCTAssertEqual(
+            SocialAuthRoute.resolve(
+                startPath: "https://study.nurio.kr/auth/naver",
+                baseURL: URL(string: "https://study.nurio.kr:443")!
+            ),
+            SocialAuthRoute(
+                provider: .naver,
+                url: URL(string: "https://study.nurio.kr/auth/naver")!
+            )
+        )
+    }
+
+    func testSocialAuthRouteRejectsRoutesOutsideConfiguredOriginOrLiteralProviderPaths() {
+        let baseURL = URL(string: "https://study.nurio.kr")!
+        let rejectedPaths = [
+            "http://study.nurio.kr/auth/kakao",
+            "https://study.nurio.kr:8443/auth/kakao",
+            "https://attacker:secret@study.nurio.kr/auth/kakao",
+            "https://study.nurio.kr/%61uth/kakao",
+        ]
+
+        for startPath in rejectedPaths {
+            XCTAssertNil(
+                SocialAuthRoute.resolve(startPath: startPath, baseURL: baseURL),
+                "\(startPath) must be rejected"
+            )
+        }
+    }
+
+    func testSocialAuthRouteRejectsInvalidConfiguredBaseOrigins() {
+        let invalidBaseURLs = [
+            URL(string: "ftp://study.nurio.kr")!,
+            URL(string: "https://attacker:secret@study.nurio.kr")!,
+            URL(string: "mailto:study.nurio.kr")!,
+        ]
+
+        for baseURL in invalidBaseURLs {
+            XCTAssertNil(
+                SocialAuthRoute.resolve(startPath: "/auth/kakao", baseURL: baseURL),
+                "\(baseURL) must be rejected"
+            )
+        }
+    }
+
     func testKakaoURLDetectionSkipsSDKWhenAppKeyIsUnconfigured() {
         let callbackURL = URL(string: "kakao://oauth?code=test")!
         var detectorInvocationCount = 0
