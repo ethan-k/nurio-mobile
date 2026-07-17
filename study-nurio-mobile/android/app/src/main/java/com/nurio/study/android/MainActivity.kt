@@ -9,6 +9,8 @@ import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.net.toUri
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.nurio.study.android.auth.NativeAuthCallback
+import com.nurio.study.android.auth.NativeAuthCallbackConsumer
+import com.nurio.study.android.auth.NativeAuthCallbackSource
 import com.nurio.study.android.auth.NativeAuthHandoffClient
 import com.nurio.study.android.auth.NativeKakaoSignInCoordinator
 import com.nurio.study.android.auth.SocialAuthCoordinator
@@ -18,15 +20,22 @@ import dev.hotwire.navigation.navigator.Navigator
 import dev.hotwire.navigation.navigator.NavigatorConfiguration
 
 class MainActivity : HotwireActivity() {
+    companion object {
+        private const val PENDING_AUTH_URL_KEY = "pending_auth_url"
+    }
+
     private var pendingAuthUrl: String? = null
     private var readyNavigator: Navigator? = null
-    private val socialAuthCoordinator by lazy {
-        val kakaoCoordinator = NativeKakaoSignInCoordinator(
+    private val nativeKakaoCoordinatorDelegate = lazy {
+        NativeKakaoSignInCoordinator(
             activity = this,
             handoffClient = NativeAuthHandoffClient()
         )
+    }
+    private val nativeKakaoCoordinator by nativeKakaoCoordinatorDelegate
+    private val socialAuthCoordinator by lazy {
         SocialAuthCoordinator(
-            startKakao = kakaoCoordinator::start,
+            startKakao = nativeKakaoCoordinator::start,
             openSystemAuth = ::openSystemAuth
         )
     }
@@ -36,6 +45,7 @@ class MainActivity : HotwireActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        pendingAuthUrl = savedInstanceState?.getString(PENDING_AUTH_URL_KEY)
         delegate.setCurrentNavigator(navigatorConfigurations().first())
         handleAuthCallbackIntent(intent)
     }
@@ -56,6 +66,21 @@ class MainActivity : HotwireActivity() {
         }
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        pendingAuthUrl?.let { authUrl ->
+            outState.putString(PENDING_AUTH_URL_KEY, authUrl)
+        }
+        super.onSaveInstanceState(outState)
+    }
+
+    override fun onDestroy() {
+        readyNavigator = null
+        if (nativeKakaoCoordinatorDelegate.isInitialized()) {
+            nativeKakaoCoordinatorDelegate.value.invalidate()
+        }
+        super.onDestroy()
+    }
+
     override fun navigatorConfigurations() = listOf(
         NavigatorConfiguration(
             name = "study",
@@ -65,7 +90,14 @@ class MainActivity : HotwireActivity() {
     )
 
     private fun handleAuthCallbackIntent(intent: Intent?) {
-        intent?.dataString?.let(::routeNativeAuthCallback)
+        val authUrl = intent?.let { callbackIntent ->
+            NativeAuthCallbackConsumer.consume(
+                source = IntentNativeAuthCallbackSource(callbackIntent),
+                baseUrl = BuildConfig.BASE_URL
+            )
+        } ?: return
+
+        routeTokenAuthUrl(authUrl)
     }
 
     internal fun dispatchSocialAuth(route: SocialAuthRoute) {
@@ -78,6 +110,10 @@ class MainActivity : HotwireActivity() {
             baseUrl = BuildConfig.BASE_URL
         ) ?: return
 
+        routeTokenAuthUrl(authUrl)
+    }
+
+    private fun routeTokenAuthUrl(authUrl: String) {
         val navigator = readyNavigator
 
         if (navigator != null) {
@@ -106,4 +142,14 @@ class MainActivity : HotwireActivity() {
             .build()
             .launchUrl(this, url.toUri())
     }
+}
+
+private class IntentNativeAuthCallbackSource(
+    private val intent: Intent
+) : NativeAuthCallbackSource {
+    override var callbackUrl: String?
+        get() = intent.dataString
+        set(value) {
+            intent.data = value?.toUri()
+        }
 }

@@ -70,8 +70,13 @@ class SocialAuthCoordinatorTest {
             "nurio://auth-callback?token=token&state=state",
             "nuriostudy://other-host?token=token&state=state",
             "nuriostudy://attacker@auth-callback?token=token&state=state",
+            "nuriostudy://auth-callback:123?token=token&state=state",
+            "nuriostudy://auth-callback/extra?token=token&state=state",
+            "nuriostudy://auth-callback?token=token&state=state#fragment",
             "nuriostudy://auth-callback?state=state",
             "nuriostudy://auth-callback?token=token",
+            "nuriostudy://auth-callback?token=one&token=two&state=state",
+            "nuriostudy://auth-callback?token=token&state=one&state=two",
             "nuriostudy://auth-callback?token=%20%20&state=state",
             "nuriostudy://auth-callback?token=token&state=%20%20"
         )
@@ -85,6 +90,46 @@ class SocialAuthCoordinatorTest {
                 )
             )
         }
+    }
+
+    @Test
+    fun `valid callback source is consumed before it can replay after recreation`() {
+        val source = FakeNativeAuthCallbackSource(
+            "nuriostudy://auth-callback?token=signed%20token&state=one%2Ftime"
+        )
+
+        val firstAuthUrl = NativeAuthCallbackConsumer.consume(
+            source = source,
+            baseUrl = "https://study.nurio.kr"
+        )
+        val replayedAuthUrl = NativeAuthCallbackConsumer.consume(
+            source = source,
+            baseUrl = "https://study.nurio.kr"
+        )
+
+        assertEquals(
+            "https://study.nurio.kr/auth/native/token_auth" +
+                "?token=signed+token&state=one%2Ftime",
+            firstAuthUrl
+        )
+        assertNull(replayedAuthUrl)
+        assertNull(source.callbackUrl)
+        assertEquals(1, source.clearCount)
+    }
+
+    @Test
+    fun `invalid callback source remains available to normal intent handling`() {
+        val unrelatedUrl = "https://study.nurio.kr/events"
+        val source = FakeNativeAuthCallbackSource(unrelatedUrl)
+
+        val authUrl = NativeAuthCallbackConsumer.consume(
+            source = source,
+            baseUrl = "https://study.nurio.kr"
+        )
+
+        assertNull(authUrl)
+        assertEquals(unrelatedUrl, source.callbackUrl)
+        assertEquals(0, source.clearCount)
     }
 
     @Test
@@ -158,6 +203,85 @@ class SocialAuthCoordinatorTest {
         assertEquals(0, failureCount)
     }
 
+    @Test
+    fun `cancel during provider login ignores late callback and allows restart`() {
+        val sdk = FakeKakaoLoginSdk(talkAvailable = true)
+        val handoff = FakeKakaoHandoffExchanger()
+        val host = FakeKakaoAuthHost()
+        val coordinator = NativeKakaoSignInCoordinator(
+            host = host,
+            loginSdk = sdk,
+            handoffExchanger = handoff,
+            isConfigured = { true }
+        )
+
+        coordinator.start()
+        coordinator.cancel()
+        sdk.completeTalk(
+            KakaoLoginResult.Success("stale access token"),
+            callbackIndex = 0
+        )
+
+        assertEquals(0, sdk.accountStartCount)
+        assertEquals(emptyList<String>(), handoff.accessTokens)
+        assertEquals(emptyList<String>(), host.callbackUrls)
+        assertEquals(0, host.errorCount)
+
+        coordinator.start()
+        sdk.completeTalk(
+            KakaoLoginResult.Success("fresh access token"),
+            callbackIndex = 1
+        )
+        handoff.complete(
+            callbackIndex = 0,
+            result = Result.success(
+                "nuriostudy://auth-callback?token=fresh&state=fresh"
+            )
+        )
+
+        assertEquals(2, sdk.talkStartCount)
+        assertEquals(listOf("fresh access token"), handoff.accessTokens)
+        assertEquals(
+            listOf("nuriostudy://auth-callback?token=fresh&state=fresh"),
+            host.callbackUrls
+        )
+        assertEquals(0, host.errorCount)
+    }
+
+    @Test
+    fun `invalidation during handoff ignores late route and error delivery`() {
+        val sdk = FakeKakaoLoginSdk(talkAvailable = true)
+        val handoff = FakeKakaoHandoffExchanger()
+        val host = FakeKakaoAuthHost()
+        val coordinator = NativeKakaoSignInCoordinator(
+            host = host,
+            loginSdk = sdk,
+            handoffExchanger = handoff,
+            isConfigured = { true }
+        )
+
+        coordinator.start()
+        sdk.completeTalk(KakaoLoginResult.Success("access token"))
+        coordinator.invalidate()
+        handoff.complete(
+            callbackIndex = 0,
+            result = Result.success(
+                "nuriostudy://auth-callback?token=stale&state=stale"
+            )
+        )
+        handoff.complete(
+            callbackIndex = 0,
+            result = Result.failure(IllegalStateException("handoff failed"))
+        )
+        coordinator.start()
+
+        assertEquals(1, sdk.talkStartCount)
+        assertEquals(listOf("access token"), handoff.accessTokens)
+        assertEquals(emptyList<String>(), host.callbackUrls)
+        assertEquals(0, host.errorCount)
+        assertEquals(1, host.invalidationCount)
+    }
+
     private class FakeKakaoLoginSdk(
         private val talkAvailable: Boolean
     ) : KakaoLoginSdk {
@@ -165,27 +289,82 @@ class SocialAuthCoordinatorTest {
             private set
         var accountStartCount = 0
             private set
-        private var talkCallback: ((KakaoLoginResult) -> Unit)? = null
-        private var accountCallback: ((KakaoLoginResult) -> Unit)? = null
+        private val talkCallbacks = mutableListOf<(KakaoLoginResult) -> Unit>()
+        private val accountCallbacks = mutableListOf<(KakaoLoginResult) -> Unit>()
 
         override fun isKakaoTalkLoginAvailable(): Boolean = talkAvailable
 
         override fun loginWithKakaoTalk(callback: (KakaoLoginResult) -> Unit) {
             talkStartCount += 1
-            talkCallback = callback
+            talkCallbacks += callback
         }
 
         override fun loginWithKakaoAccount(callback: (KakaoLoginResult) -> Unit) {
             accountStartCount += 1
-            accountCallback = callback
+            accountCallbacks += callback
         }
 
-        fun completeTalk(result: KakaoLoginResult) {
-            talkCallback?.invoke(result)
+        fun completeTalk(
+            result: KakaoLoginResult,
+            callbackIndex: Int = talkCallbacks.lastIndex
+        ) {
+            talkCallbacks[callbackIndex](result)
         }
 
-        fun completeAccount(result: KakaoLoginResult) {
-            accountCallback?.invoke(result)
+        fun completeAccount(
+            result: KakaoLoginResult,
+            callbackIndex: Int = accountCallbacks.lastIndex
+        ) {
+            accountCallbacks[callbackIndex](result)
         }
+    }
+
+    private class FakeKakaoHandoffExchanger : KakaoHandoffExchanger {
+        val accessTokens = mutableListOf<String>()
+        private val callbacks = mutableListOf<(Result<String>) -> Unit>()
+
+        override fun exchange(
+            accessToken: String,
+            callback: (Result<String>) -> Unit
+        ) {
+            accessTokens += accessToken
+            callbacks += callback
+        }
+
+        fun complete(callbackIndex: Int, result: Result<String>) {
+            callbacks[callbackIndex](result)
+        }
+    }
+
+    private class FakeKakaoAuthHost : KakaoAuthHost {
+        val callbackUrls = mutableListOf<String>()
+        var errorCount = 0
+            private set
+        var invalidationCount = 0
+            private set
+
+        override fun routeNativeAuthCallback(callbackUrl: String) {
+            callbackUrls += callbackUrl
+        }
+
+        override fun showSocialAuthError() {
+            errorCount += 1
+        }
+
+        override fun invalidate() {
+            invalidationCount += 1
+        }
+    }
+
+    private class FakeNativeAuthCallbackSource(callbackUrl: String?) :
+        NativeAuthCallbackSource {
+        var clearCount = 0
+            private set
+
+        override var callbackUrl: String? = callbackUrl
+            set(value) {
+                if (value == null) clearCount += 1
+                field = value
+            }
     }
 }

@@ -19,6 +19,21 @@ class SocialAuthCoordinator(
     }
 }
 
+internal interface NativeAuthCallbackSource {
+    var callbackUrl: String?
+}
+
+internal object NativeAuthCallbackConsumer {
+    fun consume(source: NativeAuthCallbackSource, baseUrl: String): String? {
+        val callbackUrl = source.callbackUrl ?: return null
+        val tokenAuthUrl = NativeAuthCallback.toTokenAuthUrl(callbackUrl, baseUrl)
+            ?: return null
+
+        source.callbackUrl = null
+        return tokenAuthUrl
+    }
+}
+
 internal object NativeAuthCallback {
     private const val CALLBACK_SCHEME = "nuriostudy"
     private const val CALLBACK_HOST = "auth-callback"
@@ -31,7 +46,10 @@ internal object NativeAuthCallback {
             if (
                 !callbackUri.scheme.equals(CALLBACK_SCHEME, ignoreCase = true) ||
                 !callbackUri.host.equals(CALLBACK_HOST, ignoreCase = true) ||
-                callbackUri.userInfo != null
+                callbackUri.userInfo != null ||
+                callbackUri.port != -1 ||
+                !callbackUri.rawPath.isNullOrEmpty() ||
+                callbackUri.rawFragment != null
             ) {
                 return null
             }

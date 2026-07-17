@@ -6,6 +6,7 @@ import com.kakao.sdk.common.model.ClientErrorCause
 import com.kakao.sdk.user.UserApiClient
 import com.nurio.study.android.BuildConfig
 import com.nurio.study.android.MainActivity
+import java.lang.ref.WeakReference
 import java.util.concurrent.atomic.AtomicBoolean
 
 internal sealed interface KakaoLoginResult {
@@ -44,6 +45,10 @@ internal class KakaoLoginFlow(
         } else {
             startAccountLogin()
         }
+    }
+
+    fun cancel() {
+        terminal.set(true)
     }
 
     private fun startTalkLogin() {
@@ -103,89 +108,233 @@ internal class KakaoLoginFlow(
     }
 }
 
+internal interface KakaoHandoffExchanger {
+    fun exchange(accessToken: String, callback: (Result<String>) -> Unit)
+}
+
+internal interface KakaoAuthHost {
+    fun routeNativeAuthCallback(callbackUrl: String)
+    fun showSocialAuthError()
+    fun invalidate()
+}
+
 internal class NativeKakaoSignInCoordinator(
-    private val activity: MainActivity,
-    private val handoffClient: NativeAuthHandoffClient
+    private val host: KakaoAuthHost,
+    private val loginSdk: KakaoLoginSdk,
+    private val handoffExchanger: KakaoHandoffExchanger,
+    private val isConfigured: () -> Boolean
 ) {
-    private val inFlight = AtomicBoolean(false)
-    private val loginSdk: KakaoLoginSdk = AndroidKakaoLoginSdk(activity)
+    private val stateLock = Any()
+    private var activeOperation: Operation? = null
+    private var invalidated = false
+
+    internal constructor(
+        activity: MainActivity,
+        handoffClient: NativeAuthHandoffClient
+    ) : this(
+        host = MainActivityKakaoAuthHost(activity),
+        loginSdk = AndroidKakaoLoginSdk(activity),
+        handoffExchanger = NativeKakaoHandoffExchanger(handoffClient),
+        isConfigured = { BuildConfig.KAKAO_NATIVE_APP_KEY.isNotBlank() }
+    )
 
     fun start() {
-        if (!inFlight.compareAndSet(false, true)) return
+        val operation = synchronized(stateLock) {
+            if (invalidated || activeOperation != null) return
+            Operation().also { activeOperation = it }
+        }
 
-        if (BuildConfig.KAKAO_NATIVE_APP_KEY.isBlank()) {
-            finishWithError()
+        val configured = try {
+            isConfigured()
+        } catch (_: Exception) {
+            false
+        }
+        if (!configured) {
+            finishWithError(operation)
             return
         }
 
-        KakaoLoginFlow(
+        val flow = KakaoLoginFlow(
             sdk = loginSdk,
-            onAccessToken = ::exchangeAccessToken,
-            onCancelled = ::finishSilently,
-            onFailure = ::finishWithError
-        ).start()
+            onAccessToken = { accessToken ->
+                exchangeAccessToken(operation, accessToken)
+            },
+            onCancelled = { finishSilently(operation) },
+            onFailure = { finishWithError(operation) }
+        )
+        val shouldStart = synchronized(stateLock) {
+            if (!invalidated && activeOperation === operation) {
+                operation.flow = flow
+                true
+            } else {
+                false
+            }
+        }
+
+        if (shouldStart) {
+            flow.start()
+        } else {
+            flow.cancel()
+        }
     }
 
-    private fun exchangeAccessToken(accessToken: String) {
+    fun cancel() {
+        synchronized(stateLock) {
+            activeOperation?.flow?.cancel()
+            activeOperation = null
+        }
+    }
+
+    fun invalidate() {
+        synchronized(stateLock) {
+            invalidated = true
+            activeOperation?.flow?.cancel()
+            activeOperation = null
+        }
+        host.invalidate()
+    }
+
+    private fun exchangeAccessToken(operation: Operation, accessToken: String) {
+        if (!isActive(operation)) return
+
         try {
-            handoffClient.exchangeKakao(accessToken) { result ->
+            handoffExchanger.exchange(accessToken) { result ->
                 result.fold(
                     onSuccess = { callbackUrl ->
-                        finish { activity.routeNativeAuthCallback(callbackUrl) }
+                        finish(operation) {
+                            host.routeNativeAuthCallback(callbackUrl)
+                        }
                     },
-                    onFailure = { finishWithError() }
+                    onFailure = { finishWithError(operation) }
                 )
             }
         } catch (_: Exception) {
-            finishWithError()
+            finishWithError(operation)
         }
     }
 
-    private fun finishWithError() {
-        finish(activity::showSocialAuthError)
+    private fun finishWithError(operation: Operation) {
+        finish(operation, host::showSocialAuthError)
     }
 
-    private fun finishSilently() {
-        finish {}
+    private fun finishSilently(operation: Operation) {
+        finish(operation) {}
     }
 
-    private fun finish(action: () -> Unit) {
-        activity.runOnUiThread {
-            if (inFlight.compareAndSet(true, false)) {
-                action()
+    private fun finish(operation: Operation, action: () -> Unit) {
+        val shouldDeliver = synchronized(stateLock) {
+            if (!invalidated && activeOperation === operation) {
+                activeOperation = null
+                true
+            } else {
+                false
             }
         }
+
+        if (shouldDeliver) action()
+    }
+
+    private fun isActive(operation: Operation): Boolean = synchronized(stateLock) {
+        !invalidated && activeOperation === operation
+    }
+
+    private class Operation {
+        var flow: KakaoLoginFlow? = null
     }
 }
 
 private class AndroidKakaoLoginSdk(
-    private val activity: MainActivity
+    activity: MainActivity
 ) : KakaoLoginSdk {
-    override fun isKakaoTalkLoginAvailable(): Boolean =
-        UserApiClient.instance.isKakaoTalkLoginAvailable(activity)
+    private val activityReference = WeakReference(activity)
+
+    override fun isKakaoTalkLoginAvailable(): Boolean {
+        val activity = activeActivity()
+        return UserApiClient.instance.isKakaoTalkLoginAvailable(activity)
+    }
 
     override fun loginWithKakaoTalk(callback: (KakaoLoginResult) -> Unit) {
+        val activity = activeActivity()
         UserApiClient.instance.loginWithKakaoTalk(activity) { token, error ->
-            callback(resultOf(token, error))
+            callback(kakaoLoginResult(token, error))
         }
     }
 
     override fun loginWithKakaoAccount(callback: (KakaoLoginResult) -> Unit) {
+        val activity = activeActivity()
         UserApiClient.instance.loginWithKakaoAccount(activity) { token, error ->
-            callback(resultOf(token, error))
+            callback(kakaoLoginResult(token, error))
         }
     }
 
-    private fun resultOf(token: OAuthToken?, error: Throwable?): KakaoLoginResult {
-        if (error is ClientError && error.reason == ClientErrorCause.Cancelled) {
-            return KakaoLoginResult.Cancelled
+    private fun activeActivity(): MainActivity {
+        val activity = activityReference.get()
+        if (activity == null || activity.isFinishing || activity.isDestroyed) {
+            throw IllegalStateException("Kakao auth host is unavailable")
         }
+        return activity
+    }
+}
 
-        val accessToken = token?.accessToken
-        return if (error != null || accessToken.isNullOrBlank()) {
-            KakaoLoginResult.Failed
-        } else {
-            KakaoLoginResult.Success(accessToken)
+private class NativeKakaoHandoffExchanger(
+    private val handoffClient: NativeAuthHandoffClient
+) : KakaoHandoffExchanger {
+    override fun exchange(
+        accessToken: String,
+        callback: (Result<String>) -> Unit
+    ) {
+        handoffClient.exchangeKakao(accessToken, callback)
+    }
+}
+
+private class MainActivityKakaoAuthHost(
+    activity: MainActivity
+) : KakaoAuthHost {
+    private val activityReference = WeakReference(activity)
+    private val valid = AtomicBoolean(true)
+
+    override fun routeNativeAuthCallback(callbackUrl: String) {
+        deliver { activity ->
+            activity.routeNativeAuthCallback(callbackUrl)
         }
+    }
+
+    override fun showSocialAuthError() {
+        deliver(MainActivity::showSocialAuthError)
+    }
+
+    override fun invalidate() {
+        valid.set(false)
+        activityReference.clear()
+    }
+
+    private fun deliver(action: (MainActivity) -> Unit) {
+        if (!valid.get()) return
+        val activity = activityReference.get() ?: return
+
+        activity.runOnUiThread {
+            if (!valid.get()) return@runOnUiThread
+            val currentActivity = activityReference.get() ?: return@runOnUiThread
+            if (currentActivity.isFinishing || currentActivity.isDestroyed) {
+                return@runOnUiThread
+            }
+            action(currentActivity)
+        }
+    }
+}
+
+private fun kakaoLoginResult(
+    token: OAuthToken?,
+    error: Throwable?
+): KakaoLoginResult {
+    if (error is ClientError && error.reason == ClientErrorCause.Cancelled) {
+        return KakaoLoginResult.Cancelled
+    }
+
+    val accessToken = token?.accessToken
+    return if (error != null || accessToken.isNullOrBlank()) {
+        KakaoLoginResult.Failed
+    } else {
+        KakaoLoginResult.Success(accessToken)
     }
 }

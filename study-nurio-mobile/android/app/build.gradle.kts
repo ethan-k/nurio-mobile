@@ -20,6 +20,7 @@ val kakaoNativeAppKey = providers
     .get()
     .trim()
 val kakaoManifestAppKey = kakaoNativeAppKey.ifBlank { "not_configured" }
+val kakaoAuthEnabled = kakaoNativeAppKey.isNotBlank()
 
 fun String.asBuildConfigString(): String =
     "\"" +
@@ -48,6 +49,7 @@ android {
             kakaoNativeAppKey.asBuildConfigString()
         )
         manifestPlaceholders["KAKAO_NATIVE_APP_KEY"] = kakaoManifestAppKey
+        manifestPlaceholders["KAKAO_AUTH_ENABLED"] = kakaoAuthEnabled.toString()
     }
 
     signingConfigs {
