@@ -12,6 +12,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotSame
 import org.junit.Assert.assertTrue
+import org.junit.Assert.assertThrows
 import org.junit.Assert.fail
 import org.junit.Test
 
@@ -46,6 +47,26 @@ class NativeAuthHandoffClientTest {
             } catch (_: IllegalArgumentException) {
                 // Expected.
             }
+        }
+    }
+
+    @Test
+    fun `malformed payload errors never expose token or state values`() {
+        val tokenSentinel = "SENTINEL_TOKEN_91"
+        val stateSentinel = "SENTINEL_STATE_73"
+        val malformedPayload =
+            """{"token":"$tokenSentinel","state":"$stateSentinel","broken":}"""
+
+        val error = assertThrows(IllegalArgumentException::class.java) {
+            NativeAuthHandoffClient.callbackUrl(malformedPayload)
+        }
+
+        var currentError: Throwable? = error
+        while (currentError != null) {
+            val message = currentError.message.orEmpty()
+            assertFalse("Token leaked through exception message", message.contains(tokenSentinel))
+            assertFalse("State leaked through exception message", message.contains(stateSentinel))
+            currentError = currentError.cause
         }
     }
 

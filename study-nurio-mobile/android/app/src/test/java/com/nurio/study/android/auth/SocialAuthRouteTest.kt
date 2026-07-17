@@ -43,6 +43,30 @@ class SocialAuthRouteTest {
     }
 
     @Test
+    fun `treats explicit default HTTPS ports as the configured origin`() {
+        assertEquals(
+            SocialAuthRoute(
+                SocialAuthProvider.KAKAO,
+                "https://study.nurio.kr:443/auth/kakao?platform=native"
+            ),
+            SocialAuthRoute.resolve(
+                "https://study.nurio.kr:443/auth/kakao?platform=native",
+                baseUrl
+            )
+        )
+        assertEquals(
+            SocialAuthRoute(
+                SocialAuthProvider.NAVER,
+                "https://study.nurio.kr/auth/naver"
+            ),
+            SocialAuthRoute.resolve(
+                "https://study.nurio.kr/auth/naver",
+                "https://study.nurio.kr:443"
+            )
+        )
+    }
+
+    @Test
     fun `rejects foreign hosts non web schemes and unknown paths`() {
         val rejectedPaths = listOf(
             "https://evil.example/auth/kakao",
@@ -54,6 +78,40 @@ class SocialAuthRouteTest {
 
         rejectedPaths.forEach { startPath ->
             assertNull(startPath, SocialAuthRoute.resolve(startPath, baseUrl))
+        }
+    }
+
+    @Test
+    fun `rejects routes outside the configured origin or literal provider paths`() {
+        val rejectedRoutes = listOf(
+            "http://study.nurio.kr/auth/kakao" to baseUrl,
+            "https://study.nurio.kr:8443/auth/kakao" to baseUrl,
+            "https://attacker@study.nurio.kr/auth/kakao" to baseUrl,
+            "https://study.nurio.kr/%61uth/kakao" to baseUrl,
+            "/auth/kakao" to "https://attacker@study.nurio.kr"
+        )
+
+        rejectedRoutes.forEach { (startPath, configuredBaseUrl) ->
+            assertNull(
+                "$startPath must be rejected for $configuredBaseUrl",
+                SocialAuthRoute.resolve(startPath, configuredBaseUrl)
+            )
+        }
+    }
+
+    @Test
+    fun `rejects invalid configured base origins`() {
+        val invalidBaseUrls = listOf(
+            "ftp://study.nurio.kr",
+            "https:///missing-host",
+            "mailto:study.nurio.kr"
+        )
+
+        invalidBaseUrls.forEach { invalidBaseUrl ->
+            assertNull(
+                invalidBaseUrl,
+                SocialAuthRoute.resolve("/auth/kakao", invalidBaseUrl)
+            )
         }
     }
 }

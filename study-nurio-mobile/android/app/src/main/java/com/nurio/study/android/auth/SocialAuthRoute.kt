@@ -21,30 +21,53 @@ data class SocialAuthRoute(
     val url: String
 ) {
     companion object {
+        private val webSchemes = setOf("http", "https")
+
         fun resolve(startPath: String, baseUrl: String): SocialAuthRoute? {
             return try {
                 val baseUri = URI(baseUrl)
-                val resolvedUri = baseUri.resolve(startPath)
-                val scheme = resolvedUri.scheme?.lowercase(Locale.ROOT)
-                val resolvedHost = resolvedUri.host
+                val baseScheme = baseUri.scheme?.lowercase(Locale.ROOT) ?: return null
                 val baseHost = baseUri.host
 
                 if (
-                    scheme !in setOf("http", "https") ||
-                    resolvedHost == null ||
+                    baseScheme !in webSchemes ||
                     baseHost == null ||
-                    !resolvedHost.equals(baseHost, ignoreCase = true)
+                    baseUri.userInfo != null
                 ) {
                     return null
                 }
 
-                val provider = SocialAuthProvider.fromPath(resolvedUri.path) ?: return null
+                val resolvedUri = baseUri.resolve(startPath)
+                val resolvedScheme = resolvedUri.scheme?.lowercase(Locale.ROOT) ?: return null
+                val resolvedHost = resolvedUri.host
+
+                if (
+                    resolvedScheme != baseScheme ||
+                    resolvedHost == null ||
+                    !resolvedHost.equals(baseHost, ignoreCase = true) ||
+                    resolvedUri.userInfo != null ||
+                    effectivePort(resolvedUri, resolvedScheme) != effectivePort(baseUri, baseScheme)
+                ) {
+                    return null
+                }
+
+                val provider = SocialAuthProvider.fromPath(resolvedUri.rawPath) ?: return null
 
                 SocialAuthRoute(provider, resolvedUri.toString())
             } catch (_: URISyntaxException) {
                 null
             } catch (_: IllegalArgumentException) {
                 null
+            }
+        }
+
+        private fun effectivePort(uri: URI, scheme: String): Int {
+            if (uri.port != -1) return uri.port
+
+            return when (scheme) {
+                "http" -> 80
+                "https" -> 443
+                else -> -1
             }
         }
     }

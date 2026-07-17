@@ -91,8 +91,8 @@ class NativeAuthHandoffClient(
         fun callbackUrl(responseBody: String): String {
             val payload = try {
                 json.decodeFromString<NativeAuthHandoffPayload>(responseBody)
-            } catch (error: Exception) {
-                throw IllegalArgumentException("Invalid native auth handoff payload", error)
+            } catch (_: Exception) {
+                throw IllegalArgumentException("Invalid native auth handoff payload")
             }
 
             require(payload.token.isNotBlank()) { "Native auth token must not be blank" }
