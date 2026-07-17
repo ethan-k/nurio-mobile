@@ -5,7 +5,7 @@ Standalone Hotwire Native iOS shell for the Nurio Study web experience.
 ## Runtime
 
 - Start URL: `https://study.nurio.kr`
-- Custom callback scheme: `nurio://auth-callback`
+- Custom callback scheme: `nuriostudy://auth-callback`
 - Bundled path configuration: `path-configuration.json`
 - OAuth paths intercepted natively:
   - `/auth/google_oauth2`
@@ -19,6 +19,8 @@ Standalone Hotwire Native iOS shell for the Nurio Study web experience.
 - Android parity source stays in `android/`
 
 ## Commands
+
+Social login console setup, secret injection, and real-device acceptance steps are in [`../docs/SOCIAL_LOGIN.md`](../docs/SOCIAL_LOGIN.md).
 
 ```bash
 open ios/NurioStudy.xcodeproj
