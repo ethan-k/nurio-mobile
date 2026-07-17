@@ -9,6 +9,7 @@ constraintlayout = "2.2.1"
 hotwireNative = "1.2.6"
 splashscreen = "1.0.1"
 browser = "1.8.0"
+junit = "4.13.2"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -21,6 +22,7 @@ androidx-browser = { group = "androidx.browser", name = "browser", version.ref =
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version = "1.7.3" }
 hotwire-core = { group = "dev.hotwire", name = "core", version.ref = "hotwireNative" }
 hotwire-navigation-fragments = { group = "dev.hotwire", name = "navigation-fragments", version.ref = "hotwireNative" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

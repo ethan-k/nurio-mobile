@@ -91,4 +91,6 @@ dependencies {
 
     implementation(libs.hotwire.core)
     implementation(libs.hotwire.navigation.fragments)
+
+    testImplementation(libs.junit)
 }
