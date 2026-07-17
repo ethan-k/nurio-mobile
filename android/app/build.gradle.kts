@@ -92,6 +92,7 @@ dependencies {
     implementation(libs.androidx.splashscreen)
     implementation(libs.androidx.browser)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.lottie)
 
     implementation(libs.hotwire.core)
     implementation(libs.hotwire.navigation.fragments)

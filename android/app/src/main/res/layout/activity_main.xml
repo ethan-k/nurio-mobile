@@ -18,4 +18,17 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/splash_animation"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@color/bottom_nav_background"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:lottie_fileName="animations/nurio_splash.json" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

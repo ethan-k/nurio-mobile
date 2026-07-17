@@ -1,15 +1,19 @@
 package com.nurio.android
 
 import android.Manifest
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.airbnb.lottie.LottieAnimationView
 import dev.hotwire.navigation.activities.HotwireActivity
 import dev.hotwire.navigation.navigator.Navigator
 import dev.hotwire.navigation.navigator.NavigatorConfiguration
@@ -23,9 +27,30 @@ class MainActivity : HotwireActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        showSplashAnimation(coldStart = savedInstanceState == null)
         delegate.setCurrentNavigator(navigatorConfigurations().first())
         requestNotificationPermissionIfNeeded()
         handleLaunchIntent(intent)
+    }
+
+    private fun showSplashAnimation(coldStart: Boolean) {
+        val splashView = findViewById<LottieAnimationView>(R.id.splash_animation)
+
+        if (!coldStart) {
+            splashView.visibility = View.GONE
+            return
+        }
+
+        splashView.addAnimatorListener(object : AnimatorListenerAdapter() {
+            override fun onAnimationEnd(animation: Animator) {
+                splashView.animate()
+                    .alpha(0f)
+                    .setDuration(250)
+                    .withEndAction { splashView.visibility = View.GONE }
+                    .start()
+            }
+        })
+        splashView.playAnimation()
     }
 
     override fun onNewIntent(intent: Intent) {

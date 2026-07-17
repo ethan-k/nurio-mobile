@@ -9,6 +9,7 @@ constraintlayout = "2.2.1"
 hotwireNative = "1.2.6"
 splashscreen = "1.0.1"
 browser = "1.8.0"
+lottie = "6.6.6"
 firebaseBom = "34.13.0"
 googleServices = "4.4.4"
 
@@ -20,6 +21,7 @@ androidx-activity = { group = "androidx.activity", name = "activity", version.re
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 androidx-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "splashscreen" }
 androidx-browser = { group = "androidx.browser", name = "browser", version.ref = "browser" }
+lottie = { group = "com.airbnb.android", name = "lottie", version.ref = "lottie" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version = "1.7.3" }
 hotwire-core = { group = "dev.hotwire", name = "core", version.ref = "hotwireNative" }
 hotwire-navigation-fragments = { group = "dev.hotwire", name = "navigation-fragments", version.ref = "hotwireNative" }
