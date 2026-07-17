@@ -6,7 +6,7 @@ This runbook covers social login for the customer-facing Hotwire Native iOS and 
 
 | Provider | Native behavior | Rails entry/callback |
 | --- | --- | --- |
-| Kakao | Kakao SDK opens KakaoTalk when available and falls back to Kakao Account when KakaoTalk is absent or cannot complete the request. | The app exchanges the Kakao access token at `POST /auth/kakao/native`. |
+| Kakao | Kakao SDK opens KakaoTalk when available. Both apps use Kakao Account when KakaoTalk is unavailable; Android also falls back after a non-cancellation KakaoTalk failure, while iOS reports that provider failure so the user can retry. | The app exchanges the Kakao access token at `POST /auth/kakao/native`. |
 | Google | A system authentication session opens the Rails OmniAuth flow. | `/auth/google_oauth2` returns through `https://study.nurio.kr/auth/google_oauth2/callback`. |
 | Naver | A system authentication session opens the Rails OmniAuth flow. | `/auth/naver` returns through `https://study.nurio.kr/auth/naver/callback`. |
 
@@ -24,14 +24,14 @@ KAKAO_APP_ID=1352984
 
 `KAKAO_APP_ID` is the numeric audience checked against Kakao's access-token information. It is not the Kakao Native app key. The Rails web flow also retains its existing `KAKAO_CLIENT_ID` and `KAKAO_CLIENT_SECRET` credentials.
 
-Use the Kakao **Native app key** for the Study native platform registrations. Treat it as a user-managed secret and never commit it, paste it into documentation, or print it in build logs.
+Create or select an **additional Kakao Native app key** dedicated to Nurio Study under the existing Kakao application whose ID is `1352984`. Do not reuse the main Nurio app's Native app key: co-installed apps must not register the same `kakao<NativeAppKey>://oauth` callback scheme. Treat the Study key as a user-managed secret and never commit it, paste it into documentation, or print it in build logs.
 
 In Kakao Developers, verify all of the following under the Kakao application whose numeric app ID is `1352984`:
 
 - Register the iOS platform with bundle ID `com.nurio.study.ios`.
-- Register the Android platform with package name `com.nurio.study.android` and add both the debug and release key hashes.
+- Register the Android platform with package name `com.nurio.study.android` and every signing-certificate key hash that can sign an installed build: debug, upload/release, and Google Play App Signing.
 - Enable the Kakao Login consent item `account_email`. Rails rejects native Kakao login when the granted profile has no email.
-- Keep the native key distinct from the REST API key used by server-side/web OAuth configuration.
+- Keep the Study Native app key distinct from both the main Nurio Native app key and the REST API key used by server-side/web OAuth configuration.
 
 Generate the Android debug key hash locally:
 
@@ -44,7 +44,7 @@ keytool -exportcert \
   | openssl base64
 ```
 
-Generate the release hash from the actual upload/release keystore. Let `keytool` prompt for the password; do not put the password on the command line or in the repository:
+Generate the upload/release hash from the actual upload keystore. Let `keytool` prompt for the password; do not put the password on the command line or in the repository:
 
 ```bash
 keytool -exportcert \
@@ -54,28 +54,41 @@ keytool -exportcert \
   | openssl base64
 ```
 
-Register the resulting hashes in Kakao Developers without committing them to this repository.
+Google Play re-signs distributed builds with the Play App Signing certificate, so the upload-keystore hash is not sufficient for production. In Play Console, open **App integrity**, copy the SHA-1 fingerprint under **App signing key certificate** (not the upload certificate), convert that hexadecimal SHA-1 digest to Kakao's Base64 key-hash format, and register the result for `com.nurio.study.android`:
+
+```bash
+nurio_play_app_signing_sha1='<SHA-1 from the Play App Signing key certificate>'
+printf '%s' "$nurio_play_app_signing_sha1" \
+  | tr -d ':' \
+  | xxd -r -p \
+  | openssl base64
+unset nurio_play_app_signing_sha1
+```
+
+Register the debug, upload/release, and Play App Signing hashes that apply to distributed builds in Kakao Developers without committing them to this repository.
 
 ## Injecting the Native app key
 
-Keep the source secret in the user or CI environment as `NURIO_STUDY_KAKAO_NATIVE_APP_KEY`. Do not use shell tracing (`set -x`), `echo`, or build-setting dumps while handling it.
+Keep the source secret in the user or CI secret store as `NURIO_STUDY_KAKAO_NATIVE_APP_KEY`. Do not use shell tracing (`set -x`), `echo`, command-line values, or build-setting dumps while handling it.
 
 ### iOS
 
-Pass the user-managed value to Xcode as the `KAKAO_NATIVE_APP_KEY` build setting:
+Create a protected `.xcconfig` outside the repository whose only secret setting is `KAKAO_NATIVE_APP_KEY = <Study Native app key>`. For local development, restrict the file to the current user; in CI, use the platform's protected secret-file mount. Set `NURIO_STUDY_XCCONFIG_PATH` to that file's path, not to the key value.
+
+Pass only the protected file path to Xcode. Do not put `KAKAO_NATIVE_APP_KEY=<value>` on the `xcodebuild` command line because Xcode can print command-line build settings:
 
 ```bash
-test -n "$NURIO_STUDY_KAKAO_NATIVE_APP_KEY"
+test -f "$NURIO_STUDY_XCCONFIG_PATH"
 
 xcodebuild \
   -project study-nurio-mobile/ios/NurioStudy.xcodeproj \
   -scheme NurioStudy \
   -destination 'generic/platform=iOS Simulator' \
-  KAKAO_NATIVE_APP_KEY="$NURIO_STUDY_KAKAO_NATIVE_APP_KEY" \
+  -xcconfig "$NURIO_STUDY_XCCONFIG_PATH" \
   build
 ```
 
-Configure the same build-setting mapping in the signed archive/CI job. The committed Debug and Release defaults are intentionally empty; with no value, the app skips Kakao SDK initialization and native Kakao login is unavailable.
+Use the same protected `.xcconfig` path in the signed archive job. Never place that file inside the repository or upload it as a build artifact. The committed Debug and Release defaults are intentionally empty; with no value, the app skips Kakao SDK initialization and native Kakao login is unavailable.
 
 ### Android
 
