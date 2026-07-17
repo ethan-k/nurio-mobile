@@ -82,4 +82,57 @@ final class NurioStudyTests: XCTestCase {
         XCTAssertEqual(queryItems["token"], "signed token")
         XCTAssertEqual(queryItems["state"], "one/time")
     }
+
+    func testNativeAuthHandoffRedirectDelegateRejectsRedirect() {
+        let delegate = NativeAuthRedirectRejectingDelegate()
+        let session = URLSession(
+            configuration: .ephemeral,
+            delegate: delegate,
+            delegateQueue: nil
+        )
+        defer { session.invalidateAndCancel() }
+
+        let originalURL = URL(string: "https://study.nurio.kr/auth/kakao/native")!
+        let redirectedURL = URL(string: "https://evil.example/capture")!
+        let task = session.dataTask(with: originalURL)
+        let response = HTTPURLResponse(
+            url: originalURL,
+            statusCode: 307,
+            httpVersion: nil,
+            headerFields: ["Location": redirectedURL.absoluteString]
+        )!
+        let recorder = RedirectCompletionRecorder()
+
+        delegate.urlSession(
+            session,
+            task: task,
+            willPerformHTTPRedirection: response,
+            newRequest: URLRequest(url: redirectedURL)
+        ) { request in
+            recorder.record(request)
+        }
+
+        let result = recorder.result
+        XCTAssertEqual(result.invocationCount, 1)
+        XCTAssertNil(result.request)
+    }
+}
+
+private final class RedirectCompletionRecorder: @unchecked Sendable {
+    private let lock = NSLock()
+    private var invocationCount = 0
+    private var request: URLRequest?
+
+    func record(_ request: URLRequest?) {
+        lock.lock()
+        defer { lock.unlock() }
+        invocationCount += 1
+        self.request = request
+    }
+
+    var result: (invocationCount: Int, request: URLRequest?) {
+        lock.lock()
+        defer { lock.unlock() }
+        return (invocationCount, request)
+    }
 }

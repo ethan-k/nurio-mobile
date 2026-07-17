@@ -1,28 +1,54 @@
 import Foundation
 
-enum NativeAuthHandoffError: Error, Equatable {
+enum NativeAuthHandoffError: Error, Equatable, Sendable {
     case invalidResponse
     case rejected(Int)
     case transport
 }
 
-struct NativeAuthHandoffPayload: Decodable {
+struct NativeAuthHandoffPayload: Decodable, Sendable {
     let token: String
     let state: String
+}
+
+typealias NativeAuthHandoffCompletion = @MainActor @Sendable (
+    Result<URL, NativeAuthHandoffError>
+) -> Void
+
+final class NativeAuthRedirectRejectingDelegate: NSObject, URLSessionTaskDelegate {
+    func urlSession(
+        _ session: URLSession,
+        task: URLSessionTask,
+        willPerformHTTPRedirection response: HTTPURLResponse,
+        newRequest request: URLRequest,
+        completionHandler: @escaping (URLRequest?) -> Void
+    ) {
+        completionHandler(nil)
+    }
 }
 
 final class NativeAuthHandoffClient {
     private let baseURL: URL
     private let session: URLSession
+    private let redirectDelegate: NativeAuthRedirectRejectingDelegate
 
-    init(baseURL: URL = AppEnvironment.baseURL, session: URLSession = .shared) {
+    init(
+        baseURL: URL = AppEnvironment.baseURL,
+        sessionConfiguration: URLSessionConfiguration = .ephemeral
+    ) {
         self.baseURL = baseURL
-        self.session = session
+        let redirectDelegate = NativeAuthRedirectRejectingDelegate()
+        self.session = URLSession(
+            configuration: sessionConfiguration,
+            delegate: redirectDelegate,
+            delegateQueue: nil
+        )
+        self.redirectDelegate = redirectDelegate
     }
 
     func exchangeKakao(
         accessToken: String,
-        completion: @escaping (Result<URL, NativeAuthHandoffError>) -> Void
+        completion: @escaping NativeAuthHandoffCompletion
     ) {
         let url = baseURL
             .appendingPathComponent("auth")
@@ -94,9 +120,9 @@ final class NativeAuthHandoffClient {
 
     private static func complete(
         _ result: Result<URL, NativeAuthHandoffError>,
-        using completion: @escaping (Result<URL, NativeAuthHandoffError>) -> Void
+        using completion: @escaping NativeAuthHandoffCompletion
     ) {
-        DispatchQueue.main.async {
+        Task { @MainActor in
             completion(result)
         }
     }
