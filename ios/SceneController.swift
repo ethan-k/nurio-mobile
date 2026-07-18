@@ -9,7 +9,7 @@ final class SceneController: UIResponder {
     private lazy var navigator = Navigator(
         configuration: .init(
             name: "Nurio",
-            startLocation: AppEnvironment.startURL
+            startLocation: AppEnvironment.coldStartURL
         ),
         delegate: self
     )

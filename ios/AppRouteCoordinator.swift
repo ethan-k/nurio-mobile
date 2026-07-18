@@ -17,7 +17,7 @@ final class AppRouteCoordinator {
 
     func handleIncoming(_ url: URL) {
         if NativeAppOpenURL.isAppOpenURL(url) {
-            route(NativeAppOpenURL.webURL(from: url, baseURL: AppEnvironment.baseURL) ?? AppEnvironment.startURL)
+            route(NativeAppOpenURL.webURL(from: url, baseURL: AppEnvironment.baseURL) ?? AppEnvironment.eventsURL)
             return
         }
 
@@ -37,7 +37,7 @@ final class AppRouteCoordinator {
         }
 
         if NativeAppOpenURL.isBlockedWebURL(url, baseURL: AppEnvironment.baseURL) {
-            route(AppEnvironment.startURL)
+            route(AppEnvironment.eventsURL)
             return
         }
 

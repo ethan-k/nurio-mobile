@@ -39,6 +39,24 @@ final class NurioTests: XCTestCase {
         )
     }
 
+    func testColdStartURLUsesServerAuthenticationGate() {
+        let baseURL = URL(string: "https://nurio.kr")!
+
+        XCTAssertEqual(
+            AppEnvironment.coldStartURL(for: baseURL).absoluteString,
+            "https://nurio.kr"
+        )
+    }
+
+    func testInvalidDeepLinkFallbackRemainsEvents() {
+        let baseURL = URL(string: "https://nurio.kr")!
+
+        XCTAssertEqual(
+            AppEnvironment.eventsURL(for: baseURL).absoluteString,
+            "https://nurio.kr/events"
+        )
+    }
+
     func testInvalidNativeCallbackReturnsNil() {
         let callbackURL = URL(string: "nurio://auth-callback?token=test-token")!
         XCTAssertNil(

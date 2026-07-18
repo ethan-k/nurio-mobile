@@ -19,7 +19,19 @@ enum AppEnvironment {
         return overrideURL
     }
 
-    static var startURL: URL {
+    static var coldStartURL: URL {
+        coldStartURL(for: baseURL)
+    }
+
+    static func coldStartURL(for baseURL: URL) -> URL {
+        baseURL
+    }
+
+    static var eventsURL: URL {
+        eventsURL(for: baseURL)
+    }
+
+    static func eventsURL(for baseURL: URL) -> URL {
         baseURL.appendingPathComponent("events")
     }
 
