@@ -312,7 +312,7 @@
 			files = (
 			);
 			inputPaths = (
-				"$(SRCROOT)/GoogleService-Info.plist",
+				"$(SRCROOT)/../../../nurio_study/mobile_certs/nurio-study-GoogleService-Info.plist",
 			);
 			name = "Copy Study Firebase configuration";
 			outputPaths = (
@@ -320,7 +320,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "set -eu\nmkdir -p \"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}\"\nif [ -f \"${SCRIPT_INPUT_FILE_0}\" ]; then\n  configured_project_id=$(/usr/bin/plutil -extract PROJECT_ID raw -o - \"${SCRIPT_INPUT_FILE_0}\")\n  configured_bundle_id=$(/usr/bin/plutil -extract BUNDLE_ID raw -o - \"${SCRIPT_INPUT_FILE_0}\")\n  if [ \"${configured_project_id}\" != \"nurio-prod\" ] || [ \"${configured_bundle_id}\" != \"com.nurio.study.ios\" ]; then\n    echo \"Study Firebase configuration must target nurio-prod and com.nurio.study.ios\" >&2\n    exit 1\n  fi\n  cp \"${SCRIPT_INPUT_FILE_0}\" \"${SCRIPT_OUTPUT_FILE_0}\"\nelse\n  rm -f \"${SCRIPT_OUTPUT_FILE_0}\"\nfi\n";
+			shellScript = "set -eu\nif [ ! -f \"${SCRIPT_INPUT_FILE_0}\" ]; then\n  echo \"Study production Firebase configuration is missing\" >&2\n  exit 1\nfi\nconfigured_project_id=$(/usr/bin/plutil -extract PROJECT_ID raw -o - \"${SCRIPT_INPUT_FILE_0}\")\nconfigured_bundle_id=$(/usr/bin/plutil -extract BUNDLE_ID raw -o - \"${SCRIPT_INPUT_FILE_0}\")\nif [ \"${configured_project_id}\" != \"nurio-prod\" ] || [ \"${configured_bundle_id}\" != \"com.nurio.study.ios\" ]; then\n  echo \"Study Firebase configuration must target nurio-prod and com.nurio.study.ios\" >&2\n  exit 1\nfi\nmkdir -p \"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}\"\ncp \"${SCRIPT_INPUT_FILE_0}\" \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
