@@ -7,7 +7,7 @@ Current scaffold status in this repository:
 - Xcode project: `ios/Nurio.xcodeproj`
 - Scheme: `Nurio`
 - Production bundle identifier: `com.nurio.ios`
-- Default start URL: `https://nurio.kr/events`
+- Default start URL: `https://nurio.kr/`; the server sends signed-out users to `/login` and signed-in users to `/events`
 - OAuth callback scheme: `nurio://auth-callback`
 
 ## 1. Prepare The App For Release
@@ -29,7 +29,7 @@ Before creating the release build, update the development scaffold to production
 
 Project-specific checks before submission:
 
-- Cold launch lands on `https://nurio.kr/events`
+- Cold launch opens `https://nurio.kr/`, then continues to `/login` when signed out or `/events` when signed in
 - Customer event browsing works in-app
 - OAuth sign-in works through the native callback path
 - Admin and tutor routes are not navigated in-app
@@ -108,7 +108,7 @@ After the upload appears in App Store Connect:
 
 Use TestFlight to verify the production-signed build still matches the required customer-only scope:
 
-- start page is `/events`
+- cold start opens `/`, then continues to `/login` when signed out or `/events` when signed in
 - OAuth callback returns to the signed-in web session
 - admin and tutor URLs are blocked from in-app navigation
 - checkout and payment flows still behave correctly
@@ -126,7 +126,7 @@ Once the tested build is ready:
 Recommended review notes for this app:
 
 - The app is a customer-only shell for the Nurio web experience.
-- The default landing page is `https://nurio.kr/events`.
+- The default landing page is `https://nurio.kr/`; Nurio then routes signed-out users to `/login` and signed-in users to `/events`.
 - OAuth sign-in uses an external authentication session and returns through `nurio://auth-callback`.
 - Admin and tutor routes are intentionally excluded from the app scope.
 - The app now requires an in-app Terms of Service and Privacy Policy acceptance step before Hotwire Native users can access user-generated community content.
@@ -147,7 +147,7 @@ Use this short checklist before pressing submit:
 - Production bundle identifier is set in Xcode and App Store Connect
 - Version and build number are updated
 - Release archive succeeds locally
-- TestFlight build opens `https://nurio.kr/events`
+- TestFlight build opens `https://nurio.kr/` and follows the expected signed-out `/login` or signed-in `/events` route
 - Customer checkout works
 - Google, Kakao, and Naver OAuth round-trips succeed
 - Privacy Policy URL and support URL are set

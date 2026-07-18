@@ -4,7 +4,7 @@ Standalone Hotwire Native iOS shell for the Nurio customer web experience.
 
 ## Runtime
 
-- Start URL: `https://nurio.kr/events`
+- Start URL: `https://nurio.kr/`; the server sends signed-out users to `/login` and signed-in users to `/events`
 - Custom callback scheme: `nurio://auth-callback`
 - Bundled path configuration: `../shared/configurations/ios_v1.json`
 - OAuth paths intercepted natively:
