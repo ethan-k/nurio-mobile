@@ -1,27 +1,27 @@
-# Nurio iOS Submission Guide
+# Nurio Study iOS Submission Guide
 
 This document covers the first App Store Connect submission flow for the standalone Hotwire Native iOS shell in `ios/`.
 
 Current scaffold status in this repository:
 
-- Xcode project: `ios/Nurio.xcodeproj`
-- Scheme: `Nurio`
-- Production bundle identifier: `com.nurio.ios`
-- Default start URL: `https://nurio.kr/`; the server sends signed-out users to `/login` and signed-in users to `/events`
+- Xcode project: `ios/NurioStudy.xcodeproj`
+- Scheme: `NurioStudy`
+- Production bundle identifier: `com.nurio.study.ios`
+- Default start URL: `https://study.nurio.kr`
 - OAuth callback scheme: `nurio://auth-callback`
 
 ## 1. Prepare The App For Release
 
 Before creating the release build, update the development scaffold to production values in Xcode:
 
-1. Open `ios/Nurio.xcodeproj`.
-2. Select the `Nurio` target.
+1. Open `ios/NurioStudy.xcodeproj`.
+2. Select the `NurioStudy` target.
 3. In `Signing & Capabilities`:
    - choose the Apple Developer team
-   - confirm the production bundle identifier is `com.nurio.ios`
+   - confirm the production bundle identifier is `com.nurio.study.ios`
    - confirm automatic signing or set the provisioning profile required by your release process
 4. In `General`:
-   - set the production display name if it differs from `Nurio`
+   - set the production display name if it differs from `Nurio Study`
    - set `Version` to the App Store marketing version
    - set `Build` to the new build number
 5. Verify the URL scheme remains `nurio` in `Info.plist`.
@@ -29,11 +29,11 @@ Before creating the release build, update the development scaffold to production
 
 Project-specific checks before submission:
 
-- Cold launch opens `https://nurio.kr/`, then continues to `/login` when signed out or `/events` when signed in
-- Customer event browsing works in-app
+- Cold launch lands on `https://study.nurio.kr`
+- Study browsing works in-app
 - OAuth sign-in works through the native callback path
 - Admin and tutor routes are not navigated in-app
-- Payment and checkout pages still render inside the customer shell
+- Payment and checkout pages still render inside the study shell when offered by the web app
 
 ## 2. Create The App Store Connect App
 
@@ -57,14 +57,14 @@ You will also need store assets for the first submission:
 Run the repository checks first:
 
 ```bash
-xcodebuild -project ios/Nurio.xcodeproj -scheme Nurio -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.2' build
-xcodebuild -project ios/Nurio.xcodeproj -scheme Nurio -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.2' test
+xcodebuild -project ios/NurioStudy.xcodeproj -scheme NurioStudy -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.2' build
+xcodebuild -project ios/NurioStudy.xcodeproj -scheme NurioStudy -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.2' test
 ```
 
 Then archive the release build from the repo root:
 
 ```bash
-xcodebuild -project ios/Nurio.xcodeproj -scheme Nurio -configuration Release -destination 'generic/platform=iOS' -archivePath build/Nurio.xcarchive archive
+xcodebuild -project ios/NurioStudy.xcodeproj -scheme NurioStudy -configuration Release -destination 'generic/platform=iOS' -archivePath build/NurioStudy.xcarchive archive
 ```
 
 If the archive fails, the usual causes are:
@@ -79,7 +79,7 @@ There are two practical upload flows for this project.
 
 ### Xcode Organizer
 
-1. Open `ios/Nurio.xcodeproj` in Xcode.
+1. Open `ios/NurioStudy.xcodeproj` in Xcode.
 2. Select any iOS Device or `Any iOS Device (arm64)` as the run destination.
 3. Run `Product > Archive`.
 4. In Organizer, select the archive.
@@ -92,7 +92,7 @@ There are two practical upload flows for this project.
 
 1. Run the `xcodebuild ... archive` command above.
 2. Open Organizer in Xcode.
-3. Locate the generated `Nurio.xcarchive`.
+3. Locate the generated `NurioStudy.xcarchive`.
 4. Upload it to App Store Connect from Organizer.
 
 This repository does not include a fully automated upload script because the final signing identity, provisioning, and App Store account settings are environment-specific.
@@ -106,9 +106,9 @@ After the upload appears in App Store Connect:
 3. Add internal testers first.
 4. If external testers are needed, submit the beta build for Beta App Review.
 
-Use TestFlight to verify the production-signed build still matches the required customer-only scope:
+Use TestFlight to verify the production-signed build still matches the required study-only scope:
 
-- cold start opens `/`, then continues to `/login` when signed out or `/events` when signed in
+- start page is `https://study.nurio.kr`
 - OAuth callback returns to the signed-in web session
 - admin and tutor URLs are blocked from in-app navigation
 - checkout and payment flows still behave correctly
@@ -125,21 +125,11 @@ Once the tested build is ready:
 
 Recommended review notes for this app:
 
-- The app is a customer-only shell for the Nurio web experience.
-- The default landing page is `https://nurio.kr/`; Nurio then routes signed-out users to `/login` and signed-in users to `/events`.
+- The app is a study-only shell for the Nurio Study web experience.
+- The default landing page is `https://study.nurio.kr`.
 - OAuth sign-in uses an external authentication session and returns through `nurio://auth-callback`.
 - Admin and tutor routes are intentionally excluded from the app scope.
-- All purchases are for real-world services consumed outside the app — tickets and passes for in-person language-exchange meetups at physical venues, and wallet deposits spendable only on those meetups. Per Guideline 3.1.3(e) these use the web payment gateway rather than In-App Purchase; the app sells no digital content or features. See `docs/APP_STORE_PAYMENTS.md`.
-- The app now requires an in-app Terms of Service and Privacy Policy acceptance step before Hotwire Native users can access user-generated community content.
-- Users can report objectionable content from posts, comments, chats, reviews, event pages, participant messages, and public profiles.
-- Users can block abusive users from those same community surfaces, and blocking removes that user's content from the shell immediately.
-- Reviewer test flow:
-  1. Launch the app and confirm the Terms acceptance screen appears before `/events`.
-  2. Accept the Terms and Privacy checkboxes and confirm the shell returns to the original page.
-  3. Open a community item and use the Report action.
-  4. Open a public profile or authored item and use Block user.
-  5. Confirm the blocked user's content disappears from the app feed/chat surface immediately.
-- Physical-device screen recording for App Review should be attached in App Store Connect Notes and should show the exact five-step flow above.
+- Any purchases offered are for real-world study-group programs consumed outside the app; per Guideline 3.1.3(e) they use the web payment gateway rather than In-App Purchase. The app sells no digital content or features. See `docs/APP_STORE_PAYMENTS.md` in the repo root.
 
 ## 7. First-Submission Checklist
 
@@ -148,8 +138,8 @@ Use this short checklist before pressing submit:
 - Production bundle identifier is set in Xcode and App Store Connect
 - Version and build number are updated
 - Release archive succeeds locally
-- TestFlight build opens `https://nurio.kr/` and follows the expected signed-out `/login` or signed-in `/events` route
-- Customer checkout works
+- TestFlight build opens `https://study.nurio.kr`
+- Study checkout works when offered by the web app
 - Google, Kakao, and Naver OAuth round-trips succeed
 - Privacy Policy URL and support URL are set
 - App Review notes are added
