@@ -28,6 +28,7 @@
 		A00000000000000000000013 /* NativeAuthHandoffClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000044 /* NativeAuthHandoffClient.swift */; };
 		A00000000000000000000014 /* NativeKakaoSignInCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000045 /* NativeKakaoSignInCoordinator.swift */; };
 		A00000000000000000000015 /* SocialAuthCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000046 /* SocialAuthCoordinator.swift */; };
+		A00000000000000000000016 /* NativeGoogleSignInCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000047 /* NativeGoogleSignInCoordinator.swift */; };
 		C00000000000000000000005 /* KakaoSDKCommon in Frameworks */ = {isa = PBXBuildFile; productRef = C00000000000000000000002 /* KakaoSDKCommon */; };
 		C00000000000000000000006 /* KakaoSDKAuth in Frameworks */ = {isa = PBXBuildFile; productRef = C00000000000000000000003 /* KakaoSDKAuth */; };
 		C00000000000000000000007 /* KakaoSDKUser in Frameworks */ = {isa = PBXBuildFile; productRef = C00000000000000000000004 /* KakaoSDKUser */; };
@@ -36,6 +37,7 @@
 		D00000000000000000000003 /* RegisterDeviceTokenComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000033 /* RegisterDeviceTokenComponent.swift */; };
 		D00000000000000000000004 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = D000000000000000000000C1 /* FirebaseCore */; };
 		D00000000000000000000005 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = D000000000000000000000C2 /* FirebaseMessaging */; };
+		E00000000000000000000001 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = E00000000000000000000003 /* GoogleSignIn */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -72,6 +74,7 @@
 		A00000000000000000000044 /* NativeAuthHandoffClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeAuthHandoffClient.swift; sourceTree = "<group>"; };
 		A00000000000000000000045 /* NativeKakaoSignInCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeKakaoSignInCoordinator.swift; sourceTree = "<group>"; };
 		A00000000000000000000046 /* SocialAuthCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocialAuthCoordinator.swift; sourceTree = "<group>"; };
+		A00000000000000000000047 /* NativeGoogleSignInCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeGoogleSignInCoordinator.swift; sourceTree = "<group>"; };
 		D00000000000000000000031 /* NotificationDestination.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationDestination.swift; sourceTree = "<group>"; };
 		D00000000000000000000032 /* NativePushTokenStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativePushTokenStore.swift; sourceTree = "<group>"; };
 		D00000000000000000000033 /* RegisterDeviceTokenComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterDeviceTokenComponent.swift; sourceTree = "<group>"; };
@@ -84,6 +87,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E00000000000000000000001 /* GoogleSignIn in Frameworks */,
 				D00000000000000000000004 /* FirebaseCore in Frameworks */,
 				D00000000000000000000005 /* FirebaseMessaging in Frameworks */,
 				C00000000000000000000005 /* KakaoSDKCommon in Frameworks */,
@@ -158,6 +162,7 @@
 				A00000000000000000000044 /* NativeAuthHandoffClient.swift */,
 				A00000000000000000000045 /* NativeKakaoSignInCoordinator.swift */,
 				A00000000000000000000046 /* SocialAuthCoordinator.swift */,
+				A00000000000000000000047 /* NativeGoogleSignInCoordinator.swift */,
 				A00000000000000000000034 /* AppRouteCoordinator.swift */,
 				A00000000000000000000035 /* StudyScopePolicy.swift */,
 				A00000000000000000000036 /* NativeAuthCallback.swift */,
@@ -217,6 +222,7 @@
 				C00000000000000000000004 /* KakaoSDKUser */,
 				D000000000000000000000C1 /* FirebaseCore */,
 				D000000000000000000000C2 /* FirebaseMessaging */,
+				E00000000000000000000003 /* GoogleSignIn */,
 			);
 			productName = NurioStudy;
 			productReference = A00000000000000000000030 /* NurioStudy.app */;
@@ -272,6 +278,7 @@
 				A000000000000000000000C0 /* XCRemoteSwiftPackageReference "hotwire-native-ios" */,
 				C00000000000000000000001 /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */,
 				D000000000000000000000C0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				E00000000000000000000002 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 			);
 			productRefGroup = A00000000000000000000061 /* Products */;
 			projectDirPath = "";
@@ -347,6 +354,7 @@
 				A00000000000000000000013 /* NativeAuthHandoffClient.swift in Sources */,
 				A00000000000000000000014 /* NativeKakaoSignInCoordinator.swift in Sources */,
 				A00000000000000000000015 /* SocialAuthCoordinator.swift in Sources */,
+				A00000000000000000000016 /* NativeGoogleSignInCoordinator.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -652,6 +660,14 @@
 				minimumVersion = 12.13.0;
 			};
 		};
+		E00000000000000000000002 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 9.2.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -686,6 +702,11 @@
 			productName = FirebaseMessaging;
 		};
 /* End XCSwiftPackageProductDependency section */
+		E00000000000000000000003 /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E00000000000000000000002 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
+		};
 	};
 	rootObject = A00000000000000000000100 /* Project object */;
 }

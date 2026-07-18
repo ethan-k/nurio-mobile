@@ -7,12 +7,12 @@ This runbook covers social login for the customer-facing Hotwire Native iOS and 
 | Provider | Native behavior | Rails entry/callback |
 | --- | --- | --- |
 | Kakao | Kakao SDK opens KakaoTalk when available. Both apps use Kakao Account when KakaoTalk is unavailable; Android also falls back after a non-cancellation KakaoTalk failure, while iOS reports that provider failure so the user can retry. | The app exchanges the Kakao access token at `POST /auth/kakao/native`. |
-| Google | A system authentication session opens the Rails OmniAuth flow. | `/auth/google_oauth2` returns through `https://study.nurio.kr/auth/google_oauth2/callback`. |
+| Google | iOS uses GoogleSignIn SDK and exchanges the Google ID token with Rails. Android currently keeps the system authentication session. Browser Google login is unchanged. | iOS posts to `POST /auth/google/native`; Android/browser keep `/auth/google_oauth2` and its HTTPS callback. |
 | Naver | A system authentication session opens the Rails OmniAuth flow. | `/auth/naver` returns through `https://study.nurio.kr/auth/naver/callback`. |
 
-Do not enable or embed Kakao web **Simple Login** inside the native authentication sheet. The Study Kakao button is owned by the native bridge and must use the Kakao SDK. Google and Naver intentionally use the platform system authentication session: `ASWebAuthenticationSession` on iOS and Custom Tabs on Android.
+Do not enable or embed Kakao web **Simple Login** inside the native authentication sheet. The Study Kakao button is owned by the native bridge and must use the Kakao SDK. On iOS, the Study Google button is also owned by the native bridge and must use GoogleSignIn SDK; Naver still uses `ASWebAuthenticationSession`. Android Google and Naver currently use Custom Tabs.
 
-After any provider succeeds, Rails issues a short-lived, one-time token and state. Study receives `nuriostudy://auth-callback`, converts it to an HTTPS request to `/auth/native/token_auth`, and lets the Rails session cookie persist in the Hotwire web view. The main Nurio app keeps its separate `nurio://auth-callback` callback.
+After a native provider succeeds, Rails issues a short-lived, one-time token and state. Study creates an in-memory `nuriostudy://auth-callback`, converts it to an HTTPS request to `/auth/native/token_auth`, and lets the Rails session cookie persist in the Hotwire web view. The Google SDK's own reversed-client-ID callback is handled directly by the SDK; it is not the Rails handoff callback. The main Nurio app keeps its separate `nurio://auth-callback` handoff.
 
 ## Kakao console configuration
 
@@ -73,7 +73,14 @@ Keep the source secret in the user or CI secret store as `NURIO_STUDY_KAKAO_NATI
 
 ### iOS
 
-Create a protected `.xcconfig` outside the repository whose only secret setting is `KAKAO_NATIVE_APP_KEY = <Study Native app key>`. For local development, restrict the file to the current user; in CI, use the platform's protected secret-file mount. Set `NURIO_STUDY_XCCONFIG_PATH` to that file's path, not to the key value.
+Create a protected `.xcconfig` outside the repository with the provider settings below. For local development, restrict the file to the current user; in CI, use the platform's protected secret-file mount. Set `NURIO_STUDY_XCCONFIG_PATH` to that file's path, not to any individual value.
+
+```text
+KAKAO_NATIVE_APP_KEY = <Study Native app key>
+GOOGLE_IOS_CLIENT_ID = <iOS OAuth client ID>
+GOOGLE_SERVER_CLIENT_ID = <existing Web OAuth client ID>
+GOOGLE_REVERSED_CLIENT_ID = <reversed iOS OAuth client ID>
+```
 
 Pass only the protected file path to Xcode. Do not put `KAKAO_NATIVE_APP_KEY=<value>` on the `xcodebuild` command line because Xcode can print command-line build settings:
 
@@ -88,7 +95,7 @@ xcodebuild \
   build
 ```
 
-Use the same protected `.xcconfig` path in the signed archive job. Never place that file inside the repository or upload it as a build artifact. The committed Debug and Release defaults are intentionally empty; with no value, the app skips Kakao SDK initialization and native Kakao login is unavailable.
+Use the same protected `.xcconfig` path in the signed archive job. Never add the local config to the Copy Bundle Resources phase, place it in an artifact, or print its values in logs. The committed Debug and Release defaults are intentionally empty; with missing Google settings, native Google login fails closed as unconfigured instead of falling back to the fragile web callback.
 
 ### Android
 
@@ -105,14 +112,21 @@ If a local Gradle property is required, place it only in an ignored user-level G
 
 ## Google and Naver consoles
 
-Register these exact production callback URLs for the existing Rails provider credentials:
+The existing Google Web OAuth client remains the server audience and browser credential. Keep these production callbacks registered for browser, Android system-session, and Naver login:
 
 ```text
 Google: https://study.nurio.kr/auth/google_oauth2/callback
 Naver:  https://study.nurio.kr/auth/naver/callback
 ```
 
-Do not replace them with the custom app scheme. Google and Naver first return to Rails; Rails then creates the one-time native handoff to `nuriostudy://auth-callback`.
+For native iOS Google login, create an additional **iOS OAuth client** in the same Google Cloud project:
+
+- Bundle ID: `com.nurio.study.ios`
+- `GOOGLE_IOS_CLIENT_ID`: that iOS client's `*.apps.googleusercontent.com` client ID
+- `GOOGLE_REVERSED_CLIENT_ID`: the iOS client ID with its segments reversed, as provided by Google's iOS configuration
+- `GOOGLE_SERVER_CLIENT_ID`: the existing Web OAuth client ID, exactly matching Rails `GOOGLE_CLIENT_ID`
+
+Do not substitute the iOS client ID for Rails `GOOGLE_CLIENT_ID`. Rails verifies the native ID token against the Web OAuth client audience, while the iOS client ID and reversed client ID identify the installed app to GoogleSignIn SDK.
 
 On the Rails deployment side, keep the provider names in both `config/deploy.yml` and `config/deploy.quiz.yml`, and keep their environment mappings in `.kamal/secrets`:
 
@@ -128,7 +142,7 @@ These checks validate configuration shape while `-o` prints only the matched con
 
 ```bash
 # Mobile source configuration
-rg -n -o 'nuriostudy|KAKAO_NATIVE_APP_KEY|com\.nurio\.study\.(ios|android)' \
+rg -n -o 'nuriostudy|KAKAO_NATIVE_APP_KEY|GOOGLE_(IOS|SERVER|REVERSED)_CLIENT_ID|com\.nurio\.study\.(ios|android)' \
   study-nurio-mobile/ios \
   study-nurio-mobile/android/app \
   --glob '!**/build/**'
@@ -161,7 +175,8 @@ Use a non-production test account where possible. Exercise the signed iOS and An
 - [ ] KakaoTalk installed: the Kakao button opens KakaoTalk, returns to Study, and signs in.
 - [ ] KakaoTalk absent: Kakao Account fallback completes and signs in.
 - [ ] Kakao cancellation: cancellation returns safely, creates no session, and a later attempt still works.
-- [ ] Google completes through the system authentication session and returns to Study.
+- [ ] iOS Google opens the native GoogleSignIn SDK flow, returns to Study, and creates the WebView Rails session.
+- [ ] Android Google completes through the system authentication session and returns to Study.
 - [ ] Naver completes through the system authentication session and returns to Study.
 - [ ] Relaunch after each successful provider login preserves the Rails session.
 - [ ] Main Nurio and Nurio Study installed together: Study callbacks return only to Study and main-app callbacks still return only to main Nurio.
@@ -173,6 +188,8 @@ Use a non-production test account where possible. Exercise the signed iOS and An
 - **Kakao reports that email consent is required:** enable `account_email` in Kakao Developers and confirm the test account granted it. A user may need to disconnect/re-authorize after a consent configuration change.
 - **KakaoTalk does not return to iOS:** confirm bundle ID `com.nurio.study.ios`, the injected Native app key, and the generated `kakao<NativeAppKey>://oauth` registration without printing the key in logs.
 - **KakaoTalk does not return to Android:** confirm package `com.nurio.study.android`, the correct build-variant key hash, and that the signed build received the Native app key.
+- **iOS Google reports that sign-in is not configured:** confirm all three Google build settings are present in the protected `.xcconfig`, and that `GOOGLE_SERVER_CLIENT_ID` exactly matches Rails `GOOGLE_CLIENT_ID`.
+- **iOS Google returns an audience error from Rails:** the SDK was configured with the wrong server client ID. Use the existing Web OAuth client ID as `GOOGLE_SERVER_CLIENT_ID`; keep the iOS client ID only in `GOOGLE_IOS_CLIENT_ID` and the reversed URL scheme.
 - **Google or Naver reports a redirect mismatch:** compare the provider console value character-for-character with the HTTPS callback above, including `study.nurio.kr`, provider name, and `/callback`.
 - **The wrong Nurio app opens:** Study must use `nuriostudy://auth-callback`; `nurio://auth-callback` belongs to the main app. Recheck the signed app's callback registration with both apps installed.
 - **Login succeeds but relaunch is signed out:** confirm the callback reached `/auth/native/token_auth` inside the Study Hotwire session and that cookies were not cleared. Do not log the handoff token, state, provider access token, cookies, or full callback URL while diagnosing.

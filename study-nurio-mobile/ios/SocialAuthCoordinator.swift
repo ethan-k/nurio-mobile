@@ -18,6 +18,11 @@ protocol KakaoSignInStarting: AnyObject {
 }
 
 @MainActor
+protocol GoogleSignInStarting: AnyObject {
+    func start(completion: @escaping SocialAuthCompletion)
+}
+
+@MainActor
 protocol OAuthSessionStarting: AnyObject {
     func start(url: URL, completion: @escaping SocialAuthCompletion)
 }
@@ -26,17 +31,21 @@ protocol OAuthSessionStarting: AnyObject {
 final class SocialAuthCoordinator {
     static let shared = SocialAuthCoordinator(
         kakaoStarter: NativeKakaoSignInCoordinator.shared,
+        googleStarter: NativeGoogleSignInCoordinator.shared,
         oauthStarter: OAuthSessionCoordinator.shared
     )
 
     private let kakaoStarter: any KakaoSignInStarting
+    private let googleStarter: any GoogleSignInStarting
     private let oauthStarter: any OAuthSessionStarting
 
     init(
         kakaoStarter: any KakaoSignInStarting,
+        googleStarter: any GoogleSignInStarting,
         oauthStarter: any OAuthSessionStarting
     ) {
         self.kakaoStarter = kakaoStarter
+        self.googleStarter = googleStarter
         self.oauthStarter = oauthStarter
     }
 
@@ -44,7 +53,9 @@ final class SocialAuthCoordinator {
         switch route.provider {
         case .kakao:
             kakaoStarter.start(completion: completion)
-        case .google, .naver:
+        case .google:
+            googleStarter.start(completion: completion)
+        case .naver:
             oauthStarter.start(url: route.url, completion: completion)
         }
     }

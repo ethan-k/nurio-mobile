@@ -1,4 +1,8 @@
 // Shared native-auth build settings. Developer and CI values override these defaults.
 KAKAO_NATIVE_APP_KEY =
 
+GOOGLE_IOS_CLIENT_ID =
+GOOGLE_SERVER_CLIENT_ID =
+GOOGLE_REVERSED_CLIENT_ID =
+
 #include? "NativeAuth.local.xcconfig"

@@ -197,9 +197,11 @@ final class NurioStudyTests: XCTestCase {
     @MainActor
     func testSocialAuthCoordinatorRoutesKakaoOnlyToNativeStarter() {
         let kakaoStarter = KakaoSignInStarterSpy()
+        let googleStarter = GoogleSignInStarterSpy()
         let oauthStarter = OAuthSessionStarterSpy()
         let coordinator = SocialAuthCoordinator(
             kakaoStarter: kakaoStarter,
+            googleStarter: googleStarter,
             oauthStarter: oauthStarter
         )
         let route = SocialAuthRoute(
@@ -210,29 +212,50 @@ final class NurioStudyTests: XCTestCase {
         coordinator.start(route: route) { _ in }
 
         XCTAssertEqual(kakaoStarter.startInvocationCount, 1)
+        XCTAssertEqual(googleStarter.startInvocationCount, 0)
         XCTAssertEqual(oauthStarter.startedURLs, [])
     }
 
     @MainActor
-    func testSocialAuthCoordinatorRoutesGoogleAndNaverOnlyToOAuthInOrder() {
+    func testSocialAuthCoordinatorRoutesGoogleOnlyToNativeStarter() {
         let kakaoStarter = KakaoSignInStarterSpy()
+        let googleStarter = GoogleSignInStarterSpy()
         let oauthStarter = OAuthSessionStarterSpy()
         let coordinator = SocialAuthCoordinator(
             kakaoStarter: kakaoStarter,
+            googleStarter: googleStarter,
             oauthStarter: oauthStarter
         )
         let googleURL = URL(
             string: "https://study.nurio.kr/auth/google_oauth2?platform=native"
         )!
+
+        coordinator.start(route: SocialAuthRoute(provider: .google, url: googleURL)) { _ in }
+
+        XCTAssertEqual(kakaoStarter.startInvocationCount, 0)
+        XCTAssertEqual(googleStarter.startInvocationCount, 1)
+        XCTAssertEqual(oauthStarter.startedURLs, [])
+    }
+
+    @MainActor
+    func testSocialAuthCoordinatorKeepsNaverOnOAuth() {
+        let kakaoStarter = KakaoSignInStarterSpy()
+        let googleStarter = GoogleSignInStarterSpy()
+        let oauthStarter = OAuthSessionStarterSpy()
+        let coordinator = SocialAuthCoordinator(
+            kakaoStarter: kakaoStarter,
+            googleStarter: googleStarter,
+            oauthStarter: oauthStarter
+        )
         let naverURL = URL(
             string: "https://study.nurio.kr/auth/naver?return_to=%2Fevents"
         )!
 
-        coordinator.start(route: SocialAuthRoute(provider: .google, url: googleURL)) { _ in }
         coordinator.start(route: SocialAuthRoute(provider: .naver, url: naverURL)) { _ in }
 
         XCTAssertEqual(kakaoStarter.startInvocationCount, 0)
-        XCTAssertEqual(oauthStarter.startedURLs, [googleURL, naverURL])
+        XCTAssertEqual(googleStarter.startInvocationCount, 0)
+        XCTAssertEqual(oauthStarter.startedURLs, [naverURL])
     }
 
     func testNativeAuthHandoffCallbackURLUsesStudySchemeAndDecodedValues() throws {
@@ -248,6 +271,51 @@ final class NurioStudyTests: XCTestCase {
         XCTAssertEqual(callbackURL.host, "auth-callback")
         XCTAssertEqual(queryItems["token"], "signed token")
         XCTAssertEqual(queryItems["state"], "one/time")
+    }
+
+    func testNativeGoogleHandoffRequestPostsOnlyTheIDTokenToTheGoogleEndpoint() throws {
+        let request = NativeAuthHandoffClient.googleRequest(
+            baseURL: URL(string: "https://study.nurio.kr")!,
+            idToken: "google-id-token"
+        )
+        let body = try XCTUnwrap(request.httpBody)
+        let json = try XCTUnwrap(
+            JSONSerialization.jsonObject(with: body) as? [String: String]
+        )
+
+        XCTAssertEqual(request.url, URL(string: "https://study.nurio.kr/auth/google/native")!)
+        XCTAssertEqual(request.httpMethod, "POST")
+        XCTAssertEqual(request.value(forHTTPHeaderField: "Content-Type"), "application/json")
+        XCTAssertEqual(request.value(forHTTPHeaderField: "Accept"), "application/json")
+        XCTAssertEqual(json, ["id_token": "google-id-token"])
+    }
+
+    @MainActor
+    func testNativeGoogleSignInExchangesTheSDKIDTokenForAWebViewHandoff() {
+        let callbackURL = URL(string: "nuriostudy://auth-callback?token=signed&state=one-time")!
+        let idTokenProvider = GoogleIDTokenProviderSpy(idToken: "google-id-token")
+        let handoffClient = NativeAuthHandoffExchangerSpy(googleCallbackURL: callbackURL)
+        let configuration = GoogleSDKConfiguration(
+            clientID: "ios-client.apps.googleusercontent.com",
+            serverClientID: "web-client.apps.googleusercontent.com"
+        )
+        let coordinator = NativeGoogleSignInCoordinator(
+            idTokenProvider: idTokenProvider,
+            handoffClient: handoffClient,
+            configurationProvider: { configuration }
+        )
+        coordinator.presentationViewControllerProvider = { UIViewController() }
+        var receivedURL: URL?
+
+        coordinator.start { result in
+            if case let .success(url) = result {
+                receivedURL = url
+            }
+        }
+
+        XCTAssertEqual(idTokenProvider.receivedConfigurations, [configuration])
+        XCTAssertEqual(handoffClient.googleIDTokens, ["google-id-token"])
+        XCTAssertEqual(receivedURL, callbackURL)
     }
 
     func testNativeAuthHandoffRedirectDelegateRejectsRedirect() {
@@ -459,6 +527,57 @@ private final class KakaoSignInStarterSpy: KakaoSignInStarting {
 
     func start(completion: @escaping SocialAuthCompletion) {
         startInvocationCount += 1
+    }
+}
+
+@MainActor
+private final class GoogleSignInStarterSpy: GoogleSignInStarting {
+    private(set) var startInvocationCount = 0
+
+    func start(completion: @escaping SocialAuthCompletion) {
+        startInvocationCount += 1
+    }
+}
+
+@MainActor
+private final class GoogleIDTokenProviderSpy: GoogleIDTokenProviding {
+    private let idToken: String
+    private(set) var receivedConfigurations: [GoogleSDKConfiguration] = []
+
+    init(idToken: String) {
+        self.idToken = idToken
+    }
+
+    func signIn(
+        presenting viewController: UIViewController,
+        configuration: GoogleSDKConfiguration,
+        completion: @escaping GoogleIDTokenCompletion
+    ) {
+        receivedConfigurations.append(configuration)
+        completion(.success(idToken))
+    }
+}
+
+@MainActor
+private final class NativeAuthHandoffExchangerSpy: NativeAuthHandoffExchanging {
+    private let googleCallbackURL: URL
+    private(set) var googleIDTokens: [String] = []
+
+    init(googleCallbackURL: URL) {
+        self.googleCallbackURL = googleCallbackURL
+    }
+
+    func exchangeKakao(
+        accessToken: String,
+        completion: @escaping NativeAuthHandoffCompletion
+    ) {}
+
+    func exchangeGoogle(
+        idToken: String,
+        completion: @escaping NativeAuthHandoffCompletion
+    ) {
+        googleIDTokens.append(idToken)
+        completion(.success(googleCallbackURL))
     }
 }
 

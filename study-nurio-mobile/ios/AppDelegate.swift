@@ -1,6 +1,8 @@
 import FirebaseCore
 import FirebaseMessaging
+import GoogleSignIn
 import HotwireNative
+import KakaoSDKAuth
 import KakaoSDKCommon
 import UIKit
 import UserNotifications
@@ -31,6 +33,18 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         didFailToRegisterForRemoteNotificationsWithError error: Error
     ) {
         NSLog("Nurio Study remote notification registration failed")
+    }
+
+    func application(
+        _ application: UIApplication,
+        open url: URL,
+        options: [UIApplication.OpenURLOptionsKey: Any] = [:]
+    ) -> Bool {
+        if KakaoSDKConfiguration.isKakaoTalkLoginURL(url) {
+            return AuthController.handleOpenUrl(url: url)
+        }
+
+        return GIDSignIn.sharedInstance.handle(url)
     }
 
     func application(

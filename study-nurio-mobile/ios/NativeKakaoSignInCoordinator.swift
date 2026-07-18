@@ -45,7 +45,11 @@ final class NativeKakaoSignInCoordinator: KakaoSignInStarting {
     private let handoffClient: NativeAuthHandoffClient
     private var completion: SocialAuthCompletion?
 
-    private init(handoffClient: NativeAuthHandoffClient = NativeAuthHandoffClient()) {
+    private convenience init() {
+        self.init(handoffClient: NativeAuthHandoffClient())
+    }
+
+    private init(handoffClient: NativeAuthHandoffClient) {
         self.handoffClient = handoffClient
     }
 

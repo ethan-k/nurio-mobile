@@ -15,6 +15,20 @@ typealias NativeAuthHandoffCompletion = @MainActor @Sendable (
     Result<URL, NativeAuthHandoffError>
 ) -> Void
 
+protocol NativeAuthHandoffExchanging: AnyObject {
+    @MainActor
+    func exchangeKakao(
+        accessToken: String,
+        completion: @escaping NativeAuthHandoffCompletion
+    )
+
+    @MainActor
+    func exchangeGoogle(
+        idToken: String,
+        completion: @escaping NativeAuthHandoffCompletion
+    )
+}
+
 final class NativeAuthRedirectRejectingDelegate: NSObject, URLSessionTaskDelegate {
     func urlSession(
         _ session: URLSession,
@@ -27,7 +41,7 @@ final class NativeAuthRedirectRejectingDelegate: NSObject, URLSessionTaskDelegat
     }
 }
 
-final class NativeAuthHandoffClient {
+final class NativeAuthHandoffClient: NativeAuthHandoffExchanging {
     private let baseURL: URL
     private let session: URLSession
     private let redirectDelegate: NativeAuthRedirectRejectingDelegate
@@ -61,18 +75,54 @@ final class NativeAuthHandoffClient {
         accessToken: String,
         completion: @escaping NativeAuthHandoffCompletion
     ) {
-        let url = baseURL
-            .appendingPathComponent("auth")
-            .appendingPathComponent("kakao")
-            .appendingPathComponent("native")
+        exchange(
+            request: Self.jsonRequest(
+                baseURL: baseURL,
+                provider: "kakao",
+                body: ["access_token": accessToken]
+            ),
+            completion: completion
+        )
+    }
+
+    func exchangeGoogle(
+        idToken: String,
+        completion: @escaping NativeAuthHandoffCompletion
+    ) {
+        exchange(
+            request: Self.googleRequest(baseURL: baseURL, idToken: idToken),
+            completion: completion
+        )
+    }
+
+    static func googleRequest(baseURL: URL, idToken: String) -> URLRequest {
+        jsonRequest(
+            baseURL: baseURL,
+            provider: "google",
+            body: ["id_token": idToken]
+        )
+    }
+
+    private static func jsonRequest(
+        baseURL: URL,
+        provider: String,
+        body: [String: String]
+    ) -> URLRequest {
+        let url = ["auth", provider, "native"].reduce(baseURL) { partial, component in
+            partial.appendingPathComponent(component)
+        }
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
-        request.httpBody = try? JSONSerialization.data(
-            withJSONObject: ["access_token": accessToken]
-        )
+        request.httpBody = try? JSONSerialization.data(withJSONObject: body)
+        return request
+    }
 
+    private func exchange(
+        request: URLRequest,
+        completion: @escaping NativeAuthHandoffCompletion
+    ) {
         session.dataTask(with: request) { data, response, error in
             let result: Result<URL, NativeAuthHandoffError>
 

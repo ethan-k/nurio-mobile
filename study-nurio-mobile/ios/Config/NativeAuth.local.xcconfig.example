@@ -1,2 +1,5 @@
-// Copy this file to NativeAuth.local.xcconfig and paste the Nurio Study Native App Key.
+// Copy this file to NativeAuth.local.xcconfig and add the provider configuration.
 KAKAO_NATIVE_APP_KEY = your_nurio_study_kakao_native_app_key
+GOOGLE_IOS_CLIENT_ID = your_ios_client_id.apps.googleusercontent.com
+GOOGLE_SERVER_CLIENT_ID = your_web_client_id.apps.googleusercontent.com
+GOOGLE_REVERSED_CLIENT_ID = com.googleusercontent.apps.your_ios_client_id
