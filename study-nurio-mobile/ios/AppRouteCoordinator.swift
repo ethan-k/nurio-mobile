@@ -5,9 +5,19 @@ import HotwireNative
 final class AppRouteCoordinator {
     static let shared = AppRouteCoordinator()
 
-    weak var navigationHandler: NavigationHandler?
+    private weak var navigationHandler: NavigationHandler?
+    private var pendingNotificationURL: URL?
 
-    private init() {}
+    init() {}
+
+    func installNavigationHandler(_ navigationHandler: NavigationHandler) {
+        self.navigationHandler = navigationHandler
+
+        if let pendingNotificationURL {
+            self.pendingNotificationURL = nil
+            navigationHandler.route(pendingNotificationURL)
+        }
+    }
 
     func handleIncoming(_ url: URL) {
         if let tokenAuthURL = NativeAuthCallback.tokenAuthURL(from: url, baseURL: AppEnvironment.baseURL) {
@@ -16,5 +26,19 @@ final class AppRouteCoordinator {
         }
 
         navigationHandler?.route(url)
+    }
+
+    func handleNotification(path: String?, url: String?) {
+        let destination = NotificationDestination.resolve(
+            path: path,
+            url: url,
+            baseURL: AppEnvironment.baseURL
+        )
+
+        if let navigationHandler {
+            navigationHandler.route(destination)
+        } else {
+            pendingNotificationURL = destination
+        }
     }
 }

@@ -1,4 +1,5 @@
 import AuthenticationServices
+import HotwireNative
 import XCTest
 @testable import NurioStudy
 
@@ -305,6 +306,88 @@ final class NurioStudyTests: XCTestCase {
         XCTAssertNil(session)
         XCTAssertNil(delegate)
     }
+
+    func testNotificationDestinationAcceptsOnlySafeStudyLocations() {
+        let baseURL = URL(string: "https://study.nurio.kr")!
+
+        XCTAssertEqual(
+            NotificationDestination.resolve(path: "/events/42?tab=details", url: nil, baseURL: baseURL),
+            URL(string: "https://study.nurio.kr/events/42?tab=details")
+        )
+        XCTAssertEqual(
+            NotificationDestination.resolve(
+                path: nil,
+                url: "https://STUDY.NURIO.KR/messages",
+                baseURL: baseURL
+            ),
+            URL(string: "https://study.nurio.kr/messages")
+        )
+        XCTAssertEqual(
+            NotificationDestination.resolve(
+                path: "//evil.example/events",
+                url: "/messages",
+                baseURL: baseURL
+            ),
+            URL(string: "https://study.nurio.kr/messages")
+        )
+    }
+
+    func testNotificationDestinationFallsBackForUntrustedLocations() {
+        let baseURL = URL(string: "https://study.nurio.kr")!
+        let rejected = [
+            "//evil.example/events",
+            "http://study.nurio.kr/events",
+            "https://evil.example/events",
+            "https://attacker:secret@study.nurio.kr/events",
+            "https://study.nurio.kr:8443/events",
+            "/events/42#fragment",
+            "/%61dmin/events",
+            "/admin/events",
+            "/tutoring/sessions",
+            "/tutors/42",
+        ]
+
+        for destination in rejected {
+            XCTAssertEqual(
+                NotificationDestination.resolve(path: destination, url: nil, baseURL: baseURL),
+                baseURL,
+                "\(destination) must fall back to Study root"
+            )
+        }
+    }
+
+    @MainActor
+    func testNotificationRouteQueuesUntilHandlerIsInstalledAndThenRoutesImmediately() {
+        let coordinator = AppRouteCoordinator()
+        let handler = NavigationHandlerSpy()
+
+        coordinator.handleNotification(path: "/events/1", url: nil)
+        coordinator.handleNotification(path: "/events/2", url: nil)
+        XCTAssertTrue(handler.routedURLs.isEmpty)
+
+        coordinator.installNavigationHandler(handler)
+        XCTAssertEqual(handler.routedURLs, [URL(string: "https://study.nurio.kr/events/2")!])
+
+        coordinator.handleNotification(path: "/messages", url: nil)
+        XCTAssertEqual(
+            handler.routedURLs,
+            [
+                URL(string: "https://study.nurio.kr/events/2")!,
+                URL(string: "https://study.nurio.kr/messages")!,
+            ]
+        )
+    }
+}
+
+@MainActor
+private final class NavigationHandlerSpy: @preconcurrency NavigationHandler {
+    private(set) var routedURLs: [URL] = []
+
+    func route(_ url: URL) {
+        routedURLs.append(url)
+    }
+
+    func route(_ proposal: VisitProposal) {}
 }
 
 @MainActor

@@ -22,7 +22,7 @@ final class SceneController: UIResponder {
     }
 
     private func startIfNeeded(with url: URL? = nil) {
-        AppRouteCoordinator.shared.navigationHandler = navigator
+        AppRouteCoordinator.shared.installNavigationHandler(navigator)
 
         if let anchorWindow = window {
             OAuthSessionCoordinator.shared.presentationAnchorProvider = { [weak anchorWindow] in

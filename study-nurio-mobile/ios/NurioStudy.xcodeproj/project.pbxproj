@@ -31,6 +31,7 @@
 		C00000000000000000000005 /* KakaoSDKCommon in Frameworks */ = {isa = PBXBuildFile; productRef = C00000000000000000000002 /* KakaoSDKCommon */; };
 		C00000000000000000000006 /* KakaoSDKAuth in Frameworks */ = {isa = PBXBuildFile; productRef = C00000000000000000000003 /* KakaoSDKAuth */; };
 		C00000000000000000000007 /* KakaoSDKUser in Frameworks */ = {isa = PBXBuildFile; productRef = C00000000000000000000004 /* KakaoSDKUser */; };
+		D00000000000000000000001 /* NotificationDestination.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000031 /* NotificationDestination.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -67,6 +68,7 @@
 		A00000000000000000000044 /* NativeAuthHandoffClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeAuthHandoffClient.swift; sourceTree = "<group>"; };
 		A00000000000000000000045 /* NativeKakaoSignInCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeKakaoSignInCoordinator.swift; sourceTree = "<group>"; };
 		A00000000000000000000046 /* SocialAuthCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocialAuthCoordinator.swift; sourceTree = "<group>"; };
+		D00000000000000000000031 /* NotificationDestination.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationDestination.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -117,6 +119,7 @@
 				A00000000000000000000065 /* Bridge */,
 				A00000000000000000000031 /* AppDelegate.swift */,
 				A00000000000000000000032 /* SceneController.swift */,
+				D00000000000000000000031 /* NotificationDestination.swift */,
 				A0000000000000000000003E /* Info.plist */,
 				A00000000000000000000042 /* PrivacyInfo.xcprivacy */,
 				A0000000000000000000003C /* Assets.xcassets */,
@@ -282,6 +285,7 @@
 			files = (
 				A00000000000000000000001 /* AppDelegate.swift in Sources */,
 				A00000000000000000000002 /* SceneController.swift in Sources */,
+				D00000000000000000000001 /* NotificationDestination.swift in Sources */,
 				A00000000000000000000003 /* AppEnvironment.swift in Sources */,
 				A00000000000000000000004 /* AppRouteCoordinator.swift in Sources */,
 				A00000000000000000000005 /* StudyScopePolicy.swift in Sources */,
