@@ -9,7 +9,7 @@ staged_config="${study_root}/android/app/google-services.json"
 
 test -f "${source_config}"
 test "$(jq -r '.project_info.project_id' "${source_config}")" = "nurio-prod"
-jq -e '.client[].client_info.android_client_info.package_name == "com.nurio.study.android"' \
+jq -e 'any(.client[]; .client_info.android_client_info.package_name == "com.nurio.study.android")' \
   "${source_config}" >/dev/null
 
 (cd "${study_root}/android" && ./gradlew :app:prepareStudyFirebaseConfig)
