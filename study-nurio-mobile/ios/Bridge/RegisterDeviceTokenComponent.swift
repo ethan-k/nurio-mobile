@@ -43,12 +43,15 @@ final class RegisterDeviceTokenComponent: BridgeComponent {
 
     private func requestAuthorization() {
         UNUserNotificationCenter.current().requestAuthorization(options: [ .alert, .badge, .sound ]) {
-            granted, _ in
+            granted, error in
             Task { @MainActor in
-                guard granted else {
+                if let authorizationError = NativePushRegistrationError.authorizationError(
+                    granted: granted,
+                    requestFailed: error != nil
+                ) {
                     self.reply(
                         to: "connect",
-                        with: NativePushTokenStore.shared.tokenData(error: .notificationPermissionDenied)
+                        with: NativePushTokenStore.shared.tokenData(error: authorizationError)
                     )
                     return
                 }

@@ -40,6 +40,8 @@ class NotificationDestinationTest {
             "https://study.nurio.kr:8443/events",
             "/events/42#fragment",
             "/%61dmin/events",
+            "/events/../admin",
+            "/events/./details",
             "/admin/events",
             "/tutoring/sessions",
             "/tutors/42"

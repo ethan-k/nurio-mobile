@@ -33,9 +33,13 @@ enum NotificationDestination {
         guard isRelativePath || isSameOriginURL else { return nil }
 
         let encodedPath = components.percentEncodedPath
+        let hasDotSegment = encodedPath
+            .split(separator: "/", omittingEmptySubsequences: false)
+            .contains { segment in segment == "." || segment == ".." }
         guard encodedPath.hasPrefix("/"),
               !encodedPath.hasPrefix("//"),
               !encodedPath.contains("%"),
+              !hasDotSegment,
               !isBlocked(encodedPath) else {
             return nil
         }

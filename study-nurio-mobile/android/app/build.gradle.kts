@@ -1,5 +1,6 @@
 import java.util.Properties
 import java.io.FileInputStream
+import groovy.json.JsonSlurper
 
 plugins {
     alias(libs.plugins.android.application)
@@ -7,8 +8,27 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
-val firebaseConfigured = file("google-services.json").exists()
+val firebaseConfigFile = file("google-services.json")
+val firebaseConfigured = firebaseConfigFile.isFile
 if (firebaseConfigured) {
+    val config = runCatching {
+        JsonSlurper().parse(firebaseConfigFile) as? Map<*, *>
+    }.getOrNull()
+    val projectInfo = config?.get("project_info") as? Map<*, *>
+    val projectId = projectInfo?.get("project_id") as? String
+    val clients = config?.get("client") as? List<*>
+    val packageNames = clients.orEmpty().mapNotNull { client ->
+        val clientInfo = (client as? Map<*, *>)?.get("client_info") as? Map<*, *>
+        val androidClientInfo = clientInfo?.get("android_client_info") as? Map<*, *>
+        androidClientInfo?.get("package_name") as? String
+    }
+
+    if (projectId != "nurio-prod" || "com.nurio.study.android" !in packageNames) {
+        throw GradleException(
+            "Study Firebase configuration must target nurio-prod and com.nurio.study.android"
+        )
+    }
+
     apply(plugin = "com.google.gms.google-services")
 }
 

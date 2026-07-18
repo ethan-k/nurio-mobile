@@ -342,6 +342,8 @@ final class NurioStudyTests: XCTestCase {
             "https://study.nurio.kr:8443/events",
             "/events/42#fragment",
             "/%61dmin/events",
+            "/events/../admin",
+            "/events/./details",
             "/admin/events",
             "/tutoring/sessions",
             "/tutors/42",
@@ -422,6 +424,20 @@ final class NurioStudyTests: XCTestCase {
                 platform: "ios",
                 error: "notification_permission_denied"
             )
+        )
+    }
+
+    func testNativePushAuthorizationResultSeparatesFailureFromDenial() {
+        XCTAssertNil(
+            NativePushRegistrationError.authorizationError(granted: true, requestFailed: false)
+        )
+        XCTAssertEqual(
+            NativePushRegistrationError.authorizationError(granted: false, requestFailed: false),
+            .notificationPermissionDenied
+        )
+        XCTAssertEqual(
+            NativePushRegistrationError.authorizationError(granted: false, requestFailed: true),
+            .notificationPermissionFailed
         )
     }
 }

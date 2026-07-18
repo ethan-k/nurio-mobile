@@ -5,6 +5,14 @@ enum NativePushRegistrationError: String, CaseIterable {
     case notificationPermissionDenied = "notification_permission_denied"
     case notificationPermissionFailed = "notification_permission_failed"
     case tokenUnavailable = "token_unavailable"
+
+    static func authorizationError(granted: Bool, requestFailed: Bool) -> Self? {
+        if requestFailed {
+            return .notificationPermissionFailed
+        }
+
+        return granted ? nil : .notificationPermissionDenied
+    }
 }
 
 @MainActor

@@ -310,7 +310,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "mkdir -p \"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}\"\nif [ -f \"${SCRIPT_INPUT_FILE_0}\" ]; then\n  cp \"${SCRIPT_INPUT_FILE_0}\" \"${SCRIPT_OUTPUT_FILE_0}\"\nelse\n  rm -f \"${SCRIPT_OUTPUT_FILE_0}\"\nfi\n";
+			shellScript = "set -eu\nmkdir -p \"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}\"\nif [ -f \"${SCRIPT_INPUT_FILE_0}\" ]; then\n  configured_project_id=$(/usr/bin/plutil -extract PROJECT_ID raw -o - \"${SCRIPT_INPUT_FILE_0}\")\n  configured_bundle_id=$(/usr/bin/plutil -extract BUNDLE_ID raw -o - \"${SCRIPT_INPUT_FILE_0}\")\n  if [ \"${configured_project_id}\" != \"nurio-prod\" ] || [ \"${configured_bundle_id}\" != \"com.nurio.study.ios\" ]; then\n    echo \"Study Firebase configuration must target nurio-prod and com.nurio.study.ios\" >&2\n    exit 1\n  fi\n  cp \"${SCRIPT_INPUT_FILE_0}\" \"${SCRIPT_OUTPUT_FILE_0}\"\nelse\n  rm -f \"${SCRIPT_OUTPUT_FILE_0}\"\nfi\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 

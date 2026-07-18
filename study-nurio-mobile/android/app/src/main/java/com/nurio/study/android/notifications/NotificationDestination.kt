@@ -29,6 +29,7 @@ object NotificationDestination {
 
         val rawPath = uri.rawPath.orEmpty()
         if (!rawPath.startsWith("/") || rawPath.startsWith("//") || rawPath.contains('%')) return null
+        if (rawPath.split('/').any { segment -> segment == "." || segment == ".." }) return null
         if (isBlocked(rawPath)) return null
 
         val query = uri.rawQuery?.let { "?$it" }.orEmpty()
