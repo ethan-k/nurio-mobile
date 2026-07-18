@@ -377,6 +377,53 @@ final class NurioStudyTests: XCTestCase {
             ]
         )
     }
+
+    @MainActor
+    func testNativePushTokenStoreReturnsStablePayloads() {
+        let store = NativePushTokenStore()
+
+        XCTAssertEqual(
+            store.tokenData(),
+            NativePushTokenStore.TokenData(
+                token: nil,
+                platform: "ios",
+                error: "token_unavailable"
+            )
+        )
+
+        store.update(token: "  ")
+        XCTAssertEqual(store.tokenData().error, "token_unavailable")
+
+        store.update(token: " fcm-token ")
+        XCTAssertEqual(
+            store.tokenData(),
+            NativePushTokenStore.TokenData(
+                token: "fcm-token",
+                platform: "ios",
+                error: nil
+            )
+        )
+    }
+
+    @MainActor
+    func testNativePushTokenStoreExposesOnlyStableErrors() {
+        let store = NativePushTokenStore()
+
+        for error in NativePushRegistrationError.allCases {
+            XCTAssertEqual(store.tokenData(error: error).error, error.rawValue)
+            XCTAssertFalse(store.tokenData(error: error).error?.contains("Exception") == true)
+        }
+
+        store.update(token: "cached-token")
+        XCTAssertEqual(
+            store.tokenData(error: .notificationPermissionDenied),
+            NativePushTokenStore.TokenData(
+                token: nil,
+                platform: "ios",
+                error: "notification_permission_denied"
+            )
+        )
+    }
 }
 
 @MainActor

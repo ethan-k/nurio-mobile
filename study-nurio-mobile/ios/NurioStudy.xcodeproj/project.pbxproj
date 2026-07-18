@@ -32,6 +32,10 @@
 		C00000000000000000000006 /* KakaoSDKAuth in Frameworks */ = {isa = PBXBuildFile; productRef = C00000000000000000000003 /* KakaoSDKAuth */; };
 		C00000000000000000000007 /* KakaoSDKUser in Frameworks */ = {isa = PBXBuildFile; productRef = C00000000000000000000004 /* KakaoSDKUser */; };
 		D00000000000000000000001 /* NotificationDestination.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000031 /* NotificationDestination.swift */; };
+		D00000000000000000000002 /* NativePushTokenStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000032 /* NativePushTokenStore.swift */; };
+		D00000000000000000000003 /* RegisterDeviceTokenComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000033 /* RegisterDeviceTokenComponent.swift */; };
+		D00000000000000000000004 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = D000000000000000000000C1 /* FirebaseCore */; };
+		D00000000000000000000005 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = D000000000000000000000C2 /* FirebaseMessaging */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -69,6 +73,9 @@
 		A00000000000000000000045 /* NativeKakaoSignInCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeKakaoSignInCoordinator.swift; sourceTree = "<group>"; };
 		A00000000000000000000046 /* SocialAuthCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocialAuthCoordinator.swift; sourceTree = "<group>"; };
 		D00000000000000000000031 /* NotificationDestination.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationDestination.swift; sourceTree = "<group>"; };
+		D00000000000000000000032 /* NativePushTokenStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativePushTokenStore.swift; sourceTree = "<group>"; };
+		D00000000000000000000033 /* RegisterDeviceTokenComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterDeviceTokenComponent.swift; sourceTree = "<group>"; };
+		D00000000000000000000034 /* NurioStudy.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NurioStudy.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -76,6 +83,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D00000000000000000000004 /* FirebaseCore in Frameworks */,
+				D00000000000000000000005 /* FirebaseMessaging in Frameworks */,
 				C00000000000000000000005 /* KakaoSDKCommon in Frameworks */,
 				C00000000000000000000006 /* KakaoSDKAuth in Frameworks */,
 				C00000000000000000000007 /* KakaoSDKUser in Frameworks */,
@@ -120,6 +129,8 @@
 				A00000000000000000000031 /* AppDelegate.swift */,
 				A00000000000000000000032 /* SceneController.swift */,
 				D00000000000000000000031 /* NotificationDestination.swift */,
+				D00000000000000000000032 /* NativePushTokenStore.swift */,
+				D00000000000000000000034 /* NurioStudy.entitlements */,
 				A0000000000000000000003E /* Info.plist */,
 				A00000000000000000000042 /* PrivacyInfo.xcprivacy */,
 				A0000000000000000000003C /* Assets.xcassets */,
@@ -159,6 +170,7 @@
 			isa = PBXGroup;
 			children = (
 				A0000000000000000000003B /* SignInWithOAuthComponent.swift */,
+				D00000000000000000000033 /* RegisterDeviceTokenComponent.swift */,
 			);
 			path = Bridge;
 			sourceTree = "<group>";
@@ -181,6 +193,7 @@
 				A00000000000000000000080 /* Sources */,
 				A00000000000000000000050 /* Frameworks */,
 				A00000000000000000000081 /* Resources */,
+				D00000000000000000000084 /* Copy Study Firebase configuration */,
 			);
 			buildRules = (
 			);
@@ -192,6 +205,8 @@
 				C00000000000000000000002 /* KakaoSDKCommon */,
 				C00000000000000000000003 /* KakaoSDKAuth */,
 				C00000000000000000000004 /* KakaoSDKUser */,
+				D000000000000000000000C1 /* FirebaseCore */,
+				D000000000000000000000C2 /* FirebaseMessaging */,
 			);
 			productName = NurioStudy;
 			productReference = A00000000000000000000030 /* NurioStudy.app */;
@@ -246,6 +261,7 @@
 			packageReferences = (
 				A000000000000000000000C0 /* XCRemoteSwiftPackageReference "hotwire-native-ios" */,
 				C00000000000000000000001 /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */,
+				D000000000000000000000C0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			productRefGroup = A00000000000000000000061 /* Products */;
 			projectDirPath = "";
@@ -278,6 +294,26 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		D00000000000000000000084 /* Copy Study Firebase configuration */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/GoogleService-Info.plist",
+			);
+			name = "Copy Study Firebase configuration";
+			outputPaths = (
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/GoogleService-Info.plist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "mkdir -p \"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}\"\nif [ -f \"${SCRIPT_INPUT_FILE_0}\" ]; then\n  cp \"${SCRIPT_INPUT_FILE_0}\" \"${SCRIPT_OUTPUT_FILE_0}\"\nelse\n  rm -f \"${SCRIPT_OUTPUT_FILE_0}\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		A00000000000000000000080 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -286,6 +322,8 @@
 				A00000000000000000000001 /* AppDelegate.swift in Sources */,
 				A00000000000000000000002 /* SceneController.swift in Sources */,
 				D00000000000000000000001 /* NotificationDestination.swift in Sources */,
+				D00000000000000000000002 /* NativePushTokenStore.swift in Sources */,
+				D00000000000000000000003 /* RegisterDeviceTokenComponent.swift in Sources */,
 				A00000000000000000000003 /* AppEnvironment.swift in Sources */,
 				A00000000000000000000004 /* AppRouteCoordinator.swift in Sources */,
 				A00000000000000000000005 /* StudyScopePolicy.swift in Sources */,
@@ -456,9 +494,11 @@
 		A000000000000000000000B2 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				APS_ENVIRONMENT = development;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_ENTITLEMENTS = NurioStudy.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Info.plist;
@@ -484,9 +524,11 @@
 		A000000000000000000000B3 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				APS_ENVIRONMENT = production;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_ENTITLEMENTS = NurioStudy.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Info.plist;
@@ -592,6 +634,14 @@
 				version = 2.28.0;
 			};
 		};
+		D000000000000000000000C0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.13.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -614,6 +664,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = C00000000000000000000001 /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */;
 			productName = KakaoSDKUser;
+		};
+		D000000000000000000000C1 /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D000000000000000000000C0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		D000000000000000000000C2 /* FirebaseMessaging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D000000000000000000000C0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseMessaging;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
