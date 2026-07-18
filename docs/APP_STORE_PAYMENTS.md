@@ -14,6 +14,39 @@ tutors.nurio.kr) already does inside the Hotwire Native shell.
 Nothing needs to change in App Store Connect except review notes (see below).
 Do **not** create In-App Purchase products.
 
+## Decision record
+
+**2026-07-19 — Ticket passes will NOT be sold via IAP.** Proposal considered: offer
+Apple IAP as an additional payment method for ticket passes, marked up to cover Apple's
+commission. Rejected because:
+
+1. **Not allowed.** 3.1.3(e) is a two-way rule — apps selling services consumed outside
+   the app *"must use purchase methods other than in-app purchase."* This is why Meetup,
+   Eventbrite, Uber, and Airbnb all use card checkout in-app and none offer IAP.
+2. **Worse economics even if it slipped through review.** 15–30% commission vs ~3% PG
+   fee; Apple becomes merchant of record and refunds users directly, bypassing our
+   `Cancellation::*` policy engine (a user could get an Apple refund after attending);
+   fixed Apple price points are incompatible with first-timer pricing, coupons, and
+   wallet mixing; settlement lands ~30+ days later than Portone.
+3. The "+20–30% IAP markup" seen at YouTube/Spotify is a **digital-goods** pattern —
+   those apps are *required* to use IAP and pass the commission on. It does not
+   transfer to physical-world services, which may not use IAP at all.
+
+**Standing decisions for if/when a digital product line launches** (e.g., AI practice
+subscription, premium learning content — see red lines below):
+
+- IAP becomes mandatory for that product (3.1.1) and we implement it then.
+- **Pricing:** enroll in the App Store Small Business Program (15% commission,
+  requires < $1M USD/yr App Store proceeds) and price IAP at **web price +20%**.
+  Break-even vs gross web price is +18% at 15% commission (1 ÷ 0.85); +20% rounds
+  cleanly onto Apple price points with a small buffer. At the standard 30% tier the
+  full offset would be ≈ +43% (1 ÷ 0.70) — avoid that tier while eligible for SBP.
+- **Rollout order:** main customer app (`ios/`) first; replicate to study/tutors only
+  if they gain digital products.
+- **Anti-steering:** do not mention the cheaper web price inside the app. (Exceptions
+  exist for the US storefront and Korea's external-payment rules, but treat them as a
+  separate legal/product decision, not a default.)
+
 ## What each target sells
 
 | Target | Purchasable items (`Order#order_kind`) | Nature |
@@ -79,6 +112,28 @@ Adding any of the following to an app surface makes IAP mandatory for that item
 If a product decision crosses one of these lines, budget for the StoreKit work below
 **before** shipping the feature, and get the App Store Connect products approved with
 the build.
+
+## Testing IAP without real payments (for when a digital product exists)
+
+Every layer of Apple's purchase stack can be exercised with **zero real money**:
+
+1. **Xcode StoreKit Testing** — a local `.storekit` configuration file defines products
+   with no App Store Connect setup at all. Works in the Simulator; supports simulated
+   purchase success, cancellation, pending (Ask to Buy), interrupted purchases,
+   refunds, and subscription renewals. The `StoreKitTest` framework (`SKTestSession`)
+   drives all of this from XCTest, so purchase flows get *automated* coverage, not just
+   manual runs.
+2. **Sandbox environment** — Sandbox tester accounts (App Store Connect → Users and
+   Access → Sandbox Testers) purchase the real ASC product definitions on device with
+   no charge; subscription periods are time-compressed for renewal testing.
+3. **TestFlight** — IAPs in TestFlight builds are automatically free and run against
+   the sandbox billing environment.
+4. **Rails side** — the App Store Server API and App Store Server Notifications V2
+   both have dedicated sandbox environments; ASC lets you configure a separate sandbox
+   webhook URL, so the fulfillment pipeline is testable end-to-end before launch.
+
+The current Portone/Toss web checkout has its own test story already —
+see `PORTONE_PAYMENTS_E2E.md` in the Rails repo (`docs/payment/`).
 
 ## Implementation sketch (only if a red line is crossed)
 
