@@ -72,7 +72,7 @@ class MainActivity : HotwireActivity() {
     override fun navigatorConfigurations() = listOf(
         NavigatorConfiguration(
             name = "events",
-            startLocation = "${BuildConfig.BASE_URL}/events",
+            startLocation = AppEnvironment.coldStartLocation(BuildConfig.BASE_URL),
             navigatorHostId = R.id.nav_host_events
         )
     )

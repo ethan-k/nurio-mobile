@@ -99,4 +99,6 @@ dependencies {
 
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.messaging)
+
+    testImplementation("junit:junit:4.13.2")
 }
