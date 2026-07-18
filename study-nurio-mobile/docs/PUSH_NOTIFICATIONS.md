@@ -1,8 +1,8 @@
 # Nurio Study push notifications
 
-The Study iOS and Android apps use Firebase Cloud Messaging (FCM). Native clients request permission only after the signed-in Rails page connects the `register-device-token` bridge, then return the FCM token to the existing Rails device-token endpoint.
+The Study iOS and Android apps use Firebase Cloud Messaging (FCM). Native clients request permission only after the signed-in Rails page connects the `register-device-token` bridge, then return the FCM token to the existing production Rails device-token endpoint.
 
-Both apps build without Firebase configuration. In that state registration returns `firebase_not_configured`; live delivery is intentionally unavailable.
+Every Debug and Release build requires the Study production Firebase configuration and uses `https://study.nurio.kr`. Local devices therefore register real production tokens.
 
 ## Firebase app registration
 
@@ -13,19 +13,23 @@ Use the existing Firebase project `nurio-prod` and register two distinct apps:
 
 Do not copy a Firebase configuration from the main Nurio app. Its package or bundle ID is different, and each client rejects a mismatched configuration.
 
-Download the new Study-specific configuration files into these local paths:
+The Study-specific production configuration source files are:
 
-- `study-nurio-mobile/android/app/google-services.json`
-- `study-nurio-mobile/ios/GoogleService-Info.plist`
+- `/Users/ws/es/business/nurioworkspace/nurio_study/mobile_certs/nurio-study-google-services.json`
+- `/Users/ws/es/business/nurioworkspace/nurio_study/mobile_certs/nurio-study-GoogleService-Info.plist`
 
-These paths are ignored by Git. Confirm their identity without printing credential values:
+Android stages its source into the ignored `study-nurio-mobile/android/app/google-services.json` plugin location during the build. iOS copies its source directly into the built app. Neither source file is committed to this repository.
+
+Confirm their identity without printing credential values:
 
 ```sh
 jq -r '.project_info.project_id, (.client[].client_info.android_client_info.package_name)' \
-  study-nurio-mobile/android/app/google-services.json
+  /Users/ws/es/business/nurioworkspace/nurio_study/mobile_certs/nurio-study-google-services.json
 
-plutil -extract PROJECT_ID raw study-nurio-mobile/ios/GoogleService-Info.plist
-plutil -extract BUNDLE_ID raw study-nurio-mobile/ios/GoogleService-Info.plist
+plutil -extract PROJECT_ID raw \
+  /Users/ws/es/business/nurioworkspace/nurio_study/mobile_certs/nurio-study-GoogleService-Info.plist
+plutil -extract BUNDLE_ID raw \
+  /Users/ws/es/business/nurioworkspace/nurio_study/mobile_certs/nurio-study-GoogleService-Info.plist
 ```
 
 Expected values are `nurio-prod`, `com.nurio.study.android`, and `com.nurio.study.ios` respectively.
@@ -57,31 +61,13 @@ Do not log FCM registration tokens, APNs device tokens, Firebase credential cont
 
 ## Build verification
 
-Android:
+Run the production-shaped Debug and Release verification from the mobile repository root:
 
 ```sh
-cd study-nurio-mobile/android
-./gradlew testDebugUnitTest assembleDebug
+bash study-nurio-mobile/scripts/verify_production_push_builds.sh
 ```
 
-iOS simulator:
-
-```sh
-xcodebuild test -quiet \
-  -derivedDataPath /tmp/nurio-study-push-derived-data \
-  -project study-nurio-mobile/ios/NurioStudy.xcodeproj \
-  -scheme NurioStudy \
-  -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
-  CODE_SIGNING_ALLOWED=NO
-
-xcodebuild build -quiet \
-  -derivedDataPath /tmp/nurio-study-push-build \
-  -project study-nurio-mobile/ios/NurioStudy.xcodeproj \
-  -scheme NurioStudy \
-  -sdk iphonesimulator \
-  -destination 'generic/platform=iOS Simulator' \
-  CODE_SIGNING_ALLOWED=NO
-```
+This validates only project/application identifiers, then runs Android unit tests and Debug/Release assembly, iOS Debug/Release simulator packaging, and the full iOS XCTest suite. It never prints Firebase API keys or registration tokens.
 
 ## Physical-device acceptance checklist
 
@@ -97,8 +83,8 @@ Use signed-in Study accounts on one Android device and one iPhone:
 - Signing out and signing into another account reassigns the device token through the existing Rails endpoint.
 - Sending to a stale token causes the existing backend cleanup path to deactivate or remove it.
 
-Live push delivery is not verified until the Study-specific Firebase files, APNs setup, backend credentials, and physical devices are available.
+Build verification proves that production Firebase is packaged correctly. Live delivery is not verified until APNs setup, backend credentials, and physical devices are exercised.
 
 ## Rollback
 
-To disable registration without exposing another app's credentials, remove the two local Study Firebase configuration files and rebuild. Both clients remain usable and report `firebase_not_configured` to the bridge. For a store rollback, ship the last verified app version while keeping the backend token endpoint and existing token cleanup intact.
+The production Firebase files are mandatory, so removing either source intentionally stops new builds with a stable configuration error. For a store rollback, ship the last verified app version while keeping the backend token endpoint and existing token cleanup intact. To revert the always-production build policy, revert the dedicated Android and iOS build-wiring commits rather than substituting another app's Firebase files.
