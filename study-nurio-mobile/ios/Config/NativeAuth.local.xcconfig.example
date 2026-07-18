@@ -1,0 +1,2 @@
+// Copy this file to NativeAuth.local.xcconfig and paste the Nurio Study Native App Key.
+KAKAO_NATIVE_APP_KEY = your_nurio_study_kakao_native_app_key

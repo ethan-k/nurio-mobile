@@ -12,6 +12,7 @@ android/*.jks
 
 ios/build/
 ios/DerivedData/
+ios/Config/NativeAuth.local.xcconfig
 ios/*.xcworkspace/xcuserdata/
 ios/*.xcodeproj/xcuserdata/
 ios/*.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
