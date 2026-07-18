@@ -8,28 +8,47 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
-val firebaseConfigFile = file("google-services.json")
-val firebaseConfigured = firebaseConfigFile.isFile
-if (firebaseConfigured) {
-    val config = runCatching {
-        JsonSlurper().parse(firebaseConfigFile) as? Map<*, *>
-    }.getOrNull()
-    val projectInfo = config?.get("project_info") as? Map<*, *>
-    val projectId = projectInfo?.get("project_id") as? String
-    val clients = config?.get("client") as? List<*>
-    val packageNames = clients.orEmpty().mapNotNull { client ->
-        val clientInfo = (client as? Map<*, *>)?.get("client_info") as? Map<*, *>
-        val androidClientInfo = clientInfo?.get("android_client_info") as? Map<*, *>
-        androidClientInfo?.get("package_name") as? String
-    }
+val firebaseSourceFile = rootProject.file(
+    "../../../nurio_study/mobile_certs/nurio-study-google-services.json"
+)
+val firebaseStagedFile = file("google-services.json")
 
-    if (projectId != "nurio-prod" || "com.nurio.study.android" !in packageNames) {
-        throw GradleException(
-            "Study Firebase configuration must target nurio-prod and com.nurio.study.android"
-        )
-    }
+if (!firebaseSourceFile.isFile) {
+    throw GradleException("Study production Firebase configuration is missing")
+}
 
-    apply(plugin = "com.google.gms.google-services")
+val firebaseConfig = runCatching {
+    JsonSlurper().parse(firebaseSourceFile) as? Map<*, *>
+}.getOrNull()
+val firebaseProjectInfo = firebaseConfig?.get("project_info") as? Map<*, *>
+val firebaseProjectId = firebaseProjectInfo?.get("project_id") as? String
+val firebaseClients = firebaseConfig?.get("client") as? List<*>
+val firebasePackageNames = firebaseClients.orEmpty().mapNotNull { client ->
+    val clientInfo = (client as? Map<*, *>)?.get("client_info") as? Map<*, *>
+    val androidClientInfo = clientInfo?.get("android_client_info") as? Map<*, *>
+    androidClientInfo?.get("package_name") as? String
+}
+
+if (firebaseProjectId != "nurio-prod" || "com.nurio.study.android" !in firebasePackageNames) {
+    throw GradleException(
+        "Study Firebase configuration must target nurio-prod and com.nurio.study.android"
+    )
+}
+
+val prepareStudyFirebaseConfig = tasks.register("prepareStudyFirebaseConfig") {
+    inputs.file(firebaseSourceFile)
+    outputs.file(firebaseStagedFile)
+    doLast {
+        firebaseSourceFile.copyTo(firebaseStagedFile, overwrite = true)
+    }
+}
+
+apply(plugin = "com.google.gms.google-services")
+
+tasks.matching {
+    it.name.startsWith("process") && it.name.endsWith("GoogleServices")
+}.configureEach {
+    dependsOn(prepareStudyFirebaseConfig)
 }
 
 val keystorePropertiesFile = rootProject.file("keystore.properties")
@@ -73,7 +92,7 @@ android {
             "KAKAO_NATIVE_APP_KEY",
             kakaoNativeAppKey.asBuildConfigString()
         )
-        buildConfigField("Boolean", "FIREBASE_CONFIGURED", firebaseConfigured.toString())
+        buildConfigField("Boolean", "FIREBASE_CONFIGURED", "true")
         manifestPlaceholders["KAKAO_NATIVE_APP_KEY"] = kakaoManifestAppKey
         manifestPlaceholders["KAKAO_AUTH_ENABLED"] = kakaoAuthEnabled.toString()
     }
