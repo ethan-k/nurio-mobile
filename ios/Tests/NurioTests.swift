@@ -48,11 +48,14 @@ final class NurioTests: XCTestCase {
         )
     }
 
-    func testInvalidDeepLinkFallbackRemainsEvents() {
+    func testBlockedRecognizedWebURLFallsBackToEvents() {
         let baseURL = URL(string: "https://nurio.kr")!
 
         XCTAssertEqual(
-            AppEnvironment.eventsURL(for: baseURL).absoluteString,
+            AppRouteCoordinator.destinationURL(
+                for: URL(string: "https://nurio.kr/admin/events")!,
+                baseURL: baseURL
+            ).absoluteString,
             "https://nurio.kr/events"
         )
     }

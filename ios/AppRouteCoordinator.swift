@@ -16,32 +16,31 @@ final class AppRouteCoordinator {
     private init() {}
 
     func handleIncoming(_ url: URL) {
+        route(Self.destinationURL(for: url, baseURL: AppEnvironment.baseURL))
+    }
+
+    nonisolated static func destinationURL(for url: URL, baseURL: URL) -> URL {
         if NativeAppOpenURL.isAppOpenURL(url) {
-            route(NativeAppOpenURL.webURL(from: url, baseURL: AppEnvironment.baseURL) ?? AppEnvironment.eventsURL)
-            return
+            return NativeAppOpenURL.webURL(from: url, baseURL: baseURL) ?? AppEnvironment.eventsURL(for: baseURL)
         }
 
-        if let paymentCompleteURL = NativePaymentCallback.completeURL(from: url, baseURL: AppEnvironment.baseURL) {
-            route(paymentCompleteURL)
-            return
+        if let paymentCompleteURL = NativePaymentCallback.completeURL(from: url, baseURL: baseURL) {
+            return paymentCompleteURL
         }
 
-        if let tokenAuthURL = NativeAuthCallback.tokenAuthURL(from: url, baseURL: AppEnvironment.baseURL) {
-            route(tokenAuthURL)
-            return
+        if let tokenAuthURL = NativeAuthCallback.tokenAuthURL(from: url, baseURL: baseURL) {
+            return tokenAuthURL
         }
 
-        if let webURL = NativeAppOpenURL.webURL(from: url, baseURL: AppEnvironment.baseURL) {
-            route(webURL)
-            return
+        if let webURL = NativeAppOpenURL.webURL(from: url, baseURL: baseURL) {
+            return webURL
         }
 
-        if NativeAppOpenURL.isBlockedWebURL(url, baseURL: AppEnvironment.baseURL) {
-            route(AppEnvironment.eventsURL)
-            return
+        if NativeAppOpenURL.isBlockedWebURL(url, baseURL: baseURL) {
+            return AppEnvironment.eventsURL(for: baseURL)
         }
 
-        route(url)
+        return url
     }
 
     private func route(_ url: URL) {
