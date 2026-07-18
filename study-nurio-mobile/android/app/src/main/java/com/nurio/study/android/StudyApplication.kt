@@ -17,6 +17,7 @@ import com.nurio.study.android.fragments.WebFragment
 import com.nurio.study.android.fragments.WebModalFragment
 import com.nurio.study.android.routing.OAuthRouteDecisionHandler
 import com.kakao.sdk.common.KakaoSdk
+import com.nurio.study.android.notifications.NotificationChannels
 
 class StudyApplication : Application() {
     override fun onCreate() {
@@ -24,6 +25,7 @@ class StudyApplication : Application() {
         if (BuildConfig.KAKAO_NATIVE_APP_KEY.isNotBlank()) {
             KakaoSdk.init(this, BuildConfig.KAKAO_NATIVE_APP_KEY)
         }
+        NotificationChannels.ensureCreated(this)
         configureHotwire()
     }
 

@@ -5,4 +5,6 @@
     <string name="nav_home">홈</string>
     <string name="nav_events">모임</string>
     <string name="nav_profile">프로필</string>
+    <string name="push_notification_channel_name">Nurio Study notifications</string>
+    <string name="push_notification_channel_description">Study updates, reminders, and account activity</string>
 </resources>
