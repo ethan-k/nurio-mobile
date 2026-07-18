@@ -7,6 +7,11 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
+val firebaseConfigured = file("google-services.json").exists()
+if (firebaseConfigured) {
+    apply(plugin = "com.google.gms.google-services")
+}
+
 val keystorePropertiesFile = rootProject.file("keystore.properties")
 val keystoreProperties = Properties()
 if (keystorePropertiesFile.exists()) {
@@ -48,6 +53,7 @@ android {
             "KAKAO_NATIVE_APP_KEY",
             kakaoNativeAppKey.asBuildConfigString()
         )
+        buildConfigField("Boolean", "FIREBASE_CONFIGURED", firebaseConfigured.toString())
         manifestPlaceholders["KAKAO_NATIVE_APP_KEY"] = kakaoManifestAppKey
         manifestPlaceholders["KAKAO_AUTH_ENABLED"] = kakaoAuthEnabled.toString()
     }
@@ -117,6 +123,9 @@ dependencies {
 
     implementation(libs.hotwire.core)
     implementation(libs.hotwire.navigation.fragments)
+
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.messaging)
 
     testImplementation(libs.junit)
 }

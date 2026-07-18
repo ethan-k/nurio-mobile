@@ -12,6 +12,7 @@ import dev.hotwire.navigation.routing.AppNavigationRouteDecisionHandler
 import dev.hotwire.navigation.routing.BrowserTabRouteDecisionHandler
 import dev.hotwire.navigation.routing.SystemNavigationRouteDecisionHandler
 import com.nurio.study.android.bridge.SignInWithOAuthComponent
+import com.nurio.study.android.bridge.RegisterDeviceTokenComponent
 import com.nurio.study.android.fragments.WebFragment
 import com.nurio.study.android.fragments.WebModalFragment
 import com.nurio.study.android.routing.OAuthRouteDecisionHandler
@@ -40,7 +41,8 @@ class StudyApplication : Application() {
         )
 
         Hotwire.registerBridgeComponents(
-            BridgeComponentFactory("sign-in-with-oauth", ::SignInWithOAuthComponent)
+            BridgeComponentFactory("sign-in-with-oauth", ::SignInWithOAuthComponent),
+            BridgeComponentFactory("register-device-token", ::RegisterDeviceTokenComponent)
         )
 
         Hotwire.defaultFragmentDestination = WebFragment::class
