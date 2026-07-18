@@ -4,6 +4,7 @@ enum SocialAuthProvider: Equatable {
     case kakao
     case google
     case naver
+    case apple
 
     init?(path: String) {
         switch path {
@@ -13,6 +14,8 @@ enum SocialAuthProvider: Equatable {
             self = .google
         case "/auth/naver":
             self = .naver
+        case "/auth/apple":
+            self = .apple
         default:
             return nil
         }

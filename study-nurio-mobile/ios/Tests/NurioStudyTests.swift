@@ -64,6 +64,11 @@ final class NurioStudyTests: XCTestCase {
                 .naver,
                 URL(string: "https://STUDY.NURIO.KR/auth/naver?platform=native")!
             ),
+            (
+                "/auth/apple?platform=native",
+                .apple,
+                URL(string: "https://study.nurio.kr/auth/apple?platform=native")!
+            ),
         ]
 
         for testCase in cases {
@@ -198,10 +203,12 @@ final class NurioStudyTests: XCTestCase {
     func testSocialAuthCoordinatorRoutesKakaoOnlyToNativeStarter() {
         let kakaoStarter = KakaoSignInStarterSpy()
         let googleStarter = GoogleSignInStarterSpy()
+        let appleStarter = AppleSignInStarterSpy()
         let oauthStarter = OAuthSessionStarterSpy()
         let coordinator = SocialAuthCoordinator(
             kakaoStarter: kakaoStarter,
             googleStarter: googleStarter,
+            appleStarter: appleStarter,
             oauthStarter: oauthStarter
         )
         let route = SocialAuthRoute(
@@ -213,6 +220,7 @@ final class NurioStudyTests: XCTestCase {
 
         XCTAssertEqual(kakaoStarter.startInvocationCount, 1)
         XCTAssertEqual(googleStarter.startInvocationCount, 0)
+        XCTAssertEqual(appleStarter.startInvocationCount, 0)
         XCTAssertEqual(oauthStarter.startedURLs, [])
     }
 
@@ -220,10 +228,12 @@ final class NurioStudyTests: XCTestCase {
     func testSocialAuthCoordinatorRoutesGoogleOnlyToNativeStarter() {
         let kakaoStarter = KakaoSignInStarterSpy()
         let googleStarter = GoogleSignInStarterSpy()
+        let appleStarter = AppleSignInStarterSpy()
         let oauthStarter = OAuthSessionStarterSpy()
         let coordinator = SocialAuthCoordinator(
             kakaoStarter: kakaoStarter,
             googleStarter: googleStarter,
+            appleStarter: appleStarter,
             oauthStarter: oauthStarter
         )
         let googleURL = URL(
@@ -234,6 +244,31 @@ final class NurioStudyTests: XCTestCase {
 
         XCTAssertEqual(kakaoStarter.startInvocationCount, 0)
         XCTAssertEqual(googleStarter.startInvocationCount, 1)
+        XCTAssertEqual(appleStarter.startInvocationCount, 0)
+        XCTAssertEqual(oauthStarter.startedURLs, [])
+    }
+
+    @MainActor
+    func testSocialAuthCoordinatorRoutesAppleOnlyToNativeStarter() {
+        let kakaoStarter = KakaoSignInStarterSpy()
+        let googleStarter = GoogleSignInStarterSpy()
+        let appleStarter = AppleSignInStarterSpy()
+        let oauthStarter = OAuthSessionStarterSpy()
+        let coordinator = SocialAuthCoordinator(
+            kakaoStarter: kakaoStarter,
+            googleStarter: googleStarter,
+            appleStarter: appleStarter,
+            oauthStarter: oauthStarter
+        )
+        let appleURL = URL(
+            string: "https://study.nurio.kr/auth/apple?platform=native"
+        )!
+
+        coordinator.start(route: SocialAuthRoute(provider: .apple, url: appleURL)) { _ in }
+
+        XCTAssertEqual(kakaoStarter.startInvocationCount, 0)
+        XCTAssertEqual(googleStarter.startInvocationCount, 0)
+        XCTAssertEqual(appleStarter.startInvocationCount, 1)
         XCTAssertEqual(oauthStarter.startedURLs, [])
     }
 
@@ -241,10 +276,12 @@ final class NurioStudyTests: XCTestCase {
     func testSocialAuthCoordinatorKeepsNaverOnOAuth() {
         let kakaoStarter = KakaoSignInStarterSpy()
         let googleStarter = GoogleSignInStarterSpy()
+        let appleStarter = AppleSignInStarterSpy()
         let oauthStarter = OAuthSessionStarterSpy()
         let coordinator = SocialAuthCoordinator(
             kakaoStarter: kakaoStarter,
             googleStarter: googleStarter,
+            appleStarter: appleStarter,
             oauthStarter: oauthStarter
         )
         let naverURL = URL(
@@ -255,6 +292,7 @@ final class NurioStudyTests: XCTestCase {
 
         XCTAssertEqual(kakaoStarter.startInvocationCount, 0)
         XCTAssertEqual(googleStarter.startInvocationCount, 0)
+        XCTAssertEqual(appleStarter.startInvocationCount, 0)
         XCTAssertEqual(oauthStarter.startedURLs, [naverURL])
     }
 
@@ -288,6 +326,50 @@ final class NurioStudyTests: XCTestCase {
         XCTAssertEqual(request.value(forHTTPHeaderField: "Content-Type"), "application/json")
         XCTAssertEqual(request.value(forHTTPHeaderField: "Accept"), "application/json")
         XCTAssertEqual(json, ["id_token": "google-id-token"])
+    }
+
+    func testNativeAppleHandoffRequestPostsIdTokenAndProfileToTheAppleEndpoint() throws {
+        let request = NativeAuthHandoffClient.appleRequest(
+            baseURL: URL(string: "https://study.nurio.kr")!,
+            idToken: "apple-id-token",
+            givenName: "Jane",
+            familyName: "Doe",
+            email: "jane@example.com"
+        )
+        let body = try XCTUnwrap(request.httpBody)
+        let json = try XCTUnwrap(
+            JSONSerialization.jsonObject(with: body) as? [String: String]
+        )
+
+        XCTAssertEqual(request.url, URL(string: "https://study.nurio.kr/auth/apple/native")!)
+        XCTAssertEqual(request.httpMethod, "POST")
+        XCTAssertEqual(request.value(forHTTPHeaderField: "Content-Type"), "application/json")
+        XCTAssertEqual(request.value(forHTTPHeaderField: "Accept"), "application/json")
+        XCTAssertEqual(
+            json,
+            [
+                "id_token": "apple-id-token",
+                "given_name": "Jane",
+                "family_name": "Doe",
+                "email": "jane@example.com",
+            ]
+        )
+    }
+
+    func testNativeAppleHandoffRequestOmitsAbsentProfileFields() throws {
+        let request = NativeAuthHandoffClient.appleRequest(
+            baseURL: URL(string: "https://study.nurio.kr")!,
+            idToken: "apple-id-token",
+            givenName: nil,
+            familyName: "",
+            email: nil
+        )
+        let body = try XCTUnwrap(request.httpBody)
+        let json = try XCTUnwrap(
+            JSONSerialization.jsonObject(with: body) as? [String: String]
+        )
+
+        XCTAssertEqual(json, ["id_token": "apple-id-token"])
     }
 
     @MainActor
@@ -532,6 +614,15 @@ private final class KakaoSignInStarterSpy: KakaoSignInStarting {
 
 @MainActor
 private final class GoogleSignInStarterSpy: GoogleSignInStarting {
+    private(set) var startInvocationCount = 0
+
+    func start(completion: @escaping SocialAuthCompletion) {
+        startInvocationCount += 1
+    }
+}
+
+@MainActor
+private final class AppleSignInStarterSpy: AppleSignInStarting {
     private(set) var startInvocationCount = 0
 
     func start(completion: @escaping SocialAuthCompletion) {

@@ -29,6 +29,7 @@
 		A00000000000000000000014 /* NativeKakaoSignInCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000045 /* NativeKakaoSignInCoordinator.swift */; };
 		A00000000000000000000015 /* SocialAuthCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000046 /* SocialAuthCoordinator.swift */; };
 		A00000000000000000000016 /* NativeGoogleSignInCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000047 /* NativeGoogleSignInCoordinator.swift */; };
+		A00000000000000000000017 /* NativeAppleSignInCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000048 /* NativeAppleSignInCoordinator.swift */; };
 		C00000000000000000000005 /* KakaoSDKCommon in Frameworks */ = {isa = PBXBuildFile; productRef = C00000000000000000000002 /* KakaoSDKCommon */; };
 		C00000000000000000000006 /* KakaoSDKAuth in Frameworks */ = {isa = PBXBuildFile; productRef = C00000000000000000000003 /* KakaoSDKAuth */; };
 		C00000000000000000000007 /* KakaoSDKUser in Frameworks */ = {isa = PBXBuildFile; productRef = C00000000000000000000004 /* KakaoSDKUser */; };
@@ -75,6 +76,7 @@
 		A00000000000000000000045 /* NativeKakaoSignInCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeKakaoSignInCoordinator.swift; sourceTree = "<group>"; };
 		A00000000000000000000046 /* SocialAuthCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocialAuthCoordinator.swift; sourceTree = "<group>"; };
 		A00000000000000000000047 /* NativeGoogleSignInCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeGoogleSignInCoordinator.swift; sourceTree = "<group>"; };
+		A00000000000000000000048 /* NativeAppleSignInCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeAppleSignInCoordinator.swift; sourceTree = "<group>"; };
 		D00000000000000000000031 /* NotificationDestination.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationDestination.swift; sourceTree = "<group>"; };
 		D00000000000000000000032 /* NativePushTokenStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativePushTokenStore.swift; sourceTree = "<group>"; };
 		D00000000000000000000033 /* RegisterDeviceTokenComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterDeviceTokenComponent.swift; sourceTree = "<group>"; };
@@ -163,6 +165,7 @@
 				A00000000000000000000045 /* NativeKakaoSignInCoordinator.swift */,
 				A00000000000000000000046 /* SocialAuthCoordinator.swift */,
 				A00000000000000000000047 /* NativeGoogleSignInCoordinator.swift */,
+				A00000000000000000000048 /* NativeAppleSignInCoordinator.swift */,
 				A00000000000000000000034 /* AppRouteCoordinator.swift */,
 				A00000000000000000000035 /* StudyScopePolicy.swift */,
 				A00000000000000000000036 /* NativeAuthCallback.swift */,
@@ -355,6 +358,7 @@
 				A00000000000000000000014 /* NativeKakaoSignInCoordinator.swift in Sources */,
 				A00000000000000000000015 /* SocialAuthCoordinator.swift in Sources */,
 				A00000000000000000000016 /* NativeGoogleSignInCoordinator.swift in Sources */,
+				A00000000000000000000017 /* NativeAppleSignInCoordinator.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

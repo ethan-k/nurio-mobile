@@ -95,6 +95,40 @@ final class NativeAuthHandoffClient: NativeAuthHandoffExchanging {
         )
     }
 
+    func exchangeApple(
+        idToken: String,
+        givenName: String?,
+        familyName: String?,
+        email: String?,
+        completion: @escaping NativeAuthHandoffCompletion
+    ) {
+        exchange(
+            request: Self.appleRequest(
+                baseURL: baseURL,
+                idToken: idToken,
+                givenName: givenName,
+                familyName: familyName,
+                email: email
+            ),
+            completion: completion
+        )
+    }
+
+    static func appleRequest(
+        baseURL: URL,
+        idToken: String,
+        givenName: String?,
+        familyName: String?,
+        email: String?
+    ) -> URLRequest {
+        var body = ["id_token": idToken]
+        if let givenName, !givenName.isEmpty { body["given_name"] = givenName }
+        if let familyName, !familyName.isEmpty { body["family_name"] = familyName }
+        if let email, !email.isEmpty { body["email"] = email }
+
+        return jsonRequest(baseURL: baseURL, provider: "apple", body: body)
+    }
+
     static func googleRequest(baseURL: URL, idToken: String) -> URLRequest {
         jsonRequest(
             baseURL: baseURL,
