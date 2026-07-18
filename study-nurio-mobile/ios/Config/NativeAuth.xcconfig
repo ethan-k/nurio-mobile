@@ -1,8 +1,8 @@
 // Shared native-auth build settings. Developer and CI values override these defaults.
-KAKAO_NATIVE_APP_KEY =
+KAKAO_NATIVE_APP_KEY = 3402531768e05c4eec22ad1aa3ac44d2
 
-GOOGLE_IOS_CLIENT_ID =
-GOOGLE_SERVER_CLIENT_ID =
-GOOGLE_REVERSED_CLIENT_ID =
+GOOGLE_IOS_CLIENT_ID = 817285205045-eosm1j0e46du0rp45dbconac3qf1tinv.apps.googleusercontent.com
+GOOGLE_SERVER_CLIENT_ID = 250445291884-aq9smu51oejgdg0fg9h5tvnlvfpnvj86.apps.googleusercontent.com
+GOOGLE_REVERSED_CLIENT_ID = com.googleusercontent.apps.817285205045-eosm1j0e46du0rp45dbconac3qf1tinv
 
 #include? "NativeAuth.local.xcconfig"
