@@ -7,7 +7,8 @@ import java.util.Locale
 enum class SocialAuthProvider(val path: String) {
     KAKAO("/auth/kakao"),
     GOOGLE("/auth/google_oauth2"),
-    NAVER("/auth/naver");
+    NAVER("/auth/naver"),
+    APPLE("/auth/apple");
 
     companion object {
         fun fromPath(path: String): SocialAuthProvider? = entries.firstOrNull { provider ->

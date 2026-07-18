@@ -57,6 +57,24 @@ class SocialAuthCoordinatorTest {
     }
 
     @Test
+    fun `Apple opens only system auth with the exact URL`() {
+        var kakaoStartCount = 0
+        val openedUrls = mutableListOf<String>()
+        val coordinator = SocialAuthCoordinator(
+            startKakao = { kakaoStartCount += 1 },
+            openSystemAuth = openedUrls::add
+        )
+        val appleUrl = "https://study.nurio.kr/auth/apple?platform=native"
+
+        coordinator.start(
+            SocialAuthRoute(SocialAuthProvider.APPLE, appleUrl)
+        )
+
+        assertEquals(0, kakaoStartCount)
+        assertEquals(listOf(appleUrl), openedUrls)
+    }
+
+    @Test
     fun `valid callback builds Study token auth URL with encoded values`() {
         val tokenAuthUrl = NativeAuthCallback.toTokenAuthUrl(
             callbackUrl =

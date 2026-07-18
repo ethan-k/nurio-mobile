@@ -12,6 +12,7 @@ class SocialAuthRouteTest {
         assertEquals("/auth/kakao", SocialAuthProvider.KAKAO.path)
         assertEquals("/auth/google_oauth2", SocialAuthProvider.GOOGLE.path)
         assertEquals("/auth/naver", SocialAuthProvider.NAVER.path)
+        assertEquals("/auth/apple", SocialAuthProvider.APPLE.path)
     }
 
     @Test
@@ -31,6 +32,11 @@ class SocialAuthRouteTest {
                 "https://STUDY.NURIO.KR/auth/naver?return_to=%2Fevents",
                 SocialAuthProvider.NAVER,
                 "https://STUDY.NURIO.KR/auth/naver?return_to=%2Fevents"
+            ),
+            Triple(
+                "/auth/apple?platform=native",
+                SocialAuthProvider.APPLE,
+                "https://study.nurio.kr/auth/apple?platform=native"
             )
         )
 

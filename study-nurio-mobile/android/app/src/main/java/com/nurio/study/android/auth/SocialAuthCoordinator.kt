@@ -14,7 +14,8 @@ class SocialAuthCoordinator(
         when (route.provider) {
             SocialAuthProvider.KAKAO -> startKakao()
             SocialAuthProvider.GOOGLE,
-            SocialAuthProvider.NAVER -> openSystemAuth(route.url)
+            SocialAuthProvider.NAVER,
+            SocialAuthProvider.APPLE -> openSystemAuth(route.url)
         }
     }
 }
