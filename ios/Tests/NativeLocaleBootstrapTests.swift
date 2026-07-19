@@ -48,18 +48,27 @@ final class NativeLocaleBootstrapTests: XCTestCase {
         XCTAssertEqual(NativeLocaleResolver.resolve([ "", "fr-FR", "zh-Hant" ]), "en")
     }
 
-    func testExistingExactLocaleCookieSuppressesWriteRegardlessOfValue() {
-        for value in [ "en", "ko", "", "fr" ] {
-            let store = FakeLocaleCookieStore(
-                cookiesResult: .success([ makeCookie(value: value) ])
-            )
-            var completionCount = 0
-            let bootstrap = makeBootstrap(store: store)
+    func testExistingExactUserOrDeviceLocaleCookieSuppressesWriteRegardlessOfValue() {
+        for name in [ "locale", "device_locale" ] {
+            for value in [ "en", "ko", "", "fr" ] {
+                let store = FakeLocaleCookieStore(
+                    cookiesResult: .success([ makeCookie(name: name, value: value) ])
+                )
+                var completionCount = 0
+                let bootstrap = makeBootstrap(store: store)
 
-            bootstrap.bootstrap { completionCount += 1 }
+                bootstrap.bootstrap { completionCount += 1 }
 
-            XCTAssertEqual(completionCount, 1, "value=\(value)")
-            XCTAssertTrue(store.writtenCookies.isEmpty, "value=\(value)")
+                XCTAssertEqual(completionCount, 1, "name=\(name), value=\(value)")
+                XCTAssertTrue(
+                    store.requestedCookies.isEmpty,
+                    "name=\(name), value=\(value)"
+                )
+                XCTAssertTrue(
+                    store.writtenCookies.isEmpty,
+                    "name=\(name), value=\(value)"
+                )
+            }
         }
     }
 
@@ -76,7 +85,7 @@ final class NativeLocaleBootstrapTests: XCTestCase {
     }
 
     func testCaseVariantAndNearNameLocaleCookiesDoNotSuppressWrite() {
-        for name in [ "Locale", "locale_hint" ] {
+        for name in [ "Locale", "locale_hint", "Device_Locale", "device_locale_hint" ] {
             let store = FakeLocaleCookieStore(
                 cookiesResult: .success([ makeCookie(name: name, value: "ko") ])
             )
@@ -189,11 +198,12 @@ final class NativeLocaleBootstrapTests: XCTestCase {
         let cookie = store.writtenCookies.first
         XCTAssertEqual(completionCount, 1)
         XCTAssertEqual(store.writtenCookies.count, 1)
-        XCTAssertEqual(cookie?.name, "locale")
+        XCTAssertEqual(cookie?.name, "device_locale")
         XCTAssertEqual(cookie?.value, "ko")
         XCTAssertEqual(cookie?.domain, "nurio.kr")
         XCTAssertEqual(cookie?.path, "/")
         XCTAssertEqual(cookie?.expiresDate, now.addingTimeInterval(365 * 24 * 60 * 60))
+        XCTAssertEqual(cookie?.properties?[.sameSitePolicy] as? String, "lax")
         XCTAssertEqual(cookie?.isSecure, true)
         XCTAssertEqual(scheduledDelay, 1.5)
     }
@@ -334,7 +344,7 @@ final class NativeLocaleBootstrapTests: XCTestCase {
         XCTAssertTrue(store.writtenCookies.isEmpty)
     }
 
-    func testTimeoutWaitsForInFlightCookieWriteBeforeCompleting() {
+    func testTimeoutCompletesWhileDeviceLocaleWriteIsInFlightAndLateCallbackDoesNotCompleteAgain() {
         let store = FakeLocaleCookieStore(
             cookiesResult: .success([]),
             setCookieResult: nil
@@ -348,19 +358,21 @@ final class NativeLocaleBootstrapTests: XCTestCase {
         ).bootstrap { completionCount += 1 }
 
         XCTAssertEqual(store.requestedCookies.count, 1)
+        XCTAssertEqual(store.requestedCookies.first?.name, "device_locale")
         XCTAssertTrue(store.writtenCookies.isEmpty)
         XCTAssertEqual(completionCount, 0)
 
         timeout?()
 
         XCTAssertTrue(store.writtenCookies.isEmpty)
-        XCTAssertEqual(completionCount, 0)
+        XCTAssertEqual(completionCount, 1)
 
         store.completeSetCookie(.success(()))
         timeout?()
         store.completeSetCookie(.success(()))
 
         XCTAssertEqual(store.writtenCookies.count, 1)
+        XCTAssertEqual(store.writtenCookies.first?.name, "device_locale")
         XCTAssertEqual(completionCount, 1)
     }
 

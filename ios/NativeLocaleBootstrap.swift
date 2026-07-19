@@ -125,6 +125,7 @@ final class NativeLocaleBootstrap: LocaleBootstrapping {
 
     private static let timeout: TimeInterval = 1.5
     private static let cookieLifetime: TimeInterval = 365 * 24 * 60 * 60
+    private static let localeCookieNames = Set([ "locale", "device_locale" ])
 
     private let baseURL: URL
     private let languageIdentifiers: () -> [String]
@@ -152,7 +153,7 @@ final class NativeLocaleBootstrap: LocaleBootstrapping {
         let state = LocaleBootstrapState()
 
         timeoutScheduler(Self.timeout) {
-            guard state.finishReadingOnTimeout() else {
+            guard state.finishOnTimeout() else {
                 return
             }
 
@@ -182,7 +183,7 @@ final class NativeLocaleBootstrap: LocaleBootstrapping {
                     return
                 }
 
-                guard let cookie = localeCookie() else {
+                guard let cookie = deviceLocaleCookie() else {
                     guard state.finishReading() else {
                         return
                     }
@@ -212,7 +213,7 @@ final class NativeLocaleBootstrap: LocaleBootstrapping {
         }
     }
 
-    private func localeCookie() -> HTTPCookie? {
+    private func deviceLocaleCookie() -> HTTPCookie? {
         guard
             let scheme = baseURL.scheme?.lowercased(),
             [ "http", "https" ].contains(scheme),
@@ -223,11 +224,12 @@ final class NativeLocaleBootstrap: LocaleBootstrapping {
         }
 
         var properties: [HTTPCookiePropertyKey: Any] = [
-            .name: "locale",
+            .name: "device_locale",
             .value: NativeLocaleResolver.resolve(languageIdentifiers()),
             .domain: host,
             .path: requestPath,
-            .expires: clock().addingTimeInterval(Self.cookieLifetime)
+            .expires: clock().addingTimeInterval(Self.cookieLifetime),
+            .sameSitePolicy: "Lax"
         ]
         if scheme == "https" {
             properties[.secure] = "TRUE"
@@ -237,7 +239,7 @@ final class NativeLocaleBootstrap: LocaleBootstrapping {
     }
 
     private func cookieAppliesToBaseURL(_ cookie: HTTPCookie) -> Bool {
-        cookie.name == "locale" &&
+        Self.localeCookieNames.contains(cookie.name) &&
             domain(cookie.domain, appliesTo: baseURL.host) &&
             path(cookie.path, appliesTo: requestPath) &&
             (!cookie.isSecure || baseURL.scheme?.lowercased() == "https")
@@ -305,8 +307,16 @@ private final class LocaleBootstrapState {
         transition(from: .writing, to: .finished)
     }
 
-    func finishReadingOnTimeout() -> Bool {
-        transition(from: .reading, to: .finished)
+    func finishOnTimeout() -> Bool {
+        lock.lock()
+        defer { lock.unlock() }
+
+        guard phase != .finished else {
+            return false
+        }
+
+        phase = .finished
+        return true
     }
 
     private func transition(from expected: Phase, to next: Phase) -> Bool {

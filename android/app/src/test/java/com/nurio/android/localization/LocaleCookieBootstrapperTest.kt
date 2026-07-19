@@ -8,7 +8,7 @@ import org.junit.Test
 
 class LocaleCookieBootstrapperTest {
     @Test
-    fun `missing locale cookie writes and flushes exactly once`() {
+    fun `missing authoritative locale cookies writes device locale hint and flushes exactly once`() {
         val store = FakeLocaleCookieStore(cookies = "session=active")
 
         LocaleCookieBootstrapper(store, logFailure = {}).bootstrap(
@@ -17,7 +17,7 @@ class LocaleCookieBootstrapperTest {
         )
 
         assertEquals(
-            listOf("https://nurio.kr" to "locale=ko; Path=/; Max-Age=31536000; SameSite=Lax; Secure"),
+            listOf("https://nurio.kr" to "device_locale=ko; Path=/; Max-Age=31536000; SameSite=Lax; Secure"),
             store.writes,
         )
         assertEquals(1, store.flushCount)
@@ -39,8 +39,38 @@ class LocaleCookieBootstrapperTest {
     }
 
     @Test
-    fun `similarly named or differently cased cookies do not count as locale`() {
-        listOf("preferred_locale=ko", "locale_hint=en", "Locale=ko", "locale").forEach { cookies ->
+    fun `any existing exact device locale cookie is authoritative`() {
+        listOf(
+            "device_locale=en",
+            "device_locale=ko",
+            "device_locale=",
+            "device_locale=unsupported",
+        ).forEach { cookies ->
+            val store = FakeLocaleCookieStore(cookies = cookies)
+
+            LocaleCookieBootstrapper(store, logFailure = {}).bootstrap(
+                baseUrl = "https://nurio.kr",
+                languageIdentifiers = listOf("ko-KR"),
+            )
+
+            assertTrue("Expected no write for $cookies", store.writes.isEmpty())
+            assertEquals("Expected no flush for $cookies", 0, store.flushCount)
+        }
+    }
+
+    @Test
+    fun `similarly named differently cased or malformed cookies are not authoritative`() {
+        listOf(
+            "preferred_locale=ko",
+            "locale_hint=en",
+            "Locale=ko",
+            "locale",
+            "preferred_device_locale=ko",
+            "device_locale_hint=en",
+            "Device_locale=ko",
+            "DEVICE_LOCALE=en",
+            "device_locale",
+        ).forEach { cookies ->
             val store = FakeLocaleCookieStore(cookies = cookies)
 
             LocaleCookieBootstrapper(store, logFailure = {}).bootstrap(
@@ -54,18 +84,21 @@ class LocaleCookieBootstrapperTest {
     }
 
     @Test
-    fun `finds exact lowercase locale among multiple whitespace separated entries`() {
-        val store = FakeLocaleCookieStore(
-            cookies = " session=active ;   locale = unsupported ; token=present ",
-        )
+    fun `finds either exact lowercase authoritative cookie among whitespace separated entries`() {
+        listOf(
+            " session=active ;   locale = unsupported ; token=present ",
+            " session=active ;   device_locale = unsupported ; token=present ",
+        ).forEach { cookies ->
+            val store = FakeLocaleCookieStore(cookies = cookies)
 
-        LocaleCookieBootstrapper(store, logFailure = {}).bootstrap(
-            baseUrl = "https://nurio.kr",
-            languageIdentifiers = listOf("ko-KR"),
-        )
+            LocaleCookieBootstrapper(store, logFailure = {}).bootstrap(
+                baseUrl = "https://nurio.kr",
+                languageIdentifiers = listOf("ko-KR"),
+            )
 
-        assertTrue(store.writes.isEmpty())
-        assertEquals(0, store.flushCount)
+            assertTrue("Expected no write for $cookies", store.writes.isEmpty())
+            assertEquals("Expected no flush for $cookies", 0, store.flushCount)
+        }
     }
 
     @Test
@@ -79,7 +112,7 @@ class LocaleCookieBootstrapperTest {
 
         val cookie = store.writes.single().second
         assertEquals(
-            "locale=en; Path=/; Max-Age=31536000; SameSite=Lax; Secure",
+            "device_locale=en; Path=/; Max-Age=31536000; SameSite=Lax; Secure",
             cookie,
         )
         assertFalse(cookie.contains("Domain="))
@@ -96,7 +129,7 @@ class LocaleCookieBootstrapperTest {
 
         val cookie = store.writes.single().second
         assertEquals(
-            "locale=ko; Path=/; Max-Age=31536000; SameSite=Lax",
+            "device_locale=ko; Path=/; Max-Age=31536000; SameSite=Lax",
             cookie,
         )
         assertFalse(cookie.contains("Domain="))
