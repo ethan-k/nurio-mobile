@@ -1,5 +1,6 @@
 package com.nurio.android.localization
 
+import java.util.IllformedLocaleException
 import java.util.Locale
 
 internal object UiLocaleResolver {
@@ -19,12 +20,15 @@ internal object UiLocaleResolver {
         val normalizedIdentifier = identifier.trim().replace('_', '-')
         if (normalizedIdentifier.isEmpty()) return null
 
-        return runCatching {
+        return try {
             Locale.Builder()
                 .setLanguageTag(normalizedIdentifier)
                 .build()
                 .language
                 .lowercase(Locale.ROOT)
-        }.getOrNull()?.takeIf { it.isNotEmpty() }
+                .takeIf { it.isNotEmpty() }
+        } catch (_: IllformedLocaleException) {
+            null
+        }
     }
 }
