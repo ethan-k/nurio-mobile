@@ -31,13 +31,51 @@ enum NativeLocaleResolver {
     }
 
     private static func isWellFormed(_ subtags: [Substring]) -> Bool {
-        guard !subtags.isEmpty else {
+        guard
+            !subtags.isEmpty,
+            subtags.allSatisfy({ subtag in
+                (1...8).contains(subtag.count) &&
+                    subtag.utf8.allSatisfy(isASCIILetterOrDigit)
+            })
+        else {
             return false
         }
 
-        return subtags.allSatisfy { subtag in
-            (1...8).contains(subtag.count) && subtag.utf8.allSatisfy(isASCIILetterOrDigit)
+        var index = 1
+        while index < subtags.count && subtags[index].count > 1 {
+            index += 1
         }
+
+        return validateSingletonSequences(in: subtags, startingAt: index)
+    }
+
+    private static func validateSingletonSequences(
+        in subtags: [Substring],
+        startingAt startIndex: Int
+    ) -> Bool {
+        var index = startIndex
+
+        while index < subtags.count {
+            let singleton = subtags[index]
+            guard singleton.count == 1 else {
+                return false
+            }
+
+            index += 1
+            if singleton.lowercased() == "x" {
+                return index < subtags.count
+            }
+
+            let payloadStart = index
+            while index < subtags.count && subtags[index].count >= 2 {
+                index += 1
+            }
+            guard index > payloadStart else {
+                return false
+            }
+        }
+
+        return true
     }
 
     private static func isASCIILetterOrDigit(_ character: UInt8) -> Bool {
@@ -215,6 +253,7 @@ final class NativeLocaleBootstrap: LocaleBootstrapping {
         }
 
         let normalizedHost = host.lowercased()
+        let includesSubdomains = cookieDomain.hasPrefix(".")
         let normalizedDomain = cookieDomain
             .drop(while: { $0 == "." })
             .lowercased()
@@ -223,8 +262,11 @@ final class NativeLocaleBootstrap: LocaleBootstrapping {
             return false
         }
 
-        return normalizedHost == normalizedDomain ||
-            normalizedHost.hasSuffix(".\(normalizedDomain)")
+        if normalizedHost == normalizedDomain {
+            return true
+        }
+
+        return includesSubdomains && normalizedHost.hasSuffix(".\(normalizedDomain)")
     }
 
     private func path(_ cookiePath: String, appliesTo requestPath: String) -> Bool {

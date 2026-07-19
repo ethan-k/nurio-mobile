@@ -31,6 +31,18 @@ final class NativeLocaleBootstrapTests: XCTestCase {
         )
     }
 
+    func testResolverSkipsDanglingExtensionAndPrivateUseSingletons() {
+        XCTAssertEqual(NativeLocaleResolver.resolve([ "ko-u", "en-US" ]), "en")
+        XCTAssertEqual(NativeLocaleResolver.resolve([ "ko-x", "en-US" ]), "en")
+    }
+
+    func testResolverAcceptsStructuredTagsAndCompleteSingletonPayloads() {
+        XCTAssertEqual(NativeLocaleResolver.resolve([ "ko-Kore-KR" ]), "ko")
+        XCTAssertEqual(NativeLocaleResolver.resolve([ "en-Latn-US-posix" ]), "en")
+        XCTAssertEqual(NativeLocaleResolver.resolve([ "ko-u-ca-buddhist" ]), "ko")
+        XCTAssertEqual(NativeLocaleResolver.resolve([ "ko-x-nurio" ]), "ko")
+    }
+
     func testResolverDefaultsToEnglishForEmptyOrUnsupportedPreferences() {
         XCTAssertEqual(NativeLocaleResolver.resolve([]), "en")
         XCTAssertEqual(NativeLocaleResolver.resolve([ "", "fr-FR", "zh-Hant" ]), "en")
@@ -96,6 +108,19 @@ final class NativeLocaleBootstrapTests: XCTestCase {
         ).bootstrap {}
 
         XCTAssertTrue(store.writtenCookies.isEmpty)
+    }
+
+    func testHostOnlyLocaleCookieDoesNotApplyToSubdomain() {
+        let store = FakeLocaleCookieStore(
+            cookiesResult: .success([ makeCookie(domain: "nurio.kr") ])
+        )
+
+        makeBootstrap(
+            baseURL: URL(string: "https://www.nurio.kr/events")!,
+            store: store
+        ).bootstrap {}
+
+        XCTAssertEqual(store.writtenCookies.count, 1)
     }
 
     func testExistingCookiePathAppliesAtSegmentBoundary() {
