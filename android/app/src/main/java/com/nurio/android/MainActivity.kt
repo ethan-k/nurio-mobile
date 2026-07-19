@@ -8,27 +8,47 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.os.ConfigurationCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.airbnb.lottie.LottieAnimationView
+import com.nurio.android.localization.LocaleCookieBootstrapper
+import com.nurio.android.startup.MainActivityStartupCoordinator
 import dev.hotwire.navigation.activities.HotwireActivity
 import dev.hotwire.navigation.navigator.Navigator
 import dev.hotwire.navigation.navigator.NavigatorConfiguration
 
 class MainActivity : HotwireActivity() {
-    private var navigatorReady = false
-    private var pendingRouteUrl: String? = null
+    private lateinit var startupCoordinator: MainActivityStartupCoordinator
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        showSplashAnimation(coldStart = savedInstanceState == null)
-        delegate.setCurrentNavigator(navigatorConfigurations().first())
+
+        startupCoordinator = MainActivityStartupCoordinator(
+            bootstrapLocale = {
+                LocaleCookieBootstrapper().bootstrap(
+                    baseUrl = BuildConfig.BASE_URL,
+                    languageIdentifiers = configuredLanguageTags(),
+                )
+            },
+            initializeNavigator = {
+                setContentView(R.layout.activity_main)
+                showSplashAnimation(coldStart = savedInstanceState == null)
+                delegate.setCurrentNavigator(navigatorConfigurations().first())
+            },
+            route = { url -> delegate.currentNavigator?.route(url) },
+            logFailure = { exception ->
+                Log.w(TAG, "Unable to initialize the UI locale", exception)
+            },
+        )
+        startupCoordinator.start()
+
         requestNotificationPermissionIfNeeded()
         handleLaunchIntent(intent)
     }
@@ -61,12 +81,7 @@ class MainActivity : HotwireActivity() {
 
     override fun onNavigatorReady(navigator: Navigator) {
         super.onNavigatorReady(navigator)
-        navigatorReady = true
-
-        pendingRouteUrl?.let { url ->
-            navigator.route(url)
-            pendingRouteUrl = null
-        }
+        startupCoordinator.onNavigatorReady()
     }
 
     override fun navigatorConfigurations() = listOf(
@@ -141,13 +156,13 @@ class MainActivity : HotwireActivity() {
     }
 
     private fun routeWhenReady(url: String) {
-        val navigator = delegate.currentNavigator
+        startupCoordinator.routeWhenReady(url)
+    }
 
-        if (navigatorReady && navigator != null) {
-            navigator.route(url)
-            pendingRouteUrl = null
-        } else {
-            pendingRouteUrl = url
+    private fun configuredLanguageTags(): List<String> {
+        val locales = ConfigurationCompat.getLocales(resources.configuration)
+        return (0 until locales.size()).mapNotNull { index ->
+            locales[index]?.toLanguageTag()
         }
     }
 
@@ -246,6 +261,7 @@ class MainActivity : HotwireActivity() {
     }
 
     companion object {
+        private const val TAG = "MainActivity"
         private const val NOTIFICATION_PERMISSION_REQUEST_CODE = 1001
         private val blockedPathPrefixes = listOf(
             "/admin",
