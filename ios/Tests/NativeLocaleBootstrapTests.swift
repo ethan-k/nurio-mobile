@@ -4,12 +4,16 @@ import XCTest
 
 final class NativeLocaleBootstrapTests: XCTestCase {
     func testResolverNormalizesUppercaseRegionalAndUnderscoreIdentifiers() {
+        XCTAssertEqual(NativeLocaleResolver.resolve([ "en" ]), "en")
+        XCTAssertEqual(NativeLocaleResolver.resolve([ "ko" ]), "ko")
         XCTAssertEqual(NativeLocaleResolver.resolve([ "EN-US" ]), "en")
         XCTAssertEqual(NativeLocaleResolver.resolve([ "ko_KR" ]), "ko")
         XCTAssertEqual(NativeLocaleResolver.resolve([ "  Ko-kR  " ]), "ko")
     }
 
     func testResolverUsesFirstSupportedPreference() {
+        XCTAssertEqual(NativeLocaleResolver.resolve([ "ja-JP", "ko-KR" ]), "ko")
+        XCTAssertEqual(NativeLocaleResolver.resolve([ "en-US", "ko-KR" ]), "en")
         XCTAssertEqual(
             NativeLocaleResolver.resolve([ "fr-FR", "ko-KR", "en-US" ]),
             "ko"
