@@ -37,6 +37,8 @@
 		D00000000000000000000001 /* NativeKakaoSignInCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000031 /* NativeKakaoSignInCoordinator.swift */; };
 		E00000000000000000000003 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = E00000000000000000000002 /* Lottie */; };
 		E00000000000000000000005 /* nurio_splash.json in Resources */ = {isa = PBXBuildFile; fileRef = E00000000000000000000004 /* nurio_splash.json */; };
+		F10000000000000000000001 /* NativeLocaleBootstrapTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000031 /* NativeLocaleBootstrapTests.swift */; };
+		F10000000000000000000002 /* NativeLocaleBootstrap.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000032 /* NativeLocaleBootstrap.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -77,6 +79,8 @@
 		B000000000000000000000033 /* CheckoutColdBootWebViewPolicyDecisionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckoutColdBootWebViewPolicyDecisionHandler.swift; sourceTree = "<group>"; };
 		D00000000000000000000031 /* NativeKakaoSignInCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeKakaoSignInCoordinator.swift; sourceTree = "<group>"; };
 		E00000000000000000000004 /* nurio_splash.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = nurio_splash.json; sourceTree = "<group>"; };
+		F10000000000000000000031 /* NativeLocaleBootstrapTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeLocaleBootstrapTests.swift; sourceTree = "<group>"; };
+		F10000000000000000000032 /* NativeLocaleBootstrap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeLocaleBootstrap.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -145,6 +149,7 @@
 		A00000000000000000000063 /* Support */ = {
 			isa = PBXGroup;
 			children = (
+				F10000000000000000000032 /* NativeLocaleBootstrap.swift */,
 				A00000000000000000000033 /* AppEnvironment.swift */,
 				A00000000000000000000034 /* AppRouteCoordinator.swift */,
 				A00000000000000000000035 /* CustomerScopePolicy.swift */,
@@ -181,6 +186,7 @@
 			isa = PBXGroup;
 			children = (
 				A00000000000000000000041 /* NurioTests.swift */,
+				F10000000000000000000031 /* NativeLocaleBootstrapTests.swift */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -328,6 +334,7 @@
 				B000000000000000000000001 /* NativePushTokenStore.swift in Sources */,
 				B000000000000000000000002 /* RegisterDeviceTokenComponent.swift in Sources */,
 				B000000000000000000000003 /* CheckoutColdBootWebViewPolicyDecisionHandler.swift in Sources */,
+				F10000000000000000000002 /* NativeLocaleBootstrap.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -336,6 +343,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A00000000000000000000010 /* NurioTests.swift in Sources */,
+				F10000000000000000000001 /* NativeLocaleBootstrapTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
