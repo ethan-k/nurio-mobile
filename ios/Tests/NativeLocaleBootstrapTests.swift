@@ -242,7 +242,8 @@ final class NativeLocaleBootstrapTests: XCTestCase {
         makeBootstrap(store: store).bootstrap { completionCount += 1 }
 
         XCTAssertEqual(completionCount, 1)
-        XCTAssertEqual(store.writtenCookies.count, 1)
+        XCTAssertEqual(store.requestedCookies.count, 1)
+        XCTAssertTrue(store.writtenCookies.isEmpty)
     }
 
     func testCookieConstructionFailureCompletesOnceWithoutWrite() {
@@ -333,7 +334,7 @@ final class NativeLocaleBootstrapTests: XCTestCase {
         XCTAssertTrue(store.writtenCookies.isEmpty)
     }
 
-    func testLateWriteCallbackAfterTimeoutDoesNotCompleteAgain() {
+    func testTimeoutWaitsForInFlightCookieWriteBeforeCompleting() {
         let store = FakeLocaleCookieStore(
             cookiesResult: .success([]),
             setCookieResult: nil
@@ -346,6 +347,16 @@ final class NativeLocaleBootstrapTests: XCTestCase {
             timeoutScheduler: { _, action in timeout = action }
         ).bootstrap { completionCount += 1 }
 
+        XCTAssertEqual(store.requestedCookies.count, 1)
+        XCTAssertTrue(store.writtenCookies.isEmpty)
+        XCTAssertEqual(completionCount, 0)
+
+        timeout?()
+
+        XCTAssertTrue(store.writtenCookies.isEmpty)
+        XCTAssertEqual(completionCount, 0)
+
+        store.completeSetCookie(.success(()))
         timeout?()
         store.completeSetCookie(.success(()))
 
@@ -394,7 +405,9 @@ private final class FakeLocaleCookieStore: LocaleCookieStoring {
     private let setCookieResult: Result<Void, Error>?
     private var cookiesCompletion: ((Result<[HTTPCookie], Error>) -> Void)?
     private var setCookieCompletion: ((Result<Void, Error>) -> Void)?
+    private var pendingCookie: HTTPCookie?
 
+    private(set) var requestedCookies: [HTTPCookie] = []
     private(set) var writtenCookies: [HTTPCookie] = []
 
     init(
@@ -416,10 +429,11 @@ private final class FakeLocaleCookieStore: LocaleCookieStoring {
         _ cookie: HTTPCookie,
         completion: @escaping (Result<Void, Error>) -> Void
     ) {
-        writtenCookies.append(cookie)
+        requestedCookies.append(cookie)
+        pendingCookie = cookie
         setCookieCompletion = completion
         if let setCookieResult {
-            completion(setCookieResult)
+            completeSetCookie(setCookieResult)
         }
     }
 
@@ -428,6 +442,10 @@ private final class FakeLocaleCookieStore: LocaleCookieStoring {
     }
 
     func completeSetCookie(_ result: Result<Void, Error>) {
+        if case .success = result, let pendingCookie {
+            writtenCookies.append(pendingCookie)
+        }
+        pendingCookie = nil
         setCookieCompletion?(result)
     }
 }

@@ -152,7 +152,7 @@ final class NativeLocaleBootstrap: LocaleBootstrapping {
         let state = LocaleBootstrapState()
 
         timeoutScheduler(Self.timeout) {
-            guard state.finishOnTimeout() else {
+            guard state.finishReadingOnTimeout() else {
                 return
             }
 
@@ -305,16 +305,8 @@ private final class LocaleBootstrapState {
         transition(from: .writing, to: .finished)
     }
 
-    func finishOnTimeout() -> Bool {
-        lock.lock()
-        defer { lock.unlock() }
-
-        guard phase != .finished else {
-            return false
-        }
-
-        phase = .finished
-        return true
+    func finishReadingOnTimeout() -> Bool {
+        transition(from: .reading, to: .finished)
     }
 
     private func transition(from expected: Phase, to next: Phase) -> Bool {
