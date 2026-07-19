@@ -14,38 +14,33 @@ final class SceneController: UIResponder {
         delegate: self
     )
 
-    private var hasStarted = false
+    private lazy var startupCoordinator = SceneStartupCoordinator(
+        localeBootstrapper: NativeLocaleBootstrap(baseURL: AppEnvironment.baseURL),
+        startNavigator: { [weak self] in
+            guard let self else { return }
+
+            AppRouteCoordinator.shared.navigationHandler = self.navigator
+
+            if let anchorWindow = self.window {
+                OAuthSessionCoordinator.shared.presentationAnchorProvider = { [weak anchorWindow] in
+                    anchorWindow
+                }
+            }
+
+            self.navigator.start()
+        },
+        route: { url in
+            AppRouteCoordinator.shared.handleIncoming(url)
+        },
+        nextMainTurn: { action in
+            DispatchQueue.main.async(execute: action)
+        }
+    )
 
     private func presentError(_ message: String) {
         let alert = UIAlertController(title: "Visit failed", message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default))
         navigator.activeNavigationController.present(alert, animated: true)
-    }
-
-    private func startIfNeeded(with url: URL? = nil) {
-        AppRouteCoordinator.shared.navigationHandler = navigator
-
-        if let anchorWindow = window {
-            OAuthSessionCoordinator.shared.presentationAnchorProvider = { [weak anchorWindow] in
-                anchorWindow
-            }
-        }
-
-        guard !hasStarted else {
-            if let url {
-                AppRouteCoordinator.shared.handleIncoming(url)
-            }
-            return
-        }
-
-        hasStarted = true
-        navigator.start()
-
-        if let url {
-            DispatchQueue.main.async {
-                AppRouteCoordinator.shared.handleIncoming(url)
-            }
-        }
     }
 
     private func showSplashAnimation(in window: UIWindow) {
@@ -97,11 +92,14 @@ extension SceneController: UIWindowSceneDelegate {
         if let coldLaunchURL = connectionOptions.urlContexts.first?.url,
            AuthApi.isKakaoTalkLoginUrl(coldLaunchURL) {
             _ = AuthController.handleOpenUrl(url: coldLaunchURL)
-            startIfNeeded(with: nil)
+            startupCoordinator.start()
         } else {
             let launchURL = connectionOptions.urlContexts.first?.url ??
                 connectionOptions.userActivities.compactMap(Self.url(from:)).first
-            startIfNeeded(with: launchURL)
+            if let launchURL {
+                startupCoordinator.handleIncoming(launchURL)
+            }
+            startupCoordinator.start()
         }
     }
 
@@ -111,12 +109,12 @@ extension SceneController: UIWindowSceneDelegate {
             _ = AuthController.handleOpenUrl(url: url)
             return
         }
-        startIfNeeded(with: url)
+        startupCoordinator.handleIncoming(url)
     }
 
     func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
         guard let url = Self.url(from: userActivity) else { return }
-        startIfNeeded(with: url)
+        startupCoordinator.handleIncoming(url)
     }
 }
 

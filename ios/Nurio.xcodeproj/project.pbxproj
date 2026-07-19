@@ -39,6 +39,8 @@
 		E00000000000000000000005 /* nurio_splash.json in Resources */ = {isa = PBXBuildFile; fileRef = E00000000000000000000004 /* nurio_splash.json */; };
 		F10000000000000000000001 /* NativeLocaleBootstrapTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000031 /* NativeLocaleBootstrapTests.swift */; };
 		F10000000000000000000002 /* NativeLocaleBootstrap.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000032 /* NativeLocaleBootstrap.swift */; };
+		F20000000000000000000001 /* SceneStartupCoordinatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F20000000000000000000031 /* SceneStartupCoordinatorTests.swift */; };
+		F20000000000000000000002 /* SceneStartupCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F20000000000000000000032 /* SceneStartupCoordinator.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -81,6 +83,8 @@
 		E00000000000000000000004 /* nurio_splash.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = nurio_splash.json; sourceTree = "<group>"; };
 		F10000000000000000000031 /* NativeLocaleBootstrapTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeLocaleBootstrapTests.swift; sourceTree = "<group>"; };
 		F10000000000000000000032 /* NativeLocaleBootstrap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeLocaleBootstrap.swift; sourceTree = "<group>"; };
+		F20000000000000000000031 /* SceneStartupCoordinatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneStartupCoordinatorTests.swift; sourceTree = "<group>"; };
+		F20000000000000000000032 /* SceneStartupCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneStartupCoordinator.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -150,6 +154,7 @@
 			isa = PBXGroup;
 			children = (
 				F10000000000000000000032 /* NativeLocaleBootstrap.swift */,
+				F20000000000000000000032 /* SceneStartupCoordinator.swift */,
 				A00000000000000000000033 /* AppEnvironment.swift */,
 				A00000000000000000000034 /* AppRouteCoordinator.swift */,
 				A00000000000000000000035 /* CustomerScopePolicy.swift */,
@@ -187,6 +192,7 @@
 			children = (
 				A00000000000000000000041 /* NurioTests.swift */,
 				F10000000000000000000031 /* NativeLocaleBootstrapTests.swift */,
+				F20000000000000000000031 /* SceneStartupCoordinatorTests.swift */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -320,6 +326,7 @@
 			files = (
 				A00000000000000000000001 /* AppDelegate.swift in Sources */,
 				A00000000000000000000002 /* SceneController.swift in Sources */,
+				F20000000000000000000002 /* SceneStartupCoordinator.swift in Sources */,
 				A00000000000000000000003 /* AppEnvironment.swift in Sources */,
 				A00000000000000000000004 /* AppRouteCoordinator.swift in Sources */,
 				A00000000000000000000005 /* CustomerScopePolicy.swift in Sources */,
@@ -344,6 +351,7 @@
 			files = (
 				A00000000000000000000010 /* NurioTests.swift in Sources */,
 				F10000000000000000000001 /* NativeLocaleBootstrapTests.swift in Sources */,
+				F20000000000000000000001 /* SceneStartupCoordinatorTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
