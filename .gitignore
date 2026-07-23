@@ -2,6 +2,7 @@
 android/.gradle/
 android/build/
 android/app/build/
+/google-services.json
 android/app/google-services.json
 study-nurio-mobile/android/app/google-services.json
 android/local.properties
@@ -26,8 +27,8 @@ android/vendor/
 # iOS
 ios/build/
 ios/DerivedData/
-ios/*.xcworkspace/xcuserdata/
-ios/*.xcodeproj/xcuserdata/
+ios/**/xcuserdata/
+study-nurio-mobile/ios/**/xcuserdata/
 ios/*.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
 study-nurio-mobile/ios/*.xcodeproj/project.xcworkspace/xcuserdata/
 study-nurio-mobile/ios/GoogleService-Info.plist
