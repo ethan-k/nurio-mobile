@@ -20,3 +20,9 @@
 - Android: run `./gradlew :app:testDebugUnitTest :app:assembleDebug :app:lintDebug`.
 - Verify signed-out login, approved-leader Today/Schedule/Sessions/Earnings/Settings, EN/KO switching, external-link handling, and account deletion.
 - Store screenshots must be simulator/device captures of the shipped app. Do not substitute generated UI.
+
+## Store Asset Location
+
+- Always save the complete logo and ASO delivery bundle under `/Users/ws/es/business/nurioworkspace/nurio_appstore/nurio-study-leader/`.
+- This includes editable logo sources, Apple and Google store icons, feature graphics, real-device screenshots, preview media, localized metadata exports, and upload bundles.
+- Keep only runtime icon resources and source files required by the native build in this repository. Do not commit generated marketing screenshots or other store promotional binaries.

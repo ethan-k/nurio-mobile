@@ -28,6 +28,11 @@
 - For the current Nurio Android store submission, use `versionName = "1.0.5"` and `versionCode = 6`.
 - The first Study Leader store release starts at iOS `1.0.0 (1)` and Android `versionName = "1.0.0"`, `versionCode = 1`; increment the build/code before every subsequent upload.
 
+## Study Leader ASO Storage
+- Always save the complete Nurio Study Leader logo and ASO delivery bundle under `/Users/ws/es/business/nurioworkspace/nurio_appstore/nurio-study-leader/`.
+- The external bundle includes exported store icons, editable logo artwork, screenshots, feature graphics, preview media, localized metadata exports, and upload-ready packages.
+- Keep only runtime icon resources and source files required to build the installed apps in `leaders-nurio-mobile/`; do not commit generated store screenshots or promotional binaries.
+
 ## Architecture Rules
 - Keep customer scope boundaries explicit in native navigation and API integration.
 - Keep Study Leader scope boundaries explicit and preserve `nurioleaders://auth-callback` on both platforms.
