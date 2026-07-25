@@ -13,9 +13,12 @@
 ## Authentication and Review Access
 
 - [ ] Enable Sign in with Apple in the public iOS build when other social providers are present, or document a valid Guideline 4.8 exemption.
-- [ ] Allowlist production OAuth callback URLs for `studyleaders.nurio.kr`.
+- [ ] Allowlist the exact Google, Kakao, and Naver production callback URLs documented in `OAUTH_AND_REVIEW_LOGIN.md`.
+- [ ] Confirm every provider link sends `platform=native` through the `sign-in-with-oauth` bridge on iOS and Android.
 - [ ] Create a stable approved-leader review account with no real personal or financial data.
 - [ ] Populate that account with safe sample Today, Schedule, Notifications, Sessions, and Earnings content.
+- [ ] Confirm the five-tap brand gesture reveals the review form in TestFlight and an internal Play build.
+- [ ] Confirm wrong credentials, a non-leader review account, and missing review secrets cannot establish a session.
 - [ ] Put exact review credentials and any required navigation steps in both store consoles.
 - [ ] Verify account deletion can be initiated from Leader Settings.
 

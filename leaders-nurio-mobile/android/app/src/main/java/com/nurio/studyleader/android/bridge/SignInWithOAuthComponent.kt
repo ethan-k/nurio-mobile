@@ -1,9 +1,9 @@
 package com.nurio.studyleader.android.bridge
 
 import android.util.Log
-import androidx.browser.customtabs.CustomTabsIntent
-import androidx.core.net.toUri
 import com.nurio.studyleader.android.BuildConfig
+import com.nurio.studyleader.android.MainActivity
+import com.nurio.studyleader.android.auth.SocialAuthRoute
 import dev.hotwire.core.bridge.BridgeComponent
 import dev.hotwire.core.bridge.BridgeDelegate
 import dev.hotwire.core.bridge.Message
@@ -28,25 +28,15 @@ class SignInWithOAuthComponent(
 
     private fun handleClick(message: Message) {
         val data = message.data<ClickData>() ?: return
-        if (data.startPath.isBlank()) {
-            Log.w(TAG, "Missing OAuth start path")
-            return
-        }
-
-        val fullUrl = if (data.startPath.startsWith("http://") || data.startPath.startsWith("https://")) {
-            data.startPath
-        } else {
-            "${BuildConfig.BASE_URL.trimEnd('/')}/${data.startPath.trimStart('/')}"
-        }
-        val activity = delegate.destination.fragment.activity
+        val route = SocialAuthRoute.resolve(data.startPath, BuildConfig.BASE_URL) ?: return
+        val activity = delegate.destination.fragment.activity as? MainActivity
 
         if (activity == null) {
             Log.w(TAG, "Cannot launch OAuth because the fragment is not attached")
             return
         }
 
-        val customTabsIntent = CustomTabsIntent.Builder().build()
-        customTabsIntent.launchUrl(activity, fullUrl.toUri())
+        activity.dispatchSocialAuth(route)
     }
 
     @Serializable

@@ -3,8 +3,11 @@ package com.nurio.studyleader.android
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
+import androidx.browser.customtabs.CustomTabsIntent
+import androidx.core.net.toUri
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.nurio.studyleader.android.auth.NativeAuthCallback
+import com.nurio.studyleader.android.auth.SocialAuthRoute
 import dev.hotwire.navigation.activities.HotwireActivity
 import dev.hotwire.navigation.navigator.Navigator
 import dev.hotwire.navigation.navigator.NavigatorConfiguration
@@ -43,6 +46,14 @@ class MainActivity : HotwireActivity() {
             navigatorHostId = R.id.nav_host_leader
         )
     )
+
+    internal fun dispatchSocialAuth(route: SocialAuthRoute) {
+        CustomTabsIntent.Builder()
+            .setShowTitle(true)
+            .setShareState(CustomTabsIntent.SHARE_STATE_OFF)
+            .build()
+            .launchUrl(this, route.url.toUri())
+    }
 
     private fun handleAuthCallbackIntent(intent: Intent?) {
         val callbackUrl = intent?.dataString ?: return

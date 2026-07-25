@@ -3,6 +3,7 @@ package com.nurio.studyleader.android.routing
 import androidx.browser.customtabs.CustomTabColorSchemeParams
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.net.toUri
+import com.nurio.studyleader.android.auth.SocialAuthRoute
 import dev.hotwire.core.turbo.visit.VisitProposal
 import dev.hotwire.navigation.activities.HotwireActivity
 import dev.hotwire.navigation.navigator.NavigatorConfiguration
@@ -11,23 +12,14 @@ import dev.hotwire.navigation.routing.Router
 class OAuthRouteDecisionHandler : Router.RouteDecisionHandler {
     override val name = "oauth-browser-tab"
 
-    private val oauthPaths = setOf(
-        "/auth/google_oauth2",
-        "/auth/kakao",
-        "/auth/naver",
-        "/auth/apple"
-    )
-
     override fun matches(
         proposal: VisitProposal,
         configuration: NavigatorConfiguration
     ): Boolean {
-        val locationUri = proposal.location.toUri()
-        val startLocationUri = configuration.startLocation.toUri()
-
-        return startLocationUri.host == locationUri.host &&
-            (locationUri.scheme?.lowercase() == "https" || locationUri.scheme?.lowercase() == "http") &&
-            oauthPaths.contains(locationUri.path)
+        return SocialAuthRoute.resolve(
+            proposal.location,
+            configuration.startLocation
+        ) != null
     }
 
     override fun handle(
@@ -35,6 +27,10 @@ class OAuthRouteDecisionHandler : Router.RouteDecisionHandler {
         configuration: NavigatorConfiguration,
         activity: HotwireActivity
     ): Router.Decision {
+        val route = SocialAuthRoute.resolve(
+            proposal.location,
+            configuration.startLocation
+        ) ?: return Router.Decision.CANCEL
         val colorParams = CustomTabColorSchemeParams.Builder()
             .build()
 
@@ -44,7 +40,7 @@ class OAuthRouteDecisionHandler : Router.RouteDecisionHandler {
             .setUrlBarHidingEnabled(false)
             .setDefaultColorSchemeParams(colorParams)
             .build()
-            .launchUrl(activity, proposal.location.toUri())
+            .launchUrl(activity, route.url.toUri())
 
         return Router.Decision.CANCEL
     }

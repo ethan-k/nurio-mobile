@@ -35,13 +35,13 @@ xcodebuild \
 
 Nurio Study Leader is the operational workspace for approved leaders who deliver Nurio Study sessions. It provides daily session preparation, recurring schedule management, attendance and session completion, leader-only notifications, earnings history, profile management, and account controls.
 
-Sign-in uses a secure external OAuth session and returns through `nurioleaders://auth-callback`. A review account is provided in App Review Information. Please use the populated sample Today, Schedule, Sessions, Notifications, and Earnings states.
+Google, Kakao, and Naver sign-in use a secure system authentication session and return through `nurioleaders://auth-callback`. App Review does not need to complete social-provider 2FA. On the login screen, tap the Nurio Study Leader brand five times within four seconds, then enter the review credentials provided in App Review Information. The review account contains fictional Today, Schedule, Sessions, Notifications, and Earnings data.
 
 The app has no purchase flow or digital goods. Account deletion is available from Settings.
 
 ## Required Review Information
 
-- Stable approved-leader demo email/account and exact provider steps.
+- Stable approved-leader review email and password plus the five-tap brand gesture.
 - Explanation of any one-time OAuth prompt.
 - Contact person reachable during review.
 - Confirmation that sample data is fictional and contains no real learner or financial information.

@@ -51,6 +51,7 @@ ANDROID_HOME=/Users/ws/Library/Android/sdk ./gradlew \
 ## Documentation
 
 - [Implementation plan](docs/IMPLEMENTATION_PLAN.md)
+- [OAuth and store review login](docs/OAUTH_AND_REVIEW_LOGIN.md)
 - [Launch checklist](docs/LAUNCH_CHECKLIST.md)
 - [ASO and store assets](docs/ASO.md)
 - [iOS submission](ios/docs/SUBMISSION.md)

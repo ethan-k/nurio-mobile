@@ -2,6 +2,37 @@ import XCTest
 @testable import NurioStudyLeader
 
 final class NurioStudyLeaderTests: XCTestCase {
+    func testSocialAuthRouteAcceptsOnlyAllowlistedLeaderProviderPaths() {
+        let baseURL = URL(string: "https://studyleaders.nurio.kr")!
+        let cases: [(String, SocialAuthProvider)] = [
+            ("/auth/google_oauth2?platform=native", .google),
+            ("/auth/kakao?platform=native", .kakao),
+            ("/auth/naver?platform=native", .naver),
+            ("/auth/apple?platform=native", .apple),
+        ]
+
+        for (startPath, provider) in cases {
+            let route = SocialAuthRoute.resolve(startPath: startPath, baseURL: baseURL)
+            XCTAssertEqual(route?.provider, provider)
+            XCTAssertEqual(route?.url.host, "studyleaders.nurio.kr")
+        }
+    }
+
+    func testSocialAuthRouteRejectsForeignOriginsAndUnknownPaths() {
+        let baseURL = URL(string: "https://studyleaders.nurio.kr")!
+        let invalidPaths = [
+            "https://example.com/auth/google_oauth2",
+            "https://studyleaders.nurio.kr:444/auth/kakao",
+            "https://attacker@studyleaders.nurio.kr/auth/naver",
+            "/admin/events",
+            "/auth/google_oauth2/extra",
+        ]
+
+        invalidPaths.forEach {
+            XCTAssertNil(SocialAuthRoute.resolve(startPath: $0, baseURL: baseURL))
+        }
+    }
+
     func testTokenAuthURLFromNativeCallback() {
         let callbackURL = URL(string: "nurioleaders://auth-callback?token=test-token&state=test-state")!
         let tokenAuthURL = NativeAuthCallback.tokenAuthURL(

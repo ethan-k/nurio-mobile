@@ -27,10 +27,4 @@ enum AppEnvironment {
         baseURL.appendingPathComponent("login")
     }
 
-    static let oauthPaths: Set<String> = [
-        "/auth/google_oauth2",
-        "/auth/kakao",
-        "/auth/naver",
-        "/auth/apple",
-    ]
 }
