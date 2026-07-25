@@ -15,9 +15,13 @@
 
 1. Register the bundle ID and select the Nurio Apple Developer team.
 2. Add Sign in with Apple capability when social login is enabled.
-3. Verify `nurioleaders://auth-callback` in the release build.
-4. Build and test on the current 6.9-inch iPhone simulator.
-5. Archive with:
+3. Inject the dedicated Kakao Native app key, Google iOS client ID, matching
+   Web/server client ID, and Google reversed client ID through the protected
+   native-auth xcconfig.
+4. Verify both the Google reversed-client-ID URL scheme and the independent
+   `nurioleaders://auth-callback` Rails handoff in the release build.
+5. Build and test on the current 6.9-inch iPhone simulator.
+6. Archive with:
 
 ```bash
 xcodebuild \
@@ -29,13 +33,13 @@ xcodebuild \
   archive
 ```
 
-6. Upload through Xcode Organizer, distribute to internal TestFlight, and run the authenticated checklist before submission.
+7. Upload through Xcode Organizer, distribute to internal TestFlight, and run the authenticated checklist before submission.
 
 ## Review Notes Template
 
 Nurio Study Leader is the operational workspace for approved leaders who deliver Nurio Study sessions. It provides daily session preparation, recurring schedule management, attendance and session completion, leader-only notifications, earnings history, profile management, and account controls.
 
-Google, Kakao, and Naver sign-in use a secure system authentication session and return through `nurioleaders://auth-callback`. App Review does not need to complete social-provider 2FA. On the login screen, tap the Nurio Study Leader brand five times within four seconds, then enter the review credentials provided in App Review Information. The review account contains fictional Today, Schedule, Sessions, Notifications, and Earnings data.
+Google and Kakao sign-in use their native iOS SDKs; Naver uses a secure system authentication session. All successful paths finish through a short-lived Rails handoff to `nurioleaders://auth-callback`. App Review does not need to complete social-provider 2FA. On the login screen, tap the Nurio Study Leader brand five times within four seconds, then enter the review credentials provided in App Review Information. The review account contains fictional Today, Schedule, Sessions, Notifications, and Earnings data.
 
 The app has no purchase flow or digital goods. Account deletion is available from Settings.
 

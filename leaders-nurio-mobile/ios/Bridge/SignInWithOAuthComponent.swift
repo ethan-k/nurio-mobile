@@ -17,9 +17,15 @@ final class SignInWithOAuthComponent: BridgeComponent {
         OAuthSessionCoordinator.shared.presentationAnchorProvider = { [weak self] in
             (self?.delegate?.destination as? UIViewController)?.view.window
         }
+        NativeGoogleSignInCoordinator.shared.presentationViewControllerProvider = { [weak self] in
+            self?.delegate?.destination as? UIViewController
+        }
 
-        OAuthSessionCoordinator.shared.start(url: route.url) { callbackURL in
-            AppRouteCoordinator.shared.handleIncoming(callbackURL)
+        SocialAuthCoordinator.shared.start(route: route) { [weak self] result in
+            SocialAuthResultHandler.handle(
+                result,
+                presenting: self?.delegate?.destination as? UIViewController
+            )
         }
     }
 }

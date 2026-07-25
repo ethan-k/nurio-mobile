@@ -4,6 +4,10 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <queries>
+        <package android:name="com.kakao.talk" />
+    </queries>
+
     <application
         android:name=".StudyLeaderApplication"
         android:allowBackup="true"
@@ -16,6 +20,20 @@
         android:theme="@style/Theme.NurioStudyLeader"
         android:networkSecurityConfig="@xml/network_security_config"
         tools:targetApi="36">
+
+        <activity
+            android:name="com.kakao.sdk.auth.AuthCodeHandlerActivity"
+            android:enabled="${KAKAO_AUTH_ENABLED}"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="kakao${KAKAO_NATIVE_APP_KEY}"
+                    android:host="oauth" />
+            </intent-filter>
+        </activity>
 
         <activity
             android:name=".MainActivity"

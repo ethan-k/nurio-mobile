@@ -1,4 +1,7 @@
+import GoogleSignIn
 import HotwireNative
+import KakaoSDKAuth
+import KakaoSDKCommon
 import UIKit
 
 @main
@@ -9,7 +12,20 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     ) -> Bool {
         configureAppearance()
         configureHotwire()
+        configureKakaoSDK()
         return true
+    }
+
+    func application(
+        _ application: UIApplication,
+        open url: URL,
+        options: [UIApplication.OpenURLOptionsKey: Any] = [:]
+    ) -> Bool {
+        if KakaoSDKConfiguration.isKakaoTalkLoginURL(url) {
+            return AuthController.handleOpenUrl(url: url)
+        }
+
+        return GIDSignIn.sharedInstance.handle(url)
     }
 
     func application(
@@ -50,5 +66,10 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 #if DEBUG
         Hotwire.config.debugLoggingEnabled = true
 #endif
+    }
+
+    private func configureKakaoSDK() {
+        guard let appKey = KakaoSDKConfiguration.appKey else { return }
+        KakaoSDK.initSDK(appKey: appKey)
     }
 }

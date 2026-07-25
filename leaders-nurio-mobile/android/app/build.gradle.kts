@@ -13,6 +13,24 @@ if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 }
 
+val kakaoNativeAppKey = providers
+    .gradleProperty("NURIO_STUDY_LEADER_KAKAO_NATIVE_APP_KEY")
+    .orElse(providers.environmentVariable("NURIO_STUDY_LEADER_KAKAO_NATIVE_APP_KEY"))
+    .orElse("")
+    .get()
+    .trim()
+val kakaoManifestAppKey = kakaoNativeAppKey.ifBlank { "not_configured" }
+val kakaoAuthEnabled = kakaoNativeAppKey.isNotBlank()
+
+fun String.asBuildConfigString(): String =
+    "\"" +
+        replace("\\", "\\\\")
+            .replace("\"", "\\\"")
+            .replace("\n", "\\n")
+            .replace("\r", "\\r")
+            .replace("\t", "\\t") +
+        "\""
+
 android {
     namespace = "com.nurio.studyleader.android"
     compileSdk = 36
@@ -25,6 +43,13 @@ android {
         versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField(
+            "String",
+            "KAKAO_NATIVE_APP_KEY",
+            kakaoNativeAppKey.asBuildConfigString()
+        )
+        manifestPlaceholders["KAKAO_NATIVE_APP_KEY"] = kakaoManifestAppKey
+        manifestPlaceholders["KAKAO_AUTH_ENABLED"] = kakaoAuthEnabled.toString()
     }
 
     signingConfigs {
@@ -81,6 +106,7 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.splashscreen)
     implementation(libs.androidx.browser)
+    implementation(libs.kakao.user)
     implementation(libs.kotlinx.serialization.json)
 
     implementation(libs.hotwire.core)

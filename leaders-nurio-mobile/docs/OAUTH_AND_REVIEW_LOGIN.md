@@ -2,8 +2,9 @@
 
 Nurio Study Leader uses the same working Hotwire Native login contract as the
 learner Study app: the server renders a bridge-enabled provider link, the
-native bridge opens a secure system authentication session, Rails finishes the
-provider callback, and a signed single-use handoff returns to the app.
+native bridge dispatches to a provider-specific native SDK or the explicitly
+documented system-auth fallback, Rails verifies the provider credential, and a
+signed single-use handoff returns to the app.
 
 The three public web OAuth providers are Google, Kakao, and Naver. Apple login
 remains available on iOS when configured because App Review Guideline 4.8 may
@@ -15,17 +16,24 @@ require it when third-party social login is offered.
    `data-controller="bridge--sign-in-with-oauth"` and a `startPath`.
 2. In a supported Hotwire Native client, the Stimulus bridge prevents the
    WebView navigation and sends the allowlisted path to Swift or Kotlin.
-3. iOS opens `ASWebAuthenticationSession`; Android opens a browser Custom Tab.
-   Provider credentials are never entered into or inspected by the WebView.
-4. The provider returns to the matching HTTPS callback on
-   `studyleaders.nurio.kr`.
-5. Rails completes OAuth and returns a signed, five-minute, single-use callback
-   to `nurioleaders://auth-callback`.
+3. Native code selects the provider flow:
+   - iOS Google uses GoogleSignIn SDK.
+   - iOS and Android Kakao use Kakao SDK.
+   - iOS Naver uses `ASWebAuthenticationSession`.
+   - Android Google and Naver use a Chrome Custom Tab, matching the learner
+     Study app until Android Google is migrated to Credential Manager.
+4. Native Google and Kakao post their provider token to
+   `/auth/google/native` or `/auth/kakao/native`. System-auth providers return
+   to the matching HTTPS callback on `studyleaders.nurio.kr`.
+5. Rails verifies the token or completes web OAuth and returns a signed,
+   five-minute, single-use callback to `nurioleaders://auth-callback`.
 6. The native app validates the callback and routes to
    `/auth/native/token_auth`, which establishes the leader-host web session.
 
-Do not put provider client secrets in either native app. The native apps need
-only the base URL, allowlisted provider paths, and callback scheme.
+The Google reversed-client-ID URL scheme and `nurioleaders://auth-callback`
+serve different purposes. GoogleSignIn consumes the reversed-client-ID
+callback internally; `nurioleaders` carries only the Rails one-time handoff.
+Do not put Google, Kakao, or Naver server client secrets in either native app.
 
 ## Provider Dashboard Setup
 
@@ -40,20 +48,35 @@ trailing slash must match exactly.
 
 ### Google
 
-1. Use a Web application OAuth client in Google Cloud.
-2. Add the exact Study Leader callback to Authorized redirect URIs.
-3. Configure the consent screen, verified domains, support email, and required
-   test users while the app remains in testing mode.
-4. Keep the client secret only in Rails credentials or the deployment secret
-   environment.
+1. Keep the existing Web application OAuth client as Rails
+   `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET`.
+2. Add the exact Study Leader HTTPS callback for browser and Android login.
+3. Create a separate iOS OAuth client in the same Google Cloud project:
+   - Bundle ID: `com.nurio.studyleader.ios`
+   - `GOOGLE_IOS_CLIENT_ID`: the iOS client ID
+   - `GOOGLE_REVERSED_CLIENT_ID`: the reversed iOS client ID URL scheme
+   - `GOOGLE_SERVER_CLIENT_ID`: exactly the Web client ID used by Rails
+4. Configure the consent screen, verified domains, support email, and test
+   users while the application remains in testing mode.
+
+Never substitute the iOS client ID for Rails `GOOGLE_CLIENT_ID`. Rails verifies
+the native Google ID token against the Web/server client audience.
 
 ### Kakao
 
 1. Enable Kakao Login for the production Kakao application.
 2. Add the exact Study Leader callback under the REST API key redirect URIs.
-3. Confirm required consent items and business verification before production.
-4. The current Study Leader release uses browser OAuth, so it does not require
-   the Kakao native SDK app key in the binary.
+3. Create a dedicated Study Leader Native app key. Do not reuse the main Nurio
+   or learner Study native key because co-installed apps must not compete for
+   the same Kakao callback scheme.
+4. Register:
+   - iOS bundle ID `com.nurio.studyleader.ios`
+   - Android package `com.nurio.studyleader.android`
+   - Android debug, upload/release, and Google Play App Signing key hashes
+5. Confirm the `account_email` consent item is enabled; Rails rejects a native
+   Kakao token that cannot provide an email.
+6. Keep Rails `KAKAO_APP_ID` set to the numeric Kakao application audience. It
+   is not the Native app key.
 
 ### Naver
 
@@ -62,6 +85,40 @@ trailing slash must match exactly.
 3. Move the application from development to the production/service state
    before store submission.
 4. Keep the client secret only in Rails credentials or deployment secrets.
+
+## Native Build Configuration
+
+### iOS
+
+Copy `ios/Config/NativeAuth.local.xcconfig.example` to the ignored
+`ios/Config/NativeAuth.local.xcconfig`, or inject an equivalent protected
+xcconfig in CI:
+
+```text
+KAKAO_NATIVE_APP_KEY = <dedicated Study Leader Native app key>
+GOOGLE_IOS_CLIENT_ID = <Study Leader iOS OAuth client ID>
+GOOGLE_SERVER_CLIENT_ID = <existing Web OAuth client ID>
+GOOGLE_REVERSED_CLIENT_ID = <reversed Study Leader iOS client ID>
+```
+
+The project fails closed at runtime when provider configuration is missing.
+Do not put provider values on a verbose `xcodebuild` command line or include the
+local xcconfig in Copy Bundle Resources.
+
+### Android
+
+Provide the dedicated Kakao Native app key from the developer or CI environment:
+
+```bash
+export NURIO_STUDY_LEADER_KAKAO_NATIVE_APP_KEY='<native-app-key>'
+cd leaders-nurio-mobile/android
+./gradlew :app:testDebugUnitTest :app:assembleDebug :app:lintDebug
+```
+
+The build reads the same name as a Gradle property if needed. Do not commit the
+value to `gradle.properties`. When it is absent, Kakao initialization and its
+exported callback activity are disabled rather than falling back silently to
+web Kakao.
 
 ## Store Review Login
 
@@ -120,7 +177,12 @@ them after a review cycle or immediately if they are exposed.
 ## Release Test Matrix
 
 - Each provider link contains `platform=native` in an iOS and Android build.
-- Google, Kakao, and Naver complete from a signed-out cold launch.
+- iOS Google opens GoogleSignIn, returns through the reversed client-ID scheme,
+  posts the ID token to Rails, and establishes the Hotwire session.
+- iOS and Android Kakao open KakaoTalk when available, exchange the access
+  token with Rails, and establish the Hotwire session.
+- Android Google and both Naver flows complete through the documented
+  system-auth session.
 - Cancellation returns safely without creating a partial session.
 - A callback with a wrong scheme, host, duplicated token/state, path, port, or
   fragment is rejected.
@@ -134,7 +196,9 @@ them after a review cycle or immediately if they are exposed.
 - [Hotwire Native Bridge Components](https://native.hotwired.dev/reference/bridge-components)
 - [Apple ASWebAuthenticationSession](https://developer.apple.com/documentation/authenticationservices/aswebauthenticationsession)
 - [Android authentication with Custom Tabs](https://developer.android.com/work/guide#custom-tabs)
+- [Google Sign-In for iOS](https://developers.google.com/identity/sign-in/ios/start-integrating)
 - [Google OAuth for web server applications](https://developers.google.com/identity/protocols/oauth2/web-server)
-- [Kakao Login prerequisites](https://developers.kakao.com/docs/en/kakaologin/prerequisite)
+- [Kakao iOS SDK setup](https://developers.kakao.com/docs/en/ios/getting-started)
+- [Kakao Login for Android](https://developers.kakao.com/docs/en/kakaologin/android)
 - [Naver Login](https://developers.naver.com/products/login/api)
 - [Apple App Review Guidelines](https://developer.apple.com/app-store/review/guidelines/)

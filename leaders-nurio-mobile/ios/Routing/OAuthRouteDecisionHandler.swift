@@ -24,8 +24,15 @@ final class OAuthRouteDecisionHandler: @preconcurrency RouteDecisionHandler {
             navigator?.activeNavigationController.view.window
         }
 
-        OAuthSessionCoordinator.shared.start(url: route.url) { callbackURL in
-            AppRouteCoordinator.shared.handleIncoming(callbackURL)
+        NativeGoogleSignInCoordinator.shared.presentationViewControllerProvider = { [weak navigator] in
+            navigator?.activeNavigationController
+        }
+
+        SocialAuthCoordinator.shared.start(route: route) { [weak navigator] result in
+            SocialAuthResultHandler.handle(
+                result,
+                presenting: navigator?.activeNavigationController
+            )
         }
 
         return .cancel

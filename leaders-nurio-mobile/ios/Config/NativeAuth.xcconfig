@@ -1,0 +1,7 @@
+// Native provider values are injected by a protected local/CI xcconfig.
+KAKAO_NATIVE_APP_KEY =
+GOOGLE_IOS_CLIENT_ID =
+GOOGLE_SERVER_CLIENT_ID =
+GOOGLE_REVERSED_CLIENT_ID =
+
+#include? "NativeAuth.local.xcconfig"

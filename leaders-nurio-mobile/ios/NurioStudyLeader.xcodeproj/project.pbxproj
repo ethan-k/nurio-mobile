@@ -25,6 +25,14 @@
 		A00000000000000000000010 /* NurioStudyLeaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000041 /* NurioStudyLeaderTests.swift */; };
 		A00000000000000000000011 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000042 /* PrivacyInfo.xcprivacy */; };
 		A00000000000000000000012 /* SocialAuthRoute.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000043 /* SocialAuthRoute.swift */; };
+		A00000000000000000000013 /* NativeAuthHandoffClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000044 /* NativeAuthHandoffClient.swift */; };
+		A00000000000000000000014 /* NativeKakaoSignInCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000045 /* NativeKakaoSignInCoordinator.swift */; };
+		A00000000000000000000015 /* SocialAuthCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000046 /* SocialAuthCoordinator.swift */; };
+		A00000000000000000000016 /* NativeGoogleSignInCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000047 /* NativeGoogleSignInCoordinator.swift */; };
+		C00000000000000000000005 /* KakaoSDKCommon in Frameworks */ = {isa = PBXBuildFile; productRef = C00000000000000000000002 /* KakaoSDKCommon */; };
+		C00000000000000000000006 /* KakaoSDKAuth in Frameworks */ = {isa = PBXBuildFile; productRef = C00000000000000000000003 /* KakaoSDKAuth */; };
+		C00000000000000000000007 /* KakaoSDKUser in Frameworks */ = {isa = PBXBuildFile; productRef = C00000000000000000000004 /* KakaoSDKUser */; };
+		E00000000000000000000001 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = E00000000000000000000003 /* GoogleSignIn */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -58,6 +66,12 @@
 		A00000000000000000000041 /* NurioStudyLeaderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NurioStudyLeaderTests.swift; sourceTree = "<group>"; };
 		A00000000000000000000042 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		A00000000000000000000043 /* SocialAuthRoute.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocialAuthRoute.swift; sourceTree = "<group>"; };
+		A00000000000000000000044 /* NativeAuthHandoffClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeAuthHandoffClient.swift; sourceTree = "<group>"; };
+		A00000000000000000000045 /* NativeKakaoSignInCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeKakaoSignInCoordinator.swift; sourceTree = "<group>"; };
+		A00000000000000000000046 /* SocialAuthCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocialAuthCoordinator.swift; sourceTree = "<group>"; };
+		A00000000000000000000047 /* NativeGoogleSignInCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeGoogleSignInCoordinator.swift; sourceTree = "<group>"; };
+		D00000000000000000000036 /* NativeAuth.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = NativeAuth.xcconfig; sourceTree = "<group>"; };
+		D00000000000000000000037 /* NativeAuth.local.xcconfig.example */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = NativeAuth.local.xcconfig.example; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -66,6 +80,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				A0000000000000000000000F /* HotwireNative in Frameworks */,
+				C00000000000000000000005 /* KakaoSDKCommon in Frameworks */,
+				C00000000000000000000006 /* KakaoSDKAuth in Frameworks */,
+				C00000000000000000000007 /* KakaoSDKUser in Frameworks */,
+				E00000000000000000000001 /* GoogleSignIn in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -103,6 +121,7 @@
 				A00000000000000000000063 /* Support */,
 				A00000000000000000000064 /* Routing */,
 				A00000000000000000000065 /* Bridge */,
+				D00000000000000000000060 /* Config */,
 				A00000000000000000000031 /* AppDelegate.swift */,
 				A00000000000000000000032 /* SceneController.swift */,
 				A0000000000000000000003E /* Info.plist */,
@@ -119,9 +138,13 @@
 			children = (
 				A00000000000000000000033 /* AppEnvironment.swift */,
 				A00000000000000000000043 /* SocialAuthRoute.swift */,
+				A00000000000000000000046 /* SocialAuthCoordinator.swift */,
 				A00000000000000000000034 /* AppRouteCoordinator.swift */,
 				A00000000000000000000035 /* LeaderScopePolicy.swift */,
 				A00000000000000000000036 /* NativeAuthCallback.swift */,
+				A00000000000000000000044 /* NativeAuthHandoffClient.swift */,
+				A00000000000000000000045 /* NativeKakaoSignInCoordinator.swift */,
+				A00000000000000000000047 /* NativeGoogleSignInCoordinator.swift */,
 				A00000000000000000000037 /* OAuthSessionCoordinator.swift */,
 				A00000000000000000000038 /* UIApplication+KeyWindow.swift */,
 			);
@@ -153,6 +176,15 @@
 			path = Tests;
 			sourceTree = "<group>";
 		};
+		D00000000000000000000060 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				D00000000000000000000036 /* NativeAuth.xcconfig */,
+				D00000000000000000000037 /* NativeAuth.local.xcconfig.example */,
+			);
+			path = Config;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -171,6 +203,10 @@
 			name = NurioStudyLeader;
 			packageProductDependencies = (
 				A000000000000000000000C1 /* HotwireNative */,
+				C00000000000000000000002 /* KakaoSDKCommon */,
+				C00000000000000000000003 /* KakaoSDKAuth */,
+				C00000000000000000000004 /* KakaoSDKUser */,
+				E00000000000000000000003 /* GoogleSignIn */,
 			);
 			productName = NurioStudyLeader;
 			productReference = A00000000000000000000030 /* NurioStudyLeader.app */;
@@ -224,6 +260,8 @@
 			mainGroup = A00000000000000000000060;
 			packageReferences = (
 				A000000000000000000000C0 /* XCRemoteSwiftPackageReference "hotwire-native-ios" */,
+				C00000000000000000000001 /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */,
+				E00000000000000000000002 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 			);
 			productRefGroup = A00000000000000000000061 /* Products */;
 			projectDirPath = "";
@@ -273,6 +311,10 @@
 				A0000000000000000000000A /* OAuthRouteDecisionHandler.swift in Sources */,
 				A0000000000000000000000B /* SignInWithOAuthComponent.swift in Sources */,
 				A00000000000000000000012 /* SocialAuthRoute.swift in Sources */,
+				A00000000000000000000013 /* NativeAuthHandoffClient.swift in Sources */,
+				A00000000000000000000014 /* NativeKakaoSignInCoordinator.swift in Sources */,
+				A00000000000000000000015 /* SocialAuthCoordinator.swift in Sources */,
+				A00000000000000000000016 /* NativeGoogleSignInCoordinator.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -429,6 +471,7 @@
 		};
 		A000000000000000000000B2 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = D00000000000000000000036 /* NativeAuth.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -456,6 +499,7 @@
 		};
 		A000000000000000000000B3 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = D00000000000000000000036 /* NativeAuth.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -556,6 +600,22 @@
 				version = 1.2.2;
 			};
 		};
+		C00000000000000000000001 /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/kakao/kakao-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.28.0;
+			};
+		};
+		E00000000000000000000002 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 9.2.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -563,6 +623,26 @@
 			isa = XCSwiftPackageProductDependency;
 			package = A000000000000000000000C0 /* XCRemoteSwiftPackageReference "hotwire-native-ios" */;
 			productName = HotwireNative;
+		};
+		C00000000000000000000002 /* KakaoSDKCommon */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C00000000000000000000001 /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */;
+			productName = KakaoSDKCommon;
+		};
+		C00000000000000000000003 /* KakaoSDKAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C00000000000000000000001 /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */;
+			productName = KakaoSDKAuth;
+		};
+		C00000000000000000000004 /* KakaoSDKUser */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C00000000000000000000001 /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */;
+			productName = KakaoSDKUser;
+		};
+		E00000000000000000000003 /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E00000000000000000000002 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

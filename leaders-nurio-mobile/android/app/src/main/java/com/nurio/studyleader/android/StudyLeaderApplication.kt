@@ -1,6 +1,7 @@
 package com.nurio.studyleader.android
 
 import android.app.Application
+import com.kakao.sdk.common.KakaoSdk
 import dev.hotwire.core.bridge.BridgeComponentFactory
 import dev.hotwire.core.config.Hotwire
 import dev.hotwire.core.logging.HotwireLogLevel
@@ -21,6 +22,9 @@ import com.nurio.studyleader.android.routing.OAuthRouteDecisionHandler
 class StudyLeaderApplication : Application() {
     override fun onCreate() {
         super.onCreate()
+        if (BuildConfig.KAKAO_NATIVE_APP_KEY.isNotBlank()) {
+            KakaoSdk.init(this, BuildConfig.KAKAO_NATIVE_APP_KEY)
+        }
         configureHotwire()
     }
 

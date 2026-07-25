@@ -15,6 +15,9 @@
 - [ ] Enable Sign in with Apple in the public iOS build when other social providers are present, or document a valid Guideline 4.8 exemption.
 - [ ] Allowlist the exact Google, Kakao, and Naver production callback URLs documented in `OAUTH_AND_REVIEW_LOGIN.md`.
 - [ ] Confirm every provider link sends `platform=native` through the `sign-in-with-oauth` bridge on iOS and Android.
+- [ ] Create the Google iOS OAuth client for `com.nurio.studyleader.ios` and inject its client ID, matching Web/server client ID, and reversed client ID.
+- [ ] Create a dedicated Study Leader Kakao Native app key; register both native identifiers and all Android signing hashes.
+- [ ] Confirm iOS Google and both Kakao clients exchange native provider tokens through the Rails native-auth endpoints.
 - [ ] Create a stable approved-leader review account with no real personal or financial data.
 - [ ] Populate that account with safe sample Today, Schedule, Notifications, Sessions, and Earnings content.
 - [ ] Confirm the five-tap brand gesture reveals the review form in TestFlight and an internal Play build.

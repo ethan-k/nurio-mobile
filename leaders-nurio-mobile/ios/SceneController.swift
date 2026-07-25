@@ -1,4 +1,6 @@
+import GoogleSignIn
 import HotwireNative
+import KakaoSDKAuth
 import UIKit
 
 final class SceneController: UIResponder {
@@ -63,12 +65,34 @@ extension SceneController: UIWindowSceneDelegate {
 
         hideNavigationBarOnMainStack()
 
-        let launchURL = connectionOptions.urlContexts.first?.url
-        startIfNeeded(with: launchURL)
+        if let launchURL = connectionOptions.urlContexts.first?.url {
+            if GIDSignIn.sharedInstance.handle(launchURL) {
+                startIfNeeded()
+                return
+            }
+
+            if KakaoSDKConfiguration.isKakaoTalkLoginURL(launchURL) {
+                _ = AuthController.handleOpenUrl(url: launchURL)
+                startIfNeeded()
+                return
+            }
+        }
+
+        startIfNeeded(with: connectionOptions.urlContexts.first?.url)
     }
 
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
         guard let url = URLContexts.first?.url else { return }
+
+        if GIDSignIn.sharedInstance.handle(url) {
+            return
+        }
+
+        if KakaoSDKConfiguration.isKakaoTalkLoginURL(url) {
+            _ = AuthController.handleOpenUrl(url: url)
+            return
+        }
+
         startIfNeeded(with: url)
     }
 }

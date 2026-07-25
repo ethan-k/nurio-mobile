@@ -25,8 +25,13 @@ For release signing, copy `keystore.properties.example` to the ignored `keystore
 
 - Only the exact configured leader origin remains in the Hotwire navigator.
 - `/admin` and every other host open in Chrome Custom Tabs.
-- OAuth provider URLs open in a secure browser session and return through the strict callback parser.
-- The web `sign-in-with-oauth` bridge must provide the provider `startPath`; native code rejects non-provider paths and foreign origins before opening the Custom Tab.
+- The web `sign-in-with-oauth` bridge must provide the provider `startPath`;
+  native code rejects non-provider paths and foreign origins before dispatch.
+- Kakao uses the native Kakao SDK and exchanges its access token with Rails.
+  Google and Naver use a secure Custom Tab, matching the learner Study Android
+  app, and all successful flows return through the strict callback parser.
+- Inject `NURIO_STUDY_LEADER_KAKAO_NATIVE_APP_KEY` from the developer or CI
+  environment; never commit it to `gradle.properties`.
 - The Material action bar and Hotwire toolbar remain hidden; web navigation owns the visible chrome.
 
 Provider dashboard callbacks and the hidden Play-review login are documented in
