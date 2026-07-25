@@ -5,8 +5,13 @@ vars:
   FLUTTER_DIR: "{{.ROOT_DIR}}/flutter_app"
   LEGACY_ANDROID_DIR: "{{.ROOT_DIR}}/android"
   TUTORS_ANDROID_DIR: "{{.ROOT_DIR}}/tutors-nurio-mobile/android"
+  LEADERS_ANDROID_DIR: "{{.ROOT_DIR}}/leaders-nurio-mobile/android"
+  LEADERS_IOS_DIR: "{{.ROOT_DIR}}/leaders-nurio-mobile/ios"
   LEGACY_GRADLE_FILE: "{{.LEGACY_ANDROID_DIR}}/app/build.gradle.kts"
   TUTORS_GRADLE_FILE: "{{.TUTORS_ANDROID_DIR}}/app/build.gradle.kts"
+  LEADERS_IOS_PROJECT: "{{.LEADERS_IOS_DIR}}/NurioStudyLeader.xcodeproj"
+  LEADERS_IOS_SCHEME: "NurioStudyLeader"
+  LEADERS_IOS_DESTINATION: "platform=iOS Simulator,name=iPhone 17"
   LEGACY_AAB_OUTPUT: "{{.LEGACY_ANDROID_DIR}}/app/build/outputs/bundle/release/app-release.aab"
   LEGACY_APK_OUTPUT: "{{.LEGACY_ANDROID_DIR}}/app/build/outputs/apk/debug/app-debug.apk"
   TUTORS_RELEASE_APK_OUTPUT: "{{.TUTORS_ANDROID_DIR}}/app/build/outputs/apk/release/app-release.apk"
@@ -244,3 +249,31 @@ tasks:
     dir: "{{.TUTORS_ANDROID_DIR}}"
     cmds:
       - ./gradlew clean
+
+  leaders:ios:build:
+    desc: Build the Study Leader Hotwire Native iOS app
+    cmds:
+      - xcodebuild -project {{.LEADERS_IOS_PROJECT}} -scheme {{.LEADERS_IOS_SCHEME}} -destination '{{.LEADERS_IOS_DESTINATION}}' build
+
+  leaders:ios:test:
+    desc: Run the Study Leader iOS unit tests
+    cmds:
+      - xcodebuild -project {{.LEADERS_IOS_PROJECT}} -scheme {{.LEADERS_IOS_SCHEME}} -destination '{{.LEADERS_IOS_DESTINATION}}' test
+
+  leaders:android:test:
+    desc: Run the Study Leader Android unit tests
+    dir: "{{.LEADERS_ANDROID_DIR}}"
+    cmds:
+      - ./gradlew :app:testDebugUnitTest
+
+  leaders:android:build:
+    desc: Build the Study Leader Android debug APK
+    dir: "{{.LEADERS_ANDROID_DIR}}"
+    cmds:
+      - ./gradlew :app:assembleDebug
+
+  leaders:android:lint:
+    desc: Run Android lint for the Study Leader app
+    dir: "{{.LEADERS_ANDROID_DIR}}"
+    cmds:
+      - ./gradlew :app:lintDebug

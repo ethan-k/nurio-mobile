@@ -10,6 +10,7 @@ Mobile workspace for Nurio app shells and migration tracks.
 - `tutors-nurio-mobile/android/`: standalone Hotwire Native Android shell for `https://tutors.nurio.kr`
 - `tutors-nurio-mobile/ios/`: standalone Hotwire Native iOS shell for `https://tutors.nurio.kr`
 - `study-nurio-mobile/`: sibling workspace for study product mobile shells
+- `leaders-nurio-mobile/`: dedicated iOS and Android Hotwire Native shells for `https://studyleaders.nurio.kr`
 - `shared/`: cross-app configuration assets
 
 ## Scope
@@ -27,6 +28,9 @@ Tutor app entry point:
 
 Study app entry point:
 - `study-nurio-mobile/` for the study-facing mobile workspace
+
+Study Leader app entry point:
+- `leaders-nurio-mobile/` for the leader operations workspace
 
 ## iOS Hotwire Shell
 
@@ -90,6 +94,28 @@ Build locally:
 ```bash
 xcodebuild -project tutors-nurio-mobile/ios/NurioTutors.xcodeproj -scheme NurioTutors -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.2' build
 xcodebuild -project tutors-nurio-mobile/ios/NurioTutors.xcodeproj -scheme NurioTutors -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.2' test
+```
+
+## Study Leader Hotwire Shells
+
+The Study Leader target is a separate app for approved and candidate leaders.
+
+- Start URL: `https://studyleaders.nurio.kr`
+- OAuth callback: `nurioleaders://auth-callback`
+- iOS bundle identifier: `com.nurio.studyleader.ios`
+- Android application identifier: `com.nurio.studyleader.android`
+- Implementation and release plan: `leaders-nurio-mobile/docs/IMPLEMENTATION_PLAN.md`
+- Launch gates: `leaders-nurio-mobile/docs/LAUNCH_CHECKLIST.md`
+- Store metadata and screenshot plan: `leaders-nurio-mobile/docs/ASO.md`
+
+Build and test:
+
+```bash
+xcodebuild -project leaders-nurio-mobile/ios/NurioStudyLeader.xcodeproj -scheme NurioStudyLeader -destination 'platform=iOS Simulator,name=iPhone 17' build
+xcodebuild -project leaders-nurio-mobile/ios/NurioStudyLeader.xcodeproj -scheme NurioStudyLeader -destination 'platform=iOS Simulator,name=iPhone 17' test
+
+cd leaders-nurio-mobile/android
+./gradlew :app:testDebugUnitTest :app:assembleDebug :app:lintDebug
 ```
 
 ## Flutter Constraint
