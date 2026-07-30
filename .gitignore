@@ -18,12 +18,18 @@ android/keystore.properties
 android/*.keystore
 android/*.jks
 
+# Fastlane
+android/fastlane/play-store-service-account.json
+android/fastlane/report.xml
+android/vendor/
+
 # iOS
 ios/build/
 ios/DerivedData/
 ios/*.xcworkspace/xcuserdata/
 ios/*.xcodeproj/xcuserdata/
 ios/*.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
+study-nurio-mobile/ios/*.xcodeproj/project.xcworkspace/xcuserdata/
 study-nurio-mobile/ios/GoogleService-Info.plist
 ios/Pods/
 ios/.build/

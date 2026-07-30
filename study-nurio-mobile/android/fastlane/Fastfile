@@ -1,0 +1,22 @@
+default_platform(:android)
+
+platform :android do
+  desc "Build a signed release AAB"
+  lane :build do
+    gradle(task: "bundleRelease")
+  end
+
+  desc "Build and upload the release AAB to Google Play"
+  lane :deploy do |options|
+    build
+    aab_path = Dir.glob("app/build/outputs/bundle/release/*.aab").max_by { |f| File.mtime(f) }
+    upload_to_play_store(
+      track: options[:track] || "internal",
+      release_status: options[:release_status] || "draft",
+      aab: aab_path,
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true
+    )
+  end
+end

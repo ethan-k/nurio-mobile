@@ -19,14 +19,14 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace = "com.nurio.android"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.nurio.android"
         minSdk = 28
-        targetSdk = 35
-        versionCode = 9
-        versionName = "1.0.8"
+        targetSdk = 36
+        versionCode = 10
+        versionName = "1.0.9"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
