@@ -5,8 +5,9 @@ vars:
   LEGACY_ANDROID_DIR: "{{.ROOT_DIR}}/android"
   STUDY_DIR: "{{.ROOT_DIR}}/study-nurio-mobile"
   TUTORS_ANDROID_DIR: "{{.ROOT_DIR}}/tutors-nurio-mobile/android"
-  LEADERS_ANDROID_DIR: "{{.ROOT_DIR}}/leaders-nurio-mobile/android"
-  LEADERS_IOS_DIR: "{{.ROOT_DIR}}/leaders-nurio-mobile/ios"
+  LEADERS_DIR: "{{.ROOT_DIR}}/leaders-nurio-mobile"
+  LEADERS_ANDROID_DIR: "{{.LEADERS_DIR}}/android"
+  LEADERS_IOS_DIR: "{{.LEADERS_DIR}}/ios"
   LEGACY_GRADLE_FILE: "{{.LEGACY_ANDROID_DIR}}/app/build.gradle.kts"
   TUTORS_GRADLE_FILE: "{{.TUTORS_ANDROID_DIR}}/app/build.gradle.kts"
   LEADERS_IOS_PROJECT: "{{.LEADERS_IOS_DIR}}/NurioStudyLeader.xcodeproj"
@@ -285,3 +286,58 @@ tasks:
     dir: "{{.LEADERS_ANDROID_DIR}}"
     cmds:
       - ./gradlew :app:lintDebug
+
+  leaders:validate:
+    desc: Check Study Leader app store credentials for both platforms (iOS + Android)
+    dir: "{{.LEADERS_DIR}}"
+    cmds:
+      - task: leaders:ios:validate
+      - task: leaders:android:validate
+
+  leaders:ios:validate:
+    desc: Check the Study Leader app App Store Connect API key without building
+    dir: "{{.LEADERS_DIR}}"
+    cmds:
+      - mise exec ruby -- ruby -S bundle exec fastlane ios validate
+
+  leaders:ios:build:
+    desc: Build the Study Leader app signed App Store IPA (no upload)
+    dir: "{{.LEADERS_DIR}}"
+    cmds:
+      - mise exec ruby -- ruby -S bundle exec fastlane ios build
+
+  leaders:ios:beta:
+    desc: Build and upload the Study Leader app to TestFlight
+    dir: "{{.LEADERS_DIR}}"
+    cmds:
+      - mise exec ruby -- ruby -S bundle exec fastlane ios beta
+
+  leaders:ios:release:
+    desc: Build and upload the Study Leader app to App Store Connect for release review
+    dir: "{{.LEADERS_DIR}}"
+    cmds:
+      - mise exec ruby -- ruby -S bundle exec fastlane ios release
+
+  leaders:android:validate:
+    desc: Check the Study Leader app Play publisher service account without building
+    dir: "{{.LEADERS_DIR}}"
+    cmds:
+      - mise exec ruby -- ruby -S bundle exec fastlane android validate
+
+  leaders:android:build:
+    desc: Build the Study Leader app signed release AAB (no upload)
+    dir: "{{.LEADERS_DIR}}"
+    cmds:
+      - mise exec ruby -- ruby -S bundle exec fastlane android build
+
+  leaders:android:beta:
+    desc: Build and upload the Study Leader app AAB to the Play internal track
+    dir: "{{.LEADERS_DIR}}"
+    cmds:
+      - mise exec ruby -- ruby -S bundle exec fastlane android beta
+
+  leaders:android:promote:
+    desc: Promote the Study Leader app Play internal build to production
+    dir: "{{.LEADERS_DIR}}"
+    cmds:
+      - mise exec ruby -- ruby -S bundle exec fastlane android promote

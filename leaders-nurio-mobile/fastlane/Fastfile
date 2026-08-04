@@ -1,4 +1,4 @@
-# Nurio Study mobile deployment lanes.
+# Nurio Study Leader mobile deployment lanes.
 #
 # Version bumping stays with the existing release scripts; these lanes only
 # build and upload at whatever versions are currently written to the iOS
@@ -8,8 +8,8 @@
 # Credentials come from the shared workspace shell environment. These names
 # are deliberately unprefixed: one Apple Developer account and one Play
 # publisher service account serve every app in this workspace, so the same
-# variables work for Nurio Study and its siblings. Do not rename or add a
-# NURIO_ prefix.
+# variables work for Nurio Study Leader and its siblings. Do not rename or add
+# a NURIO_ prefix.
 #
 #   APP_STORE_CONNECT_KEY_IDENTIFIER  App Store Connect API key ID
 #   APP_STORE_CONNECT_ISSUER_ID       App Store Connect issuer UUID
@@ -104,7 +104,7 @@ module NurioCredentials
 end
 
 before_all do
-  # Lanes run with study-nurio-mobile/ as fastlane's working directory root.
+  # Lanes run with leaders-nurio-mobile/ as fastlane's working directory root.
   ENV["FASTLANE_SKIP_UPDATE_CHECK"] = "1"
 
   # bundle exec exports RUBYOPT/BUNDLE_*/GEM_* to child processes; ruby
@@ -169,8 +169,8 @@ platform :ios do
     end
 
     build_app(
-      project: "ios/NurioStudy.xcodeproj",
-      scheme: "NurioStudy",
+      project: "ios/NurioStudyLeader.xcodeproj",
+      scheme: "NurioStudyLeader",
       configuration: "Release",
       export_method: "app-store",
       output_directory: "ios/build/fastlane",
@@ -210,33 +210,33 @@ platform :ios do
   end
 end
 
-  STUDY_PACKAGE = "com.nurio.study.android".freeze
+  LEADER_PACKAGE = "com.nurio.studyleader.android".freeze
 
   # fastlane runs lanes with Dir.pwd set to <project>/fastlane, so resolve the
   # gradle file against the project root (parent of fastlane/) at runtime.
-  def study_gradle_file
+  def leader_gradle_file
     File.expand_path("../android/app/build.gradle.kts", Dir.pwd)
   end
 
   # Best practice: the store is the monotonic source of truth for versionCode.
   # next_code = max(file_code + 1, highest_code_on_production + 1, highest_code_on_internal + 1)
   # so Play can never reject a build as "version code already used".
-  def study_read_version_code
-    match = File.read(study_gradle_file).match(/versionCode\s*=\s*(\d+)/)
-    UI.user_error!("Cannot read versionCode from #{study_gradle_file}") unless match
+  def leader_read_version_code
+    match = File.read(leader_gradle_file).match(/versionCode\s*=\s*(\d+)/)
+    UI.user_error!("Cannot read versionCode from #{leader_gradle_file}") unless match
     match[1].to_i
   end
 
-  def study_read_version_name
-    match = File.read(study_gradle_file).match(/versionName\s*=\s*"([^"]+)"/)
-    UI.user_error!("Cannot read versionName from #{study_gradle_file}") unless match
+  def leader_read_version_name
+    match = File.read(leader_gradle_file).match(/versionName\s*=\s*"([^"]+)"/)
+    UI.user_error!("Cannot read versionName from #{leader_gradle_file}") unless match
     match[1]
   end
 
-  def study_play_max_version_code(json_key_data:)
+  def leader_play_max_version_code(json_key_data:)
     %w[production internal].filter_map do |track|
       google_play_track_version_codes(
-        package_name: STUDY_PACKAGE,
+        package_name: LEADER_PACKAGE,
         track: track,
         json_key_data: json_key_data
       ).map(&:to_i).max
@@ -246,39 +246,20 @@ end
     end.max.to_i
   end
 
-  def study_bump_version_code!(json_key_data:)
-    current = study_read_version_code
-    play_max = study_play_max_version_code(json_key_data: json_key_data)
+  def leader_bump_version_code!(json_key_data:)
+    current = leader_read_version_code
+    play_max = leader_play_max_version_code(json_key_data: json_key_data)
     next_code = [current + 1, play_max + 1].max
     File.write(
-      study_gradle_file,
-      File.read(study_gradle_file).sub(/versionCode\s*=\s*\d+/, "versionCode = #{next_code}")
+      leader_gradle_file,
+      File.read(leader_gradle_file).sub(/versionCode\s*=\s*\d+/, "versionCode = #{next_code}")
     )
     UI.message("versionCode #{current} (file) / #{play_max} (Play max) -> #{next_code}")
     next_code
   end
 
-  # Commit only the versionCode bump in build.gradle.kts after a successful upload,
-  # so the file's monotonic floor tracks what actually shipped. Scoped to that one
-  # file so unrelated working-tree changes are never swept into a release commit.
-  def study_commit_version_bump!(code:, name:)
-    repo_root = sh("git rev-parse --show-toplevel").strip
-    gradle_rel = study_gradle_file.delete_prefix("#{repo_root}/")
-    sh("git -C #{Shellwords.escape(repo_root)} add -- #{Shellwords.escape(gradle_rel)}")
-
-    staged = sh("git -C #{Shellwords.escape(repo_root)} diff --cached --name-only -- #{Shellwords.escape(gradle_rel)}").strip
-    if staged.empty?
-      UI.message("versionCode bump already committed; nothing to commit")
-      return
-    end
-
-    message = "chore(release): bump Study Android to #{name} (#{code})"
-    sh("git -C #{Shellwords.escape(repo_root)} commit -m #{Shellwords.escape(message)} -- #{Shellwords.escape(gradle_rel)}")
-    UI.success("Committed version bump: #{message}")
-  end
-
 platform :android do
-  # Study versionCode helpers live above (top-level) so both platforms can reuse them.
+  # Study Leader versionCode helpers live above (top-level) so both platforms can reuse them.
   desc "Check the Play publisher credentials without building or uploading"
   lane :validate do
     validate_play_store_json_key(json_key_data: NurioCredentials.play_json_key_data)
@@ -301,9 +282,9 @@ platform :android do
 
     # versionCode is sourced from Play itself, so the upload can never collide
     # with a previously accepted code. versionName stays manual.
-    next_code = study_bump_version_code!(json_key_data: json_key_data)
-    version_name = study_read_version_name
-    UI.success("Deploying Nurio Study Android: #{version_name} (#{next_code}) -> Play internal track")
+    next_code = leader_bump_version_code!(json_key_data: json_key_data)
+    version_name = leader_read_version_name
+    UI.success("Deploying Nurio Study Leader Android: #{version_name} (#{next_code}) -> Play internal track")
 
     build
     upload_to_play_store(
@@ -318,10 +299,6 @@ platform :android do
       skip_upload_images: true,
       skip_upload_screenshots: true
     )
-
-    # Only reached on a successful upload (fastlane aborts on failure). Record the
-    # versionCode bump so the shipped state is committed.
-    study_commit_version_bump!(code: next_code, name: version_name)
   end
 
   desc "Promote the internal build to production (no rebuild)"
