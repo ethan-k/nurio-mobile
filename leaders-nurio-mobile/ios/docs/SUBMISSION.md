@@ -3,7 +3,7 @@
 ## App Record
 
 - Name: `Nurio Study Leader`
-- Bundle ID: `com.nurio.studyleader.ios`
+- Bundle ID: `com.nurio.studyleaders.ios`
 - SKU: `nurio-study-leader-ios`
 - Version/build: `1.0.0` / `1`
 - Primary category: Education

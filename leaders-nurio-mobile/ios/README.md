@@ -5,7 +5,7 @@ Hotwire Native iPhone shell for `https://studyleaders.nurio.kr`.
 ## Identity
 
 - Project/scheme: `NurioStudyLeader`
-- Bundle ID: `com.nurio.studyleader.ios`
+- Bundle ID: `com.nurio.studyleaders.ios`
 - Callback: `nurioleaders://auth-callback`
 - Minimum iOS: 15.6
 - Version/build: `1.0.0` / `1`

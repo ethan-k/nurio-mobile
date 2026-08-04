@@ -24,7 +24,7 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>com.nurio.studyleader.ios.auth</string>
+			<string>com.nurio.studyleaders.ios.auth</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>nurioleaders</string>
@@ -34,7 +34,7 @@
 				<key>CFBundleTypeRole</key>
 				<string>Editor</string>
 				<key>CFBundleURLName</key>
-				<string>com.nurio.studyleader.ios.kakao</string>
+				<string>com.nurio.studyleaders.ios.kakao</string>
 				<key>CFBundleURLSchemes</key>
 				<array>
 					<string>kakao$(KAKAO_NATIVE_APP_KEY)</string>
@@ -44,7 +44,7 @@
 				<key>CFBundleTypeRole</key>
 				<string>Editor</string>
 				<key>CFBundleURLName</key>
-				<string>com.nurio.studyleader.ios.google</string>
+				<string>com.nurio.studyleaders.ios.google</string>
 				<key>CFBundleURLSchemes</key>
 				<array>
 					<string>$(GOOGLE_REVERSED_CLIENT_ID)</string>
