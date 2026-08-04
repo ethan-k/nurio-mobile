@@ -1,0 +1,5 @@
+// Copy outside source control or to the ignored NativeAuth.local.xcconfig.
+KAKAO_NATIVE_APP_KEY = your_nurio_study_leader_kakao_native_app_key
+GOOGLE_IOS_CLIENT_ID = your_study_leader_ios_client_id.apps.googleusercontent.com
+GOOGLE_SERVER_CLIENT_ID = your_existing_web_client_id.apps.googleusercontent.com
+GOOGLE_REVERSED_CLIENT_ID = com.googleusercontent.apps.your_study_leader_ios_client_id
