@@ -1,4 +1,4 @@
-package com.nurio.studyleader.android.routing
+package com.nurio.studyleaders.android.routing
 
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.net.toUri

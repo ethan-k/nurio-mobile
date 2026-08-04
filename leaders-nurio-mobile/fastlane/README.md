@@ -23,6 +23,14 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 
 Check App Store Connect credentials without building or uploading
 
+### ios create_app
+
+```sh
+[bundle exec] fastlane ios create_app
+```
+
+Create the app record in App Store Connect (one-time; uses the ASC API key)
+
 ### ios build
 
 ```sh

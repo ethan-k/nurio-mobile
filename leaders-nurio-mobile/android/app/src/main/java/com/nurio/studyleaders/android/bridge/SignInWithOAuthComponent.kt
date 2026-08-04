@@ -1,9 +1,9 @@
-package com.nurio.studyleader.android.bridge
+package com.nurio.studyleaders.android.bridge
 
 import android.util.Log
-import com.nurio.studyleader.android.BuildConfig
-import com.nurio.studyleader.android.MainActivity
-import com.nurio.studyleader.android.auth.SocialAuthRoute
+import com.nurio.studyleaders.android.BuildConfig
+import com.nurio.studyleaders.android.MainActivity
+import com.nurio.studyleaders.android.auth.SocialAuthRoute
 import dev.hotwire.core.bridge.BridgeComponent
 import dev.hotwire.core.bridge.BridgeDelegate
 import dev.hotwire.core.bridge.Message

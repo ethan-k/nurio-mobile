@@ -1,6 +1,6 @@
-package com.nurio.studyleader.android.auth
+package com.nurio.studyleaders.android.auth
 
-import com.nurio.studyleader.android.BuildConfig
+import com.nurio.studyleaders.android.BuildConfig
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL

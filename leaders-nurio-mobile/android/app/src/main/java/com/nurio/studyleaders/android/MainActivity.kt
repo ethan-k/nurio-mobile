@@ -1,4 +1,4 @@
-package com.nurio.studyleader.android
+package com.nurio.studyleaders.android
 
 import android.content.Intent
 import android.os.Bundle
@@ -7,11 +7,11 @@ import androidx.appcompat.app.AlertDialog
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.net.toUri
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import com.nurio.studyleader.android.auth.NativeAuthCallback
-import com.nurio.studyleader.android.auth.NativeAuthHandoffClient
-import com.nurio.studyleader.android.auth.NativeKakaoSignInCoordinator
-import com.nurio.studyleader.android.auth.SocialAuthCoordinator
-import com.nurio.studyleader.android.auth.SocialAuthRoute
+import com.nurio.studyleaders.android.auth.NativeAuthCallback
+import com.nurio.studyleaders.android.auth.NativeAuthHandoffClient
+import com.nurio.studyleaders.android.auth.NativeKakaoSignInCoordinator
+import com.nurio.studyleaders.android.auth.SocialAuthCoordinator
+import com.nurio.studyleaders.android.auth.SocialAuthRoute
 import dev.hotwire.navigation.activities.HotwireActivity
 import dev.hotwire.navigation.navigator.Navigator
 import dev.hotwire.navigation.navigator.NavigatorConfiguration

@@ -1,4 +1,4 @@
-package com.nurio.studyleader.android.fragments
+package com.nurio.studyleaders.android.fragments
 
 import android.os.Bundle
 import android.view.View

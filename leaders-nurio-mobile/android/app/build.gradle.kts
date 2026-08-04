@@ -32,11 +32,11 @@ fun String.asBuildConfigString(): String =
         "\""
 
 android {
-    namespace = "com.nurio.studyleader.android"
+    namespace = "com.nurio.studyleaders.android"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.nurio.studyleader.android"
+        applicationId = "com.nurio.studyleaders.android"
         minSdk = 28
         targetSdk = 36
         versionCode = 1

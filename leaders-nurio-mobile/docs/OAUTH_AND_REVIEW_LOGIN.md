@@ -52,7 +52,7 @@ trailing slash must match exactly.
    `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET`.
 2. Add the exact Study Leader HTTPS callback for browser and Android login.
 3. Create a separate iOS OAuth client in the same Google Cloud project:
-   - Bundle ID: `com.nurio.studyleader.ios`
+   - Bundle ID: `com.nurio.studyleaders.ios`
    - `GOOGLE_IOS_CLIENT_ID`: the iOS client ID
    - `GOOGLE_REVERSED_CLIENT_ID`: the reversed iOS client ID URL scheme
    - `GOOGLE_SERVER_CLIENT_ID`: exactly the Web client ID used by Rails
@@ -70,8 +70,8 @@ the native Google ID token against the Web/server client audience.
    or learner Study native key because co-installed apps must not compete for
    the same Kakao callback scheme.
 4. Register:
-   - iOS bundle ID `com.nurio.studyleader.ios`
-   - Android package `com.nurio.studyleader.android`
+   - iOS bundle ID `com.nurio.studyleaders.ios`
+   - Android package `com.nurio.studyleaders.android`
    - Android debug, upload/release, and Google Play App Signing key hashes
 5. Confirm the `account_email` consent item is enabled; Rails rejects a native
    Kakao token that cannot provide an email.

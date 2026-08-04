@@ -7,7 +7,7 @@ Hotwire Native iOS and Android clients for the approved-leader workspace at `htt
 | Item | iOS | Android |
 | --- | --- | --- |
 | Product | Nurio Study Leader | Nurio Study Leader |
-| Identifier | `com.nurio.studyleader.ios` | `com.nurio.studyleader.android` |
+| Identifier | `com.nurio.studyleaders.ios` | `com.nurio.studyleaders.android` |
 | OAuth callback | `nurioleaders://auth-callback` | `nurioleaders://auth-callback` |
 | Version | `1.0.0` (build 1) | `1.0.0` (code 1) |
 | Start URL | `https://studyleaders.nurio.kr` | `https://studyleaders.nurio.kr` |

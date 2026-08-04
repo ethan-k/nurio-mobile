@@ -1,4 +1,4 @@
-package com.nurio.studyleader.android.fragments
+package com.nurio.studyleaders.android.fragments
 
 import dev.hotwire.navigation.destinations.HotwireDestinationDeepLink
 import dev.hotwire.navigation.fragments.HotwireWebBottomSheetFragment

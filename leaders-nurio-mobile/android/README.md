@@ -4,7 +4,7 @@ Hotwire Native Android shell for `https://studyleaders.nurio.kr`.
 
 ## Identity
 
-- Package: `com.nurio.studyleader.android`
+- Package: `com.nurio.studyleaders.android`
 - Callback: `nurioleaders://auth-callback`
 - Minimum SDK: 28
 - Target/compile SDK: 36

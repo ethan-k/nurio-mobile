@@ -1,4 +1,4 @@
-package com.nurio.studyleader.android.routing
+package com.nurio.studyleaders.android.routing
 
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue

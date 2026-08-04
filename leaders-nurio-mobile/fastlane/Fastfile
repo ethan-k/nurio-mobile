@@ -16,6 +16,12 @@
 #   APP_STORE_CONNECT_PRIVATE_KEY     AuthKey_<KEY_IDENTIFIER>.p8 PEM text
 #   APPLE_TEAM_ID                     Developer Portal team ID (read by Appfile)
 #   PLAY_SERVICE_ACCOUNT_JSON_BASE64  Play publisher service-account JSON, base64
+#
+# Native auth (optional, iOS archive only; override the xcconfig placeholders):
+#   NURIO_STUDY_LEADER_KAKAO_NATIVE_APP_KEY       Kakao native app key (shared w/ Android)
+#   NURIO_STUDY_LEADER_GOOGLE_IOS_CLIENT_ID       Google Sign-In iOS client ID
+#   NURIO_STUDY_LEADER_GOOGLE_SERVER_CLIENT_ID    Google Sign-In web/server client ID
+#   NURIO_STUDY_LEADER_GOOGLE_REVERSED_CLIENT_ID  Google reversed client ID
 
 require "base64"
 require "fileutils"
@@ -142,11 +148,67 @@ def nurio_asc_api_key
   )
 end
 
+# Native auth secrets (Kakao native key, Google iOS/signing IDs) are optional.
+# When their env vars are present they override the xcconfig placeholders as
+# xcodebuild build settings, so a headless fastlane build needs no local
+# NativeAuth.local.xcconfig file. When absent, the committed NativeAuth.xcconfig
+# (plus the optional gitignored local include) remains the source, preserving
+# local Xcode development. Names mirror the Android gradle property / env var
+# names, so a single NURIO_STUDY_LEADER_KAKAO_NATIVE_APP_KEY serves both
+# platforms.
+IOS_NATIVE_AUTH_SETTINGS = {
+  "KAKAO_NATIVE_APP_KEY" => "NURIO_STUDY_LEADER_KAKAO_NATIVE_APP_KEY",
+  "GOOGLE_IOS_CLIENT_ID" => "NURIO_STUDY_LEADER_GOOGLE_IOS_CLIENT_ID",
+  "GOOGLE_SERVER_CLIENT_ID" => "NURIO_STUDY_LEADER_GOOGLE_SERVER_CLIENT_ID",
+  "GOOGLE_REVERSED_CLIENT_ID" => "NURIO_STUDY_LEADER_GOOGLE_REVERSED_CLIENT_ID"
+}.freeze
+
+def nurio_ios_native_auth_xcargs
+  injected = IOS_NATIVE_AUTH_SETTINGS.filter_map do |setting, env|
+    next unless NurioCredentials.present?(ENV[env])
+    "#{setting}=#{ENV[env].shellescape}"
+  end
+  if injected.any?
+    UI.message("Injecting native auth secrets from env: " \
+               "#{injected.map { |token| token.split('=', 2).first }.join(', ')}")
+  end
+  injected.join(" ")
+end
+
 platform :ios do
   desc "Check App Store Connect credentials without building or uploading"
   lane :validate do
     nurio_asc_api_key
     UI.success("App Store Connect API key #{ENV.fetch('APP_STORE_CONNECT_KEY_IDENTIFIER')} loaded")
+  end
+
+  desc "Create the app record in App Store Connect (one-time; uses the ASC API key)"
+  lane :create_app do
+    require "spaceship"
+
+    # nurio_asc_api_key calls app_store_connect_api_key, which sets
+    # Spaceship::ConnectAPI.token (a real Token object) as a side effect. We
+    # create the record directly via the ConnectAPI rather than through
+    # `produce`, because this fastlane build's `produce` still demands an Apple
+    # ID username in its option resolver even when a token is present. This
+    # mirrors produce's own Spaceship::ConnectAPI::App.create call.
+    nurio_asc_api_key
+
+    bundle_id = "com.nurio.studyleaders.ios"
+    if (existing = Spaceship::ConnectAPI::App.find(bundle_id))
+      UI.success("App '#{bundle_id}' already exists (#{existing.id}) — nothing to do")
+      next
+    end
+
+    app = Spaceship::ConnectAPI::App.create(
+      name: "Nurio Study Leader",
+      version_string: "1.0",
+      sku: "nurioStudyLeader",
+      primary_locale: "en",
+      bundle_id: bundle_id,
+      platforms: [Spaceship::ConnectAPI::Platform.map("ios")]
+    )
+    UI.success("Created app '#{app.name}' (#{app.id}) for #{bundle_id}")
   end
 
   desc "Archive and export a signed App Store IPA (no upload)"
@@ -167,6 +229,11 @@ platform :ios do
         "the local Xcode account session, which fails headless."
       )
     end
+
+    # Optional native auth (Kakao/Google) overrides sourced from the shared
+    # workspace env vars. No-op when unset; the xcconfig placeholders then apply.
+    native_auth_xcargs = nurio_ios_native_auth_xcargs
+    xcargs += " #{native_auth_xcargs}" unless native_auth_xcargs.empty?
 
     build_app(
       project: "ios/NurioStudyLeader.xcodeproj",
@@ -210,7 +277,7 @@ platform :ios do
   end
 end
 
-  LEADER_PACKAGE = "com.nurio.studyleader.android".freeze
+  LEADER_PACKAGE = "com.nurio.studyleaders.android".freeze
 
   # fastlane runs lanes with Dir.pwd set to <project>/fastlane, so resolve the
   # gradle file against the project root (parent of fastlane/) at runtime.

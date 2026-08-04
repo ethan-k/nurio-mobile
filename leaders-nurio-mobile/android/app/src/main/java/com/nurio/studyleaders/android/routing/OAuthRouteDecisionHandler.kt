@@ -1,9 +1,9 @@
-package com.nurio.studyleader.android.routing
+package com.nurio.studyleaders.android.routing
 
 import androidx.browser.customtabs.CustomTabColorSchemeParams
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.net.toUri
-import com.nurio.studyleader.android.auth.SocialAuthRoute
+import com.nurio.studyleaders.android.auth.SocialAuthRoute
 import dev.hotwire.core.turbo.visit.VisitProposal
 import dev.hotwire.navigation.activities.HotwireActivity
 import dev.hotwire.navigation.navigator.NavigatorConfiguration

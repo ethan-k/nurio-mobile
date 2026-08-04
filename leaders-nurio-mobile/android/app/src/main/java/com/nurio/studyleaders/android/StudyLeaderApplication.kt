@@ -1,4 +1,4 @@
-package com.nurio.studyleader.android
+package com.nurio.studyleaders.android
 
 import android.app.Application
 import com.kakao.sdk.common.KakaoSdk
@@ -13,11 +13,11 @@ import dev.hotwire.navigation.config.registerRouteDecisionHandlers
 import dev.hotwire.navigation.routing.AppNavigationRouteDecisionHandler
 import dev.hotwire.navigation.routing.BrowserTabRouteDecisionHandler
 import dev.hotwire.navigation.routing.SystemNavigationRouteDecisionHandler
-import com.nurio.studyleader.android.bridge.SignInWithOAuthComponent
-import com.nurio.studyleader.android.fragments.WebFragment
-import com.nurio.studyleader.android.fragments.WebModalFragment
-import com.nurio.studyleader.android.routing.LeaderScopeRouteDecisionHandler
-import com.nurio.studyleader.android.routing.OAuthRouteDecisionHandler
+import com.nurio.studyleaders.android.bridge.SignInWithOAuthComponent
+import com.nurio.studyleaders.android.fragments.WebFragment
+import com.nurio.studyleaders.android.fragments.WebModalFragment
+import com.nurio.studyleaders.android.routing.LeaderScopeRouteDecisionHandler
+import com.nurio.studyleaders.android.routing.OAuthRouteDecisionHandler
 
 class StudyLeaderApplication : Application() {
     override fun onCreate() {

@@ -1,11 +1,11 @@
-package com.nurio.studyleader.android.auth
+package com.nurio.studyleaders.android.auth
 
 import com.kakao.sdk.auth.model.OAuthToken
 import com.kakao.sdk.common.model.ClientError
 import com.kakao.sdk.common.model.ClientErrorCause
 import com.kakao.sdk.user.UserApiClient
-import com.nurio.studyleader.android.BuildConfig
-import com.nurio.studyleader.android.MainActivity
+import com.nurio.studyleaders.android.BuildConfig
+import com.nurio.studyleaders.android.MainActivity
 import java.lang.ref.WeakReference
 import java.util.concurrent.atomic.AtomicBoolean
 

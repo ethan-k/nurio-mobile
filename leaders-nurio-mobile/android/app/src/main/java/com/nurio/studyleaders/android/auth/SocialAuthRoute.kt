@@ -1,4 +1,4 @@
-package com.nurio.studyleader.android.auth
+package com.nurio.studyleaders.android.auth
 
 import java.net.URI
 import java.net.URISyntaxException
