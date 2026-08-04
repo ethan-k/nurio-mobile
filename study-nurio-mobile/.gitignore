@@ -17,3 +17,12 @@ ios/**/xcuserdata/
 ios/*.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
 ios/Pods/
 ios/.build/
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+fastlane/.env
+fastlane/.env.*
+vendor/

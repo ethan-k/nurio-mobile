@@ -1,0 +1,262 @@
+# Nurio Study mobile deployment lanes.
+#
+# Version bumping stays with the existing release scripts; these lanes only
+# build and upload at whatever versions are currently written to the iOS
+# project (MARKETING_VERSION / CURRENT_PROJECT_VERSION) and Android gradle
+# file (versionName / versionCode).
+#
+# Credentials come from the shared workspace shell environment. These names
+# are deliberately unprefixed: one Apple Developer account and one Play
+# publisher service account serve every app in this workspace, so the same
+# variables work for Nurio Study and its siblings. Do not rename or add a
+# NURIO_ prefix.
+#
+#   APP_STORE_CONNECT_KEY_IDENTIFIER  App Store Connect API key ID
+#   APP_STORE_CONNECT_ISSUER_ID       App Store Connect issuer UUID
+#   APP_STORE_CONNECT_PRIVATE_KEY     AuthKey_<KEY_IDENTIFIER>.p8 PEM text
+#   APPLE_TEAM_ID                     Developer Portal team ID (read by Appfile)
+#   PLAY_SERVICE_ACCOUNT_JSON_BASE64  Play publisher service-account JSON, base64
+
+require "base64"
+require "fileutils"
+require "json"
+require "shellwords"
+require "tmpdir"
+
+IOS_REQUIRED_VARIABLES = %w[APP_STORE_CONNECT_KEY_IDENTIFIER APP_STORE_CONNECT_ISSUER_ID APP_STORE_CONNECT_PRIVATE_KEY].freeze
+ANDROID_REQUIRED_VARIABLES = %w[PLAY_SERVICE_ACCOUNT_JSON_BASE64].freeze
+
+# Credential decoding lives in a module so the memoized temp-key path survives
+# across lane, after_all, and error blocks, which do not share `self`.
+module NurioCredentials
+  extend self
+
+  def present?(value)
+    !value.nil? && !value.to_s.strip.empty?
+  end
+
+  def available?(names)
+    names.all? { |name| present?(ENV[name]) }
+  end
+
+  def require!(names)
+    missing = names.reject { |name| present?(ENV[name]) }
+    return if missing.empty?
+
+    UI.user_error!(
+      "missing release credentials: #{missing.sort.join(', ')}. These are " \
+      "exported by the shared workspace shell environment and are never read " \
+      "from this repository."
+    )
+  end
+
+  def fetch!(name)
+    require!([name])
+    ENV.fetch(name)
+  end
+
+  def decode!(name)
+    Base64.strict_decode64(fetch!(name).gsub(/\s+/, ""))
+  rescue ArgumentError
+    UI.user_error!("#{name} is not valid base64")
+  end
+
+  # xcodebuild's -authenticationKeyPath needs the key on disk. The env var
+  # holds the raw .p8 PEM text; it is written verbatim to a 0600 temp file and
+  # removed when the run finishes. No base64, no decoding.
+  def asc_key_path
+    @asc_key_path ||= begin
+      path = File.join(Dir.tmpdir, "nurio-AuthKey_#{fetch!('APP_STORE_CONNECT_KEY_IDENTIFIER')}.p8")
+      FileUtils.rm_f(path)
+      File.open(path, File::WRONLY | File::CREAT | File::EXCL, 0o600) do |file|
+        file.write(fetch!("APP_STORE_CONNECT_PRIVATE_KEY"))
+      end
+      path
+    end
+  end
+
+  def discard_asc_key!
+    FileUtils.rm_f(@asc_key_path) if @asc_key_path
+    @asc_key_path = nil
+  end
+
+  def play_json_key_data
+    @play_json_key_data ||= begin
+      decoded = decode!("PLAY_SERVICE_ACCOUNT_JSON_BASE64")
+
+      parsed =
+        begin
+          JSON.parse(decoded)
+        rescue JSON::ParserError
+          UI.user_error!("PLAY_SERVICE_ACCOUNT_JSON_BASE64 does not decode to JSON")
+        end
+
+      unless parsed["type"] == "service_account" && present?(parsed["client_email"])
+        UI.user_error!(
+          "PLAY_SERVICE_ACCOUNT_JSON_BASE64 must decode to a Play publisher " \
+          "service-account key"
+        )
+      end
+
+      decoded
+    end
+  end
+end
+
+before_all do
+  # Lanes run with study-nurio-mobile/ as fastlane's working directory root.
+  ENV["FASTLANE_SKIP_UPDATE_CHECK"] = "1"
+
+  # bundle exec exports RUBYOPT/BUNDLE_*/GEM_* to child processes; ruby
+  # helpers spawned by xcodebuild can crash loading a mismatched bundler.
+  # fastlane is fully loaded by now and no longer needs them.
+  %w[RUBYOPT BUNDLE_GEMFILE BUNDLE_BIN_PATH BUNDLER_SETUP BUNDLER_VERSION GEM_HOME GEM_PATH].each do |var|
+    ENV.delete(var)
+  end
+
+  # gradlew needs JAVA_HOME to launch; Android Studio's bundled JBR is the
+  # JDK this machine builds with.
+  jbr = "/Applications/Android Studio.app/Contents/jbr/Contents/Home"
+  ENV["JAVA_HOME"] ||= jbr if File.directory?(jbr)
+
+  sdk = File.expand_path("~/Library/Android/sdk")
+  ENV["ANDROID_HOME"] ||= sdk if File.directory?(sdk)
+end
+
+after_all do
+  NurioCredentials.discard_asc_key!
+end
+
+error do |_lane, _exception|
+  NurioCredentials.discard_asc_key!
+end
+
+def nurio_asc_api_key
+  NurioCredentials.require!(IOS_REQUIRED_VARIABLES)
+
+  app_store_connect_api_key(
+    key_id: ENV.fetch("APP_STORE_CONNECT_KEY_IDENTIFIER"),
+    issuer_id: ENV.fetch("APP_STORE_CONNECT_ISSUER_ID"),
+    key_content: ENV.fetch("APP_STORE_CONNECT_PRIVATE_KEY"),
+    in_house: false
+  )
+end
+
+platform :ios do
+  desc "Check App Store Connect credentials without building or uploading"
+  lane :validate do
+    nurio_asc_api_key
+    UI.success("App Store Connect API key #{ENV.fetch('APP_STORE_CONNECT_KEY_IDENTIFIER')} loaded")
+  end
+
+  desc "Archive and export a signed App Store IPA (no upload)"
+  lane :build do
+    # skipPackagePluginValidation/skipMacroValidation: headless xcodebuild
+    # cannot approve SPM plugins interactively.
+    xcargs = "-allowProvisioningUpdates -skipPackagePluginValidation -skipMacroValidation"
+
+    # With the ASC API key, automatic signing works headless (cloud signing)
+    # even when no Xcode account session is available to xcodebuild.
+    if NurioCredentials.available?(IOS_REQUIRED_VARIABLES)
+      xcargs += " -authenticationKeyID #{ENV.fetch("APP_STORE_CONNECT_KEY_IDENTIFIER")}" \
+                " -authenticationKeyIssuerID #{ENV.fetch("APP_STORE_CONNECT_ISSUER_ID")}" \
+                " -authenticationKeyPath #{NurioCredentials.asc_key_path.shellescape}"
+    else
+      UI.important(
+        "#{IOS_REQUIRED_VARIABLES.join(', ')} not set — signing falls back to " \
+        "the local Xcode account session, which fails headless."
+      )
+    end
+
+    build_app(
+      project: "ios/NurioStudy.xcodeproj",
+      scheme: "NurioStudy",
+      configuration: "Release",
+      export_method: "app-store",
+      output_directory: "ios/build/fastlane",
+      # Raw output: the xcpretty formatter is a system-Ruby script that can
+      # crash under bundle exec and kill the archive via pipefail.
+      xcodebuild_formatter: "",
+      xcargs: xcargs,
+      export_options: {
+        signingStyle: "automatic"
+      }
+    )
+  end
+
+  desc "Build and upload to TestFlight"
+  lane :beta do
+    api_key = nurio_asc_api_key
+    build
+    upload_to_testflight(
+      api_key: api_key,
+      skip_waiting_for_build_processing: true,
+      distribute_external: false
+    )
+  end
+
+  desc "Build and upload to App Store Connect for release review (metadata untouched)"
+  lane :release do
+    api_key = nurio_asc_api_key
+    build
+    upload_to_app_store(
+      api_key: api_key,
+      skip_metadata: true,
+      skip_screenshots: true,
+      precheck_include_in_app_purchases: false,
+      run_precheck_before_submit: false,
+      submit_for_review: false
+    )
+  end
+end
+
+platform :android do
+  desc "Check the Play publisher credentials without building or uploading"
+  lane :validate do
+    validate_play_store_json_key(json_key_data: NurioCredentials.play_json_key_data)
+    UI.success("Play publisher service account authenticated")
+  end
+
+  desc "Build the signed release AAB (no upload)"
+  lane :build do
+    gradle(
+      project_dir: "android",
+      task: "bundle",
+      build_type: "Release"
+    )
+  end
+
+  desc "Build and upload to the Play Console internal track"
+  lane :beta do
+    NurioCredentials.require!(ANDROID_REQUIRED_VARIABLES)
+    json_key_data = NurioCredentials.play_json_key_data
+
+    build
+    upload_to_play_store(
+      json_key_data: json_key_data,
+      track: "internal",
+      aab: "android/app/build/outputs/bundle/release/app-release.aab",
+      # The gradle lane context also advertises any stale debug/release APKs
+      # left in outputs/apk, and supply refuses an APK and an AAB together.
+      skip_upload_apk: true,
+      release_status: "draft",
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true
+    )
+  end
+
+  desc "Promote the internal build to production (no rebuild)"
+  lane :promote do
+    upload_to_play_store(
+      json_key_data: NurioCredentials.play_json_key_data,
+      track: "internal",
+      track_promote_to: "production",
+      skip_upload_aab: true,
+      skip_upload_apk: true,
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true
+    )
+  end
+end

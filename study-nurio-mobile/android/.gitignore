@@ -10,9 +10,7 @@ keystore.properties
 *.jks
 *.keystore
 
-# Fastlane
-fastlane/play-store-service-account.json
-fastlane/report.xml
+# Fastlane (top-level fastlane/ dir; see /.gitignore)
 vendor/
 
 # Android Studio / IntelliJ

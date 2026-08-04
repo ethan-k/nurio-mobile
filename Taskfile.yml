@@ -2,8 +2,8 @@ version: "3"
 
 vars:
   IOS_DIR: "{{.ROOT_DIR}}/ios"
-  FLUTTER_DIR: "{{.ROOT_DIR}}/flutter_app"
   LEGACY_ANDROID_DIR: "{{.ROOT_DIR}}/android"
+  STUDY_DIR: "{{.ROOT_DIR}}/study-nurio-mobile"
   TUTORS_ANDROID_DIR: "{{.ROOT_DIR}}/tutors-nurio-mobile/android"
   LEADERS_ANDROID_DIR: "{{.ROOT_DIR}}/leaders-nurio-mobile/android"
   LEADERS_IOS_DIR: "{{.ROOT_DIR}}/leaders-nurio-mobile/ios"
@@ -89,52 +89,60 @@ tasks:
     cmds:
       - ./scripts/ios-release.sh && ./scripts/ios-upload.sh
 
-  flutter:pub:
-    desc: Install Flutter dependencies
-    dir: "{{.FLUTTER_DIR}}"
+  study:validate:
+    desc: Check Study app store credentials for both platforms (iOS + Android)
+    dir: "{{.STUDY_DIR}}"
     cmds:
-      - flutter pub get
+      - task: study:ios:validate
+      - task: study:android:validate
 
-  flutter:analyze:
-    desc: Run Flutter static analysis
-    dir: "{{.FLUTTER_DIR}}"
+  study:ios:validate:
+    desc: Check the Study app App Store Connect API key without building
+    dir: "{{.STUDY_DIR}}"
     cmds:
-      - flutter analyze
+      - mise exec ruby -- ruby -S bundle exec fastlane ios validate
 
-  flutter:test:
-    desc: Run Flutter tests
-    dir: "{{.FLUTTER_DIR}}"
+  study:ios:build:
+    desc: Build the Study app signed App Store IPA (no upload)
+    dir: "{{.STUDY_DIR}}"
     cmds:
-      - flutter test
+      - mise exec ruby -- ruby -S bundle exec fastlane ios build
 
-  flutter:run:
-    desc: Run Flutter app
-    dir: "{{.FLUTTER_DIR}}"
+  study:ios:beta:
+    desc: Build and upload the Study app to TestFlight
+    dir: "{{.STUDY_DIR}}"
     cmds:
-      - flutter run
+      - mise exec ruby -- ruby -S bundle exec fastlane ios beta
 
-  flutter:build:apk:
-    desc: Build Flutter Android APK (release)
-    dir: "{{.FLUTTER_DIR}}"
+  study:ios:release:
+    desc: Build and upload the Study app to App Store Connect for release review
+    dir: "{{.STUDY_DIR}}"
     cmds:
-      - flutter build apk --release
+      - mise exec ruby -- ruby -S bundle exec fastlane ios release
 
-  flutter:build:aab:
-    desc: Build Flutter Android App Bundle (release)
-    dir: "{{.FLUTTER_DIR}}"
+  study:android:validate:
+    desc: Check the Study app Play publisher service account without building
+    dir: "{{.STUDY_DIR}}"
     cmds:
-      - flutter build appbundle --release
+      - mise exec ruby -- ruby -S bundle exec fastlane android validate
 
-  flutter:release:
-    desc: Bump Flutter version and build release AAB
+  study:android:build:
+    desc: Build the Study app signed release AAB (no upload)
+    dir: "{{.STUDY_DIR}}"
     cmds:
-      - ./scripts/build-release-flutter.sh
+      - mise exec ruby -- ruby -S bundle exec fastlane android build
 
-  flutter:clean:
-    desc: Clean Flutter build artifacts
-    dir: "{{.FLUTTER_DIR}}"
+  study:android:beta:
+    desc: Build and upload the Study app AAB to the Play internal track
+    dir: "{{.STUDY_DIR}}"
     cmds:
-      - flutter clean
+      - mise exec ruby -- ruby -S bundle exec fastlane android beta
+
+  study:android:promote:
+    desc: Promote the Study app Play internal build to production
+    dir: "{{.STUDY_DIR}}"
+    cmds:
+      - mise exec ruby -- ruby -S bundle exec fastlane android promote
 
   android:build:
     desc: Build debug APK for the Android app
