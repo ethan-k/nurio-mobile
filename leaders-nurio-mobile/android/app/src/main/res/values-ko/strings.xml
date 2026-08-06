@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">누리오 스터디 리더</string>
+    <string name="push_notification_channel_name">스터디 리더 알림</string>
+    <string name="push_notification_channel_description">세션, 일정 및 계정 활동 알림</string>
 </resources>

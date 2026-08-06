@@ -14,8 +14,10 @@ import dev.hotwire.navigation.routing.AppNavigationRouteDecisionHandler
 import dev.hotwire.navigation.routing.BrowserTabRouteDecisionHandler
 import dev.hotwire.navigation.routing.SystemNavigationRouteDecisionHandler
 import com.nurio.studyleaders.android.bridge.SignInWithOAuthComponent
+import com.nurio.studyleaders.android.bridge.RegisterDeviceTokenComponent
 import com.nurio.studyleaders.android.fragments.WebFragment
 import com.nurio.studyleaders.android.fragments.WebModalFragment
+import com.nurio.studyleaders.android.notifications.NotificationChannels
 import com.nurio.studyleaders.android.routing.LeaderScopeRouteDecisionHandler
 import com.nurio.studyleaders.android.routing.OAuthRouteDecisionHandler
 
@@ -25,6 +27,7 @@ class StudyLeaderApplication : Application() {
         if (BuildConfig.KAKAO_NATIVE_APP_KEY.isNotBlank()) {
             KakaoSdk.init(this, BuildConfig.KAKAO_NATIVE_APP_KEY)
         }
+        NotificationChannels.ensureCreated(this)
         configureHotwire()
     }
 
@@ -44,7 +47,8 @@ class StudyLeaderApplication : Application() {
         )
 
         Hotwire.registerBridgeComponents(
-            BridgeComponentFactory("sign-in-with-oauth", ::SignInWithOAuthComponent)
+            BridgeComponentFactory("sign-in-with-oauth", ::SignInWithOAuthComponent),
+            BridgeComponentFactory("register-device-token", ::RegisterDeviceTokenComponent)
         )
 
         Hotwire.defaultFragmentDestination = WebFragment::class

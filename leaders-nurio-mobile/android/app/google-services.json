@@ -1,0 +1,91 @@
+{
+  "project_info": {
+    "project_number": "817285205045",
+    "project_id": "nurio-prod",
+    "storage_bucket": "nurio-prod.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:817285205045:android:f0a383c7b541d3487eb57c",
+        "android_client_info": {
+          "package_name": "com.nurio.android"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC7An8qulD70mNBQOjmmxjUs7yh8A4rUy8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "817285205045-eosm1j0e46du0rp45dbconac3qf1tinv.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.nurio.study.ios"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:817285205045:android:8f0622e754a640087eb57c",
+        "android_client_info": {
+          "package_name": "com.nurio.study.android"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC7An8qulD70mNBQOjmmxjUs7yh8A4rUy8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "817285205045-eosm1j0e46du0rp45dbconac3qf1tinv.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.nurio.study.ios"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:817285205045:android:feada9ade3bf2e9e7eb57c",
+        "android_client_info": {
+          "package_name": "com.nurio.studyleaders.android"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC7An8qulD70mNBQOjmmxjUs7yh8A4rUy8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "817285205045-eosm1j0e46du0rp45dbconac3qf1tinv.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.nurio.study.ios"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
