@@ -47,6 +47,12 @@ android {
             buildConfigField("String", "BASE_URL", "\"https://nurio.kr\"")
             buildConfigField("Boolean", "DEBUG_LOGGING", "true")
         }
+        create("productionDebug") {
+            initWith(getByName("debug"))
+            buildConfigField("String", "BASE_URL", "\"https://nurio.kr\"")
+            isDebuggable = true
+            signingConfig = signingConfigs.getByName("debug")
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(

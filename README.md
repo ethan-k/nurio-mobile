@@ -118,6 +118,23 @@ cd leaders-nurio-mobile/android
 ./gradlew :app:testDebugUnitTest :app:assembleDebug :app:lintDebug
 ```
 
+## Android Studio production emulator builds
+
+Each Android shell exposes a debuggable `productionDebug` build variant for
+one-click emulator runs against its live product host:
+
+| App | Android project | Production host |
+| --- | --- | --- |
+| Customer Nurio | `android/` | `https://nurio.kr` |
+| Study Nurio | `study-nurio-mobile/android/` | `https://study.nurio.kr` |
+| Study Leader Nurio | `leaders-nurio-mobile/android/` | `https://studyleaders.nurio.kr` |
+
+Open the relevant Android project in Android Studio, sync Gradle, then choose
+`app: productionDebug` in **View > Tool Windows > Build Variants**. Select the
+`app` Run configuration and click **Run** or **Debug**. These are local
+debug-key emulator builds that use live production data; use a designated QA
+account and avoid destructive actions.
+
 ## Flutter Constraint
 
 The Flutter app remains native-only.
