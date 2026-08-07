@@ -163,6 +163,7 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.splashscreen)
     implementation(libs.androidx.browser)
+    implementation(libs.lottie)
     implementation(libs.kakao.user)
     implementation(libs.kotlinx.serialization.json)
 

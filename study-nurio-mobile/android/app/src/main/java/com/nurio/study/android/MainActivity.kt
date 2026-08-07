@@ -1,10 +1,13 @@
 package com.nurio.study.android
 
 import android.Manifest
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
@@ -13,6 +16,7 @@ import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.net.toUri
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.airbnb.lottie.LottieAnimationView
 import com.nurio.study.android.auth.NativeAuthCallback
 import com.nurio.study.android.auth.NativeAuthCallbackConsumer
 import com.nurio.study.android.auth.NativeAuthCallbackSource
@@ -66,10 +70,31 @@ class MainActivity : HotwireActivity(), NotificationPermissionHost {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        showSplashAnimation(coldStart = savedInstanceState == null)
         pendingAuthUrl = savedInstanceState?.getString(PENDING_AUTH_URL_KEY)
         delegate.setCurrentNavigator(navigatorConfigurations().first())
         handleAuthCallbackIntent(intent)
         handleNotificationIntent(intent)
+    }
+
+    private fun showSplashAnimation(coldStart: Boolean) {
+        val splashView = findViewById<LottieAnimationView>(R.id.splash_animation)
+
+        if (!coldStart) {
+            splashView.visibility = View.GONE
+            return
+        }
+
+        splashView.addAnimatorListener(object : AnimatorListenerAdapter() {
+            override fun onAnimationEnd(animation: Animator) {
+                splashView.animate()
+                    .alpha(0f)
+                    .setDuration(250)
+                    .withEndAction { splashView.visibility = View.GONE }
+                    .start()
+            }
+        })
+        splashView.playAnimation()
     }
 
     override fun onNewIntent(intent: Intent) {
