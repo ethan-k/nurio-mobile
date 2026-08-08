@@ -26,11 +26,13 @@ import com.nurio.study.android.auth.NativeAuthHandoffClient
 import com.nurio.study.android.auth.NativeKakaoSignInCoordinator
 import com.nurio.study.android.auth.SocialAuthCoordinator
 import com.nurio.study.android.auth.SocialAuthRoute
+import com.nurio.study.android.microphone.MicPermissionHost
+import com.nurio.study.android.microphone.MicrophonePermissionRequestAction
+import com.nurio.study.android.microphone.MicrophonePermissionRequestState
 import com.nurio.study.android.notifications.NotificationDestination
 import com.nurio.study.android.notifications.NotificationPayload
 import com.nurio.study.android.notifications.NotificationPermissionHost
 import com.nurio.study.android.notifications.PendingNotificationRoute
-import com.nurio.study.android.microphone.MicPermissionHost
 import dev.hotwire.navigation.activities.HotwireActivity
 import dev.hotwire.navigation.navigator.Navigator
 import dev.hotwire.navigation.navigator.NavigatorConfiguration
@@ -40,8 +42,7 @@ class MainActivity : HotwireActivity(), MicPermissionHost, NotificationPermissio
         private const val PENDING_AUTH_URL_KEY = "pending_auth_url"
         private const val PUSH_PERMISSION_PREFERENCES = "nurio_study_push"
         private const val PUSH_PERMISSION_REQUESTED_KEY = "permission_requested"
-        private const val MICROPHONE_PERMISSION_PREFERENCES = "nurio_study_microphone"
-        private const val MICROPHONE_PERMISSION_REQUESTED_KEY = "permission_requested"
+        private const val LEGACY_MICROPHONE_PERMISSION_PREFERENCES = "nurio_study_microphone"
         const val NOTIFICATION_DESTINATION_EXTRA = "notification_destination"
     }
 
@@ -49,7 +50,7 @@ class MainActivity : HotwireActivity(), MicPermissionHost, NotificationPermissio
     private val pendingNotificationRoute = PendingNotificationRoute()
     private var readyNavigator: Navigator? = null
     private val notificationPermissionCallbacks = mutableListOf<(Boolean) -> Unit>()
-    private val microphonePermissionCallbacks = mutableListOf<(Boolean) -> Unit>()
+    private val microphonePermissionRequestState = MicrophonePermissionRequestState()
     private var microphoneSettingsDialog: AlertDialog? = null
     private val notificationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -61,15 +62,16 @@ class MainActivity : HotwireActivity(), MicPermissionHost, NotificationPermissio
     private val microphonePermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
-        val callbacks = microphonePermissionCallbacks.toList()
-        microphonePermissionCallbacks.clear()
-        callbacks.forEach { it(granted) }
+        val result = microphonePermissionRequestState.complete(
+            granted = granted,
+            shouldShowRequestPermissionRationale = !granted &&
+                ActivityCompat.shouldShowRequestPermissionRationale(
+                    this,
+                    Manifest.permission.RECORD_AUDIO
+                )
+        ) ?: return@registerForActivityResult
 
-        if (!granted && !ActivityCompat.shouldShowRequestPermissionRationale(
-                this,
-                Manifest.permission.RECORD_AUDIO
-            )
-        ) {
+        if (result.showSettingsRecovery) {
             showMicrophoneSettingsDialog()
         }
     }
@@ -91,6 +93,7 @@ class MainActivity : HotwireActivity(), MicPermissionHost, NotificationPermissio
         installSplashScreen()
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+        deleteSharedPreferences(LEGACY_MICROPHONE_PERMISSION_PREFERENCES)
         setContentView(R.layout.activity_main)
         showSplashAnimation(coldStart = savedInstanceState == null)
         pendingAuthUrl = savedInstanceState?.getString(PENDING_AUTH_URL_KEY)
@@ -147,6 +150,7 @@ class MainActivity : HotwireActivity(), MicPermissionHost, NotificationPermissio
 
     override fun onDestroy() {
         readyNavigator = null
+        microphonePermissionRequestState.cancel()
         microphoneSettingsDialog?.dismiss()
         microphoneSettingsDialog = null
         if (nativeKakaoCoordinatorDelegate.isInitialized()) {
@@ -233,30 +237,16 @@ class MainActivity : HotwireActivity(), MicPermissionHost, NotificationPermissio
     }
 
     override fun requestMicrophonePermission(callback: (Boolean) -> Unit) {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) ==
-            PackageManager.PERMISSION_GRANTED
-        ) {
-            callback(true)
-            return
+        val permissionGranted =
+            ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) ==
+                PackageManager.PERMISSION_GRANTED
+
+        when (microphonePermissionRequestState.request(permissionGranted, callback)) {
+            MicrophonePermissionRequestAction.LAUNCH_RUNTIME_REQUEST ->
+                microphonePermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+            MicrophonePermissionRequestAction.COMPLETE_GRANTED,
+            MicrophonePermissionRequestAction.AWAIT_RUNTIME_RESULT -> Unit
         }
-
-        val preferences = getSharedPreferences(MICROPHONE_PERMISSION_PREFERENCES, MODE_PRIVATE)
-        val requestedBefore = preferences.getBoolean(MICROPHONE_PERMISSION_REQUESTED_KEY, false)
-        if (requestedBefore && !ActivityCompat.shouldShowRequestPermissionRationale(
-                this,
-                Manifest.permission.RECORD_AUDIO
-            )
-        ) {
-            callback(false)
-            showMicrophoneSettingsDialog()
-            return
-        }
-
-        microphonePermissionCallbacks += callback
-        if (microphonePermissionCallbacks.size > 1) return
-
-        preferences.edit().putBoolean(MICROPHONE_PERMISSION_REQUESTED_KEY, true).apply()
-        microphonePermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
     }
 
     private fun showMicrophoneSettingsDialog() {

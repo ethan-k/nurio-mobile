@@ -3,5 +3,6 @@
     <cloud-backup>
         <include domain="sharedpref" path="."/>
         <exclude domain="sharedpref" path="device.xml"/>
+        <exclude domain="sharedpref" path="nurio_study_microphone.xml"/>
     </cloud-backup>
 </data-extraction-rules>
