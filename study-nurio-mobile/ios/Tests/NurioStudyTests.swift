@@ -4,6 +4,85 @@ import XCTest
 @testable import NurioStudy
 
 final class NurioStudyTests: XCTestCase {
+    func testAIPracticeNativePolicyRecognizesOnlySessionURLs() {
+        XCTAssertTrue(
+            AiPracticeNativePolicy.isSessionURL(URL(string: "https://study.nurio.kr/practice/42")!)
+        )
+        XCTAssertTrue(
+            AiPracticeNativePolicy.isSessionURL(
+                URL(string: "https://study.nurio.kr/practice/42?lang=ko")!
+            )
+        )
+
+        [
+            "https://study.nurio.kr/practice",
+            "https://study.nurio.kr/practice/new",
+            "https://study.nurio.kr/practice/42/review",
+        ].forEach { location in
+            XCTAssertFalse(AiPracticeNativePolicy.isSessionURL(URL(string: location)!))
+        }
+    }
+
+    func testAIPracticeMicrophoneOriginRequiresConfiguredHTTPSOrigin() {
+        let baseURL = URL(string: "https://study.nurio.kr")!
+        XCTAssertTrue(
+            AiPracticeNativePolicy.isTrustedMicrophoneOrigin(
+                protocol: "https",
+                host: "STUDY.NURIO.KR",
+                port: 0,
+                baseURL: baseURL
+            )
+        )
+        XCTAssertTrue(
+            AiPracticeNativePolicy.isTrustedMicrophoneOrigin(
+                protocol: "https",
+                host: "study.nurio.kr",
+                port: 443,
+                baseURL: baseURL
+            )
+        )
+
+        let rejectedOrigins = [
+            (protocol: "http", host: "study.nurio.kr", port: 80),
+            (protocol: "https", host: "evil.example", port: 443),
+            (protocol: "https", host: "study.nurio.kr", port: 8443),
+        ]
+        for origin in rejectedOrigins {
+            XCTAssertFalse(
+                AiPracticeNativePolicy.isTrustedMicrophoneOrigin(
+                    protocol: origin.protocol,
+                    host: origin.host,
+                    port: origin.port,
+                    baseURL: baseURL
+                )
+            )
+        }
+    }
+
+    func testAIPracticeNativeConfigurationIsBundled() throws {
+        XCTAssertFalse(
+            (Bundle.main.object(forInfoDictionaryKey: "NSMicrophoneUsageDescription") as? String)?
+                .isEmpty ?? true
+        )
+
+        let configurationURL = try XCTUnwrap(
+            Bundle.main.url(forResource: AppEnvironment.pathConfigurationResourceName, withExtension: "json")
+        )
+        let data = try Data(contentsOf: configurationURL)
+        let configuration = try XCTUnwrap(
+            JSONSerialization.jsonObject(with: data) as? [String: Any]
+        )
+        let rules = try XCTUnwrap(configuration["rules"] as? [[String: Any]])
+        let practiceRule = try XCTUnwrap(rules.first { rule in
+            (rule["patterns"] as? [String])?.contains("/practice/\\d+(?:\\?.*)?$") == true
+        })
+        let properties = try XCTUnwrap(practiceRule["properties"] as? [String: Any])
+
+        XCTAssertEqual(properties["context"] as? String, "default")
+        XCTAssertEqual(properties["uri"] as? String, "hotwire://fragment/web")
+        XCTAssertEqual(properties["pull_to_refresh_enabled"] as? Bool, false)
+    }
+
     func testTokenAuthURLFromNativeCallback() {
         let callbackURL = URL(string: "nuriostudy://auth-callback?token=test-token&state=test-state")!
         let tokenAuthURL = NativeAuthCallback.tokenAuthURL(

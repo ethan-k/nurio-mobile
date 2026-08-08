@@ -2,17 +2,102 @@ import HotwireNative
 import GoogleSignIn
 import KakaoSDKAuth
 import UIKit
+import WebKit
+
+enum AiPracticeNativePolicy {
+    private static let sessionPathPattern = #"^/practice/[0-9]+/?$"#
+
+    static func isSessionURL(_ url: URL) -> Bool {
+        url.path.range(of: sessionPathPattern, options: .regularExpression) != nil
+    }
+
+    static func isTrustedMicrophoneOrigin(
+        protocol originProtocol: String,
+        host: String,
+        port: Int,
+        baseURL: URL
+    ) -> Bool {
+        guard let requestedOrigin = Origin(
+            scheme: originProtocol,
+            host: host,
+            port: port == 0 ? nil : port
+        ), let trustedOrigin = Origin(url: baseURL) else {
+            return false
+        }
+
+        return requestedOrigin == trustedOrigin && requestedOrigin.scheme == "https"
+    }
+
+    private struct Origin: Equatable {
+        let scheme: String
+        let host: String
+        let port: Int?
+
+        init?(url: URL) {
+            guard url.user == nil, url.password == nil, let scheme = url.scheme, let host = url.host else {
+                return nil
+            }
+            self.init(scheme: scheme, host: host, port: url.port)
+        }
+
+        init?(scheme: String, host: String, port: Int?) {
+            let normalizedScheme = scheme.lowercased()
+            let normalizedHost = host.lowercased()
+            guard !normalizedScheme.isEmpty, !normalizedHost.isEmpty else { return nil }
+
+            self.scheme = normalizedScheme
+            self.host = normalizedHost
+            self.port = Self.isDefaultPort(port, scheme: normalizedScheme) ? nil : port
+        }
+
+        private static func isDefaultPort(_ port: Int?, scheme: String) -> Bool {
+            (scheme == "https" && port == 443) || (scheme == "http" && port == 80)
+        }
+    }
+}
+
+final class StudyWKUIController: WKUIController {
+    private let trustedBaseURL: URL
+
+    init(delegate: WKUIControllerDelegate, trustedBaseURL: URL) {
+        self.trustedBaseURL = trustedBaseURL
+        super.init(delegate: delegate)
+    }
+
+    func webView(
+        _ webView: WKWebView,
+        requestMediaCapturePermissionFor origin: WKSecurityOrigin,
+        initiatedByFrame frame: WKFrameInfo,
+        type: WKMediaCaptureType,
+        decisionHandler: @escaping (WKPermissionDecision) -> Void
+    ) {
+        let trustedRequest = type == .microphone && AiPracticeNativePolicy.isTrustedMicrophoneOrigin(
+            protocol: origin.`protocol`,
+            host: origin.host,
+            port: origin.port,
+            baseURL: trustedBaseURL
+        )
+        decisionHandler(trustedRequest ? .grant : .deny)
+    }
+}
 
 final class SceneController: UIResponder {
     var window: UIWindow?
 
-    private lazy var navigator = Navigator(
-        configuration: .init(
-            name: "NurioStudy",
-            startLocation: AppEnvironment.startURL
-        ),
-        delegate: self
-    )
+    private lazy var navigator: Navigator = {
+        let navigator = Navigator(
+            configuration: .init(
+                name: "NurioStudy",
+                startLocation: AppEnvironment.startURL
+            ),
+            delegate: self
+        )
+        navigator.webkitUIDelegate = StudyWKUIController(
+            delegate: navigator,
+            trustedBaseURL: AppEnvironment.baseURL
+        )
+        return navigator
+    }()
 
     private var hasStarted = false
 
@@ -51,6 +136,10 @@ final class SceneController: UIResponder {
         guard let rootNav = navigator.rootViewController as? UINavigationController else { return }
         rootNav.setNavigationBarHidden(true, animated: false)
         rootNav.delegate = self
+    }
+
+    private func updateIdleTimer(for url: URL?) {
+        UIApplication.shared.isIdleTimerDisabled = url.map(AiPracticeNativePolicy.isSessionURL) ?? false
     }
 }
 
@@ -95,6 +184,19 @@ extension SceneController: UIWindowSceneDelegate {
 
         startIfNeeded(with: url)
     }
+
+    func sceneWillEnterForeground(_ scene: UIScene) {
+        let visitable = navigator.activeNavigationController.topViewController as? any Visitable
+        updateIdleTimer(for: visitable?.currentVisitableURL)
+    }
+
+    func sceneDidEnterBackground(_ scene: UIScene) {
+        updateIdleTimer(for: nil)
+    }
+
+    func sceneDidDisconnect(_ scene: UIScene) {
+        updateIdleTimer(for: nil)
+    }
 }
 
 extension SceneController: NavigatorDelegate {
@@ -126,5 +228,7 @@ extension SceneController: UINavigationControllerDelegate {
         animated: Bool
     ) {
         navigationController.setNavigationBarHidden(true, animated: animated)
+        let visitable = viewController as? any Visitable
+        updateIdleTimer(for: visitable?.currentVisitableURL)
     }
 }
