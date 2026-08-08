@@ -190,6 +190,38 @@ final class NurioStudyTests: XCTestCase {
         XCTAssertEqual(properties["pull_to_refresh_enabled"] as? Bool, false)
     }
 
+    func testAIPracticePrivacyManifestDeclaresLinkedNonTrackingUserContent() throws {
+        let manifestURL = try XCTUnwrap(
+            Bundle.main.url(forResource: "PrivacyInfo", withExtension: "xcprivacy")
+        )
+        let manifestData = try Data(contentsOf: manifestURL)
+        let manifest = try XCTUnwrap(
+            PropertyListSerialization.propertyList(from: manifestData, format: nil)
+                as? [String: Any]
+        )
+        let collectedDataTypes = try XCTUnwrap(
+            manifest["NSPrivacyCollectedDataTypes"] as? [[String: Any]]
+        )
+
+        XCTAssertEqual(manifest["NSPrivacyTracking"] as? Bool, false)
+
+        for dataType in [
+            "NSPrivacyCollectedDataTypeAudioData",
+            "NSPrivacyCollectedDataTypeOtherUserContent",
+        ] {
+            let declaration = try XCTUnwrap(collectedDataTypes.first { item in
+                item["NSPrivacyCollectedDataType"] as? String == dataType
+            })
+
+            XCTAssertEqual(declaration["NSPrivacyCollectedDataTypeLinked"] as? Bool, true)
+            XCTAssertEqual(declaration["NSPrivacyCollectedDataTypeTracking"] as? Bool, false)
+            XCTAssertEqual(
+                declaration["NSPrivacyCollectedDataTypePurposes"] as? [String],
+                ["NSPrivacyCollectedDataTypePurposeAppFunctionality"]
+            )
+        }
+    }
+
     func testTokenAuthURLFromNativeCallback() {
         let callbackURL = URL(string: "nuriostudy://auth-callback?token=test-token&state=test-state")!
         let tokenAuthURL = NativeAuthCallback.tokenAuthURL(

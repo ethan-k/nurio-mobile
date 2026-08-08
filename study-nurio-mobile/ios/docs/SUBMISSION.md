@@ -8,7 +8,7 @@ Current scaffold status in this repository:
 - Scheme: `NurioStudy`
 - Production bundle identifier: `com.nurio.study.ios`
 - Default start URL: `https://study.nurio.kr`
-- OAuth callback scheme: `nurio://auth-callback`
+- OAuth callback scheme: `nuriostudy://auth-callback`
 
 ## 1. Prepare The App For Release
 
@@ -34,6 +34,7 @@ Project-specific checks before submission:
 - OAuth sign-in works through the native callback path
 - Admin and tutor routes are not navigated in-app
 - Payment and checkout pages still render inside the study shell when offered by the web app
+- The AI Practice privacy and store-console gate in [`../../docs/PRIVACY_RELEASE.md`](../../docs/PRIVACY_RELEASE.md) is complete
 
 ## 2. Create The App Store Connect App
 
@@ -127,9 +128,10 @@ Recommended review notes for this app:
 
 - The app is a study-only shell for the Nurio Study web experience.
 - The default landing page is `https://study.nurio.kr`.
-- OAuth sign-in uses an external authentication session and returns through `nurio://auth-callback`.
+- OAuth sign-in uses an external authentication session and returns through `nuriostudy://auth-callback`.
 - Admin and tutor routes are intentionally excluded from the app scope.
-- Any purchases offered are for real-world study-group programs consumed outside the app; per Guideline 3.1.3(e) they use the web payment gateway rather than In-App Purchase. The app sells no digital content or features. See `docs/APP_STORE_PAYMENTS.md` in the repo root.
+- AI Practice is an optional membership feature that processes microphone audio and speech-derived transcripts to provide private conversation and pronunciation feedback.
+- Real-world class purchases use the web payment gateway. Because AI Practice is a membership-included digital feature, the release owner must confirm the current App Review/payment classification before submission; do not claim that the app contains no digital features. See `docs/APP_STORE_PAYMENTS.md` in the Rails repository.
 
 ## 7. First-Submission Checklist
 
@@ -142,6 +144,10 @@ Use this short checklist before pressing submit:
 - Study checkout works when offered by the web app
 - Google, Kakao, and Naver OAuth round-trips succeed
 - Privacy Policy URL and support URL are set
+- `PrivacyInfo.xcprivacy` is validated and the cross-platform privacy checklist is complete
+- App Store Connect App Privacy answers are published for the full app, including AI Practice audio and transcripts
+- The active AI provider list matches the public Study privacy policy
+- App Review/payment classification is approved for membership-included AI Practice
 - App Review notes are added
 
 ## Official Apple References
