@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Nurio Study</string>
+    <string name="app_name_korean">누리오 스터디</string>
+    <string name="nav_home">Home</string>
+    <string name="nav_events">Events</string>
+    <string name="nav_profile">Profile</string>
+    <string name="push_notification_channel_name">Nurio Study notifications</string>
+    <string name="push_notification_channel_description">Study updates, reminders, and account activity</string>
+    <string name="microphone_permission_settings_title">Microphone access needed</string>
+    <string name="microphone_permission_settings_message">To start AI English conversation practice, allow Nurio Study to use the microphone in Settings.</string>
+    <string name="microphone_permission_settings_cancel">Not now</string>
+    <string name="microphone_permission_settings_open">Open Settings</string>
+</resources>

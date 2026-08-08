@@ -166,6 +166,117 @@ final class NurioStudyTests: XCTestCase {
         XCTAssertFalse(shouldGrant(type: .cameraAndMicrophone, webViewURL: sessionURL))
     }
 
+    func testAIPracticeMicrophoneDispositionGrantsOnlyAvailableTrustedRequests() {
+        for systemPermission in [
+            AiPracticeNativePolicy.SystemMicrophonePermission.authorized,
+            .notDetermined,
+        ] {
+            XCTAssertEqual(
+                AiPracticeNativePolicy.microphoneCaptureDisposition(
+                    trustedRequest: true,
+                    systemPermission: systemPermission
+                ),
+                AiPracticeNativePolicy.MicrophoneCaptureDisposition(
+                    grantsCapture: true,
+                    showsSettingsRecovery: false
+                )
+            )
+        }
+
+        XCTAssertEqual(
+            AiPracticeNativePolicy.microphoneCaptureDisposition(
+                trustedRequest: true,
+                systemPermission: .denied
+            ),
+            AiPracticeNativePolicy.MicrophoneCaptureDisposition(
+                grantsCapture: false,
+                showsSettingsRecovery: true
+            )
+        )
+        XCTAssertEqual(
+            AiPracticeNativePolicy.microphoneCaptureDisposition(
+                trustedRequest: true,
+                systemPermission: .restricted
+            ),
+            AiPracticeNativePolicy.MicrophoneCaptureDisposition(
+                grantsCapture: false,
+                showsSettingsRecovery: false
+            )
+        )
+    }
+
+    func testDeniedUntrustedMicrophoneRequestsStaySilentAndClosed() {
+        for systemPermission in AiPracticeNativePolicy.SystemMicrophonePermission.allCases {
+            XCTAssertEqual(
+                AiPracticeNativePolicy.microphoneCaptureDisposition(
+                    trustedRequest: false,
+                    systemPermission: systemPermission
+                ),
+                AiPracticeNativePolicy.MicrophoneCaptureDisposition(
+                    grantsCapture: false,
+                    showsSettingsRecovery: false
+                )
+            )
+        }
+    }
+
+    func testMicrophoneSettingsRecoveryAllowsOnlyOneAlertAtATime() {
+        let state = MicrophoneSettingsRecoveryState()
+
+        XCTAssertTrue(state.beginPresentation())
+        XCTAssertFalse(state.beginPresentation())
+        state.finishPresentation()
+        XCTAssertTrue(state.beginPresentation())
+    }
+
+    func testMicrophoneCopyIsLocalizedInEnglishAndKorean() throws {
+        let expectedCopy: [String: [String: String]] = [
+            "en": [
+                "usage": "Nurio Study uses the microphone to hear your voice and provide feedback during AI English conversation practice.",
+                "title": "Microphone access needed",
+                "message": "To start AI English conversation practice, allow Nurio Study to use the microphone in Settings.",
+                "cancel": "Not now",
+                "open": "Open Settings",
+            ],
+            "ko": [
+                "usage": "AI 영어회화 연습에서 내 목소리를 듣고 대화 피드백을 제공하기 위해 마이크를 사용합니다.",
+                "title": "마이크 권한이 필요해요",
+                "message": "AI 영어회화 연습을 시작하려면 설정에서 Nurio Study의 마이크 권한을 허용해 주세요.",
+                "cancel": "나중에",
+                "open": "설정 열기",
+            ],
+        ]
+
+        for (localization, copy) in expectedCopy {
+            let infoURL = try XCTUnwrap(
+                Bundle.main.url(
+                    forResource: "InfoPlist",
+                    withExtension: "strings",
+                    subdirectory: nil,
+                    localization: localization
+                )
+            )
+            let localizableURL = try XCTUnwrap(
+                Bundle.main.url(
+                    forResource: "Localizable",
+                    withExtension: "strings",
+                    subdirectory: nil,
+                    localization: localization
+                )
+            )
+            let info = try XCTUnwrap(NSDictionary(contentsOf: infoURL) as? [String: String])
+            let localizable = try XCTUnwrap(
+                NSDictionary(contentsOf: localizableURL) as? [String: String]
+            )
+
+            XCTAssertEqual(info["NSMicrophoneUsageDescription"], copy["usage"])
+            XCTAssertEqual(localizable["microphone_permission_settings_title"], copy["title"])
+            XCTAssertEqual(localizable["microphone_permission_settings_message"], copy["message"])
+            XCTAssertEqual(localizable["microphone_permission_settings_cancel"], copy["cancel"])
+            XCTAssertEqual(localizable["microphone_permission_settings_open"], copy["open"])
+        }
+    }
+
     func testAIPracticeNativeConfigurationIsBundled() throws {
         XCTAssertFalse(
             (Bundle.main.object(forInfoDictionaryKey: "NSMicrophoneUsageDescription") as? String)?

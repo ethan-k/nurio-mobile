@@ -30,6 +30,8 @@
 		A00000000000000000000015 /* SocialAuthCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000046 /* SocialAuthCoordinator.swift */; };
 		A00000000000000000000016 /* NativeGoogleSignInCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000047 /* NativeGoogleSignInCoordinator.swift */; };
 		A00000000000000000000017 /* NativeAppleSignInCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000048 /* NativeAppleSignInCoordinator.swift */; };
+		A00000000000000000000018 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = A000000000000000000000A1 /* InfoPlist.strings */; };
+		A00000000000000000000019 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = A000000000000000000000A2 /* Localizable.strings */; };
 		C00000000000000000000005 /* KakaoSDKCommon in Frameworks */ = {isa = PBXBuildFile; productRef = C00000000000000000000002 /* KakaoSDKCommon */; };
 		C00000000000000000000006 /* KakaoSDKAuth in Frameworks */ = {isa = PBXBuildFile; productRef = C00000000000000000000003 /* KakaoSDKAuth */; };
 		C00000000000000000000007 /* KakaoSDKUser in Frameworks */ = {isa = PBXBuildFile; productRef = C00000000000000000000004 /* KakaoSDKUser */; };
@@ -78,6 +80,10 @@
 		A00000000000000000000046 /* SocialAuthCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocialAuthCoordinator.swift; sourceTree = "<group>"; };
 		A00000000000000000000047 /* NativeGoogleSignInCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeGoogleSignInCoordinator.swift; sourceTree = "<group>"; };
 		A00000000000000000000048 /* NativeAppleSignInCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeAppleSignInCoordinator.swift; sourceTree = "<group>"; };
+		A00000000000000000000049 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		A0000000000000000000004A /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		A0000000000000000000004B /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		A0000000000000000000004C /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/Localizable.strings; sourceTree = "<group>"; };
 		D00000000000000000000031 /* NotificationDestination.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationDestination.swift; sourceTree = "<group>"; };
 		D00000000000000000000032 /* NativePushTokenStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativePushTokenStore.swift; sourceTree = "<group>"; };
 		D00000000000000000000033 /* RegisterDeviceTokenComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterDeviceTokenComponent.swift; sourceTree = "<group>"; };
@@ -142,6 +148,8 @@
 				D00000000000000000000034 /* NurioStudy.entitlements */,
 				A0000000000000000000003E /* Info.plist */,
 				A00000000000000000000042 /* PrivacyInfo.xcprivacy */,
+				A000000000000000000000A1 /* InfoPlist.strings */,
+				A000000000000000000000A2 /* Localizable.strings */,
 				A0000000000000000000003C /* Assets.xcassets */,
 				A000000000000000000000A0 /* LaunchScreen.storyboard */,
 				A0000000000000000000003F /* path-configuration.json */,
@@ -276,6 +284,7 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				ko,
 				Base,
 			);
 			mainGroup = A00000000000000000000060;
@@ -304,6 +313,8 @@
 				A0000000000000000000000D /* LaunchScreen.storyboard in Resources */,
 				A0000000000000000000000E /* path-configuration.json in Resources */,
 				A00000000000000000000011 /* PrivacyInfo.xcprivacy in Resources */,
+				A00000000000000000000018 /* InfoPlist.strings in Resources */,
+				A00000000000000000000019 /* Localizable.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -383,6 +394,24 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
+		A000000000000000000000A1 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				A00000000000000000000049 /* en */,
+				A0000000000000000000004A /* ko */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		A000000000000000000000A2 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				A0000000000000000000004B /* en */,
+				A0000000000000000000004C /* ko */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
 		A000000000000000000000A0 /* LaunchScreen.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (

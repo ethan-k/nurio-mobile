@@ -1,3 +1,4 @@
+import AVFoundation
 import HotwireNative
 import GoogleSignIn
 import KakaoSDKAuth
@@ -6,6 +7,18 @@ import WebKit
 
 enum AiPracticeNativePolicy {
     private static let sessionPathPattern = #"^/practice/[0-9]+/?$"#
+
+    enum SystemMicrophonePermission: CaseIterable {
+        case authorized
+        case notDetermined
+        case denied
+        case restricted
+    }
+
+    struct MicrophoneCaptureDisposition: Equatable {
+        let grantsCapture: Bool
+        let showsSettingsRecovery: Bool
+    }
 
     static func isSessionURL(_ url: URL) -> Bool {
         guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
@@ -65,6 +78,36 @@ enum AiPracticeNativePolicy {
         return frameURL.map { hasTrustedHTTPSOrigin($0, baseURL: baseURL) } ?? true
     }
 
+    static func microphoneCaptureDisposition(
+        trustedRequest: Bool,
+        systemPermission: SystemMicrophonePermission
+    ) -> MicrophoneCaptureDisposition {
+        guard trustedRequest else {
+            return MicrophoneCaptureDisposition(
+                grantsCapture: false,
+                showsSettingsRecovery: false
+            )
+        }
+
+        switch systemPermission {
+        case .authorized, .notDetermined:
+            return MicrophoneCaptureDisposition(
+                grantsCapture: true,
+                showsSettingsRecovery: false
+            )
+        case .denied:
+            return MicrophoneCaptureDisposition(
+                grantsCapture: false,
+                showsSettingsRecovery: true
+            )
+        case .restricted:
+            return MicrophoneCaptureDisposition(
+                grantsCapture: false,
+                showsSettingsRecovery: false
+            )
+        }
+    }
+
     private static func hasTrustedHTTPSOrigin(_ url: URL, baseURL: URL) -> Bool {
         guard let requestedOrigin = Origin(url: url),
               let trustedOrigin = Origin(url: baseURL) else {
@@ -102,11 +145,34 @@ enum AiPracticeNativePolicy {
     }
 }
 
+final class MicrophoneSettingsRecoveryState {
+    private(set) var isPresenting = false
+
+    func beginPresentation() -> Bool {
+        guard !isPresenting else { return false }
+        isPresenting = true
+        return true
+    }
+
+    func finishPresentation() {
+        isPresenting = false
+    }
+}
+
 final class StudyWKUIController: WKUIController {
     private let trustedBaseURL: URL
+    private let microphonePermission: () -> AiPracticeNativePolicy.SystemMicrophonePermission
+    private let showMicrophoneSettingsRecovery: () -> Void
 
-    init(delegate: WKUIControllerDelegate, trustedBaseURL: URL) {
+    init(
+        delegate: WKUIControllerDelegate,
+        trustedBaseURL: URL,
+        microphonePermission: @escaping () -> AiPracticeNativePolicy.SystemMicrophonePermission,
+        showMicrophoneSettingsRecovery: @escaping () -> Void
+    ) {
         self.trustedBaseURL = trustedBaseURL
+        self.microphonePermission = microphonePermission
+        self.showMicrophoneSettingsRecovery = showMicrophoneSettingsRecovery
         super.init(delegate: delegate)
     }
 
@@ -127,7 +193,16 @@ final class StudyWKUIController: WKUIController {
             webViewURL: webView.url,
             baseURL: trustedBaseURL
         )
-        decisionHandler(trustedRequest ? .grant : .deny)
+        let systemPermission = trustedRequest ? microphonePermission() : .restricted
+        let disposition = AiPracticeNativePolicy.microphoneCaptureDisposition(
+            trustedRequest: trustedRequest,
+            systemPermission: systemPermission
+        )
+
+        decisionHandler(disposition.grantsCapture ? .grant : .deny)
+        if disposition.showsSettingsRecovery {
+            showMicrophoneSettingsRecovery()
+        }
     }
 }
 
@@ -144,12 +219,76 @@ final class SceneController: UIResponder {
         )
         navigator.webkitUIDelegate = StudyWKUIController(
             delegate: navigator,
-            trustedBaseURL: AppEnvironment.baseURL
+            trustedBaseURL: AppEnvironment.baseURL,
+            microphonePermission: Self.currentMicrophonePermission,
+            showMicrophoneSettingsRecovery: { [weak self] in
+                self?.presentMicrophoneSettingsRecovery()
+            }
         )
         return navigator
     }()
 
     private var hasStarted = false
+    private let microphoneSettingsRecoveryState = MicrophoneSettingsRecoveryState()
+
+    private static func currentMicrophonePermission() -> AiPracticeNativePolicy.SystemMicrophonePermission {
+        switch AVCaptureDevice.authorizationStatus(for: .audio) {
+        case .authorized:
+            return .authorized
+        case .notDetermined:
+            return .notDetermined
+        case .denied:
+            return .denied
+        case .restricted:
+            return .restricted
+        @unknown default:
+            return .restricted
+        }
+    }
+
+    private func presentMicrophoneSettingsRecovery() {
+        DispatchQueue.main.async { [weak self] in
+            guard let self,
+                  self.microphoneSettingsRecoveryState.beginPresentation() else {
+                return
+            }
+
+            let presenter = self.navigator.activeNavigationController
+            guard presenter.viewIfLoaded?.window != nil,
+                  presenter.presentedViewController == nil else {
+                self.microphoneSettingsRecoveryState.finishPresentation()
+                return
+            }
+
+            let alert = UIAlertController(
+                title: NSLocalizedString("microphone_permission_settings_title", comment: ""),
+                message: NSLocalizedString("microphone_permission_settings_message", comment: ""),
+                preferredStyle: .alert
+            )
+            alert.addAction(
+                UIAlertAction(
+                    title: NSLocalizedString("microphone_permission_settings_cancel", comment: ""),
+                    style: .cancel
+                ) { [weak self] _ in
+                    self?.microphoneSettingsRecoveryState.finishPresentation()
+                }
+            )
+            alert.addAction(
+                UIAlertAction(
+                    title: NSLocalizedString("microphone_permission_settings_open", comment: ""),
+                    style: .default
+                ) { [weak self] _ in
+                    self?.microphoneSettingsRecoveryState.finishPresentation()
+                    guard let settingsURL = URL(string: UIApplication.openSettingsURLString),
+                          UIApplication.shared.canOpenURL(settingsURL) else {
+                        return
+                    }
+                    UIApplication.shared.open(settingsURL)
+                }
+            )
+            presenter.present(alert, animated: true)
+        }
+    }
 
     private func presentError(_ message: String) {
         let alert = UIAlertController(title: "Visit failed", message: message, preferredStyle: .alert)
