@@ -25,10 +25,12 @@ class WebFragment : HotwireWebFragment() {
 
     override fun createWebChromeClient(): HotwireWebChromeClient {
         val permissionHost = activity as? MicPermissionHost ?: return super.createWebChromeClient()
+        val session = navigator.session
         return StudyWebChromeClient(
-            session = navigator.session,
+            session = session,
             microphonePermissionHost = permissionHost,
-            trustedBaseUrl = BuildConfig.BASE_URL
+            trustedBaseUrl = BuildConfig.BASE_URL,
+            currentLocation = { session.webView.url }
         )
     }
 }

@@ -1,5 +1,6 @@
 import AuthenticationServices
 import HotwireNative
+import WebKit
 import XCTest
 @testable import NurioStudy
 
@@ -18,8 +19,34 @@ final class NurioStudyTests: XCTestCase {
             "https://study.nurio.kr/practice",
             "https://study.nurio.kr/practice/new",
             "https://study.nurio.kr/practice/42/review",
+            "https://study.nurio.kr/practice/%34%32",
         ].forEach { location in
             XCTAssertFalse(AiPracticeNativePolicy.isSessionURL(URL(string: location)!))
+        }
+    }
+
+    func testAIPracticeTrustedSessionRequiresConfiguredHTTPSOrigin() {
+        let baseURL = URL(string: "https://study.nurio.kr")!
+
+        XCTAssertTrue(
+            AiPracticeNativePolicy.isTrustedSessionURL(
+                URL(string: "https://STUDY.NURIO.KR:443/practice/42?lang=ko")!,
+                baseURL: baseURL
+            )
+        )
+
+        [
+            "http://study.nurio.kr/practice/42",
+            "https://evil.example/practice/42",
+            "https://study.nurio.kr:8443/practice/42",
+            "https://attacker:secret@study.nurio.kr/practice/42",
+        ].forEach { location in
+            XCTAssertFalse(
+                AiPracticeNativePolicy.isTrustedSessionURL(
+                    URL(string: location)!,
+                    baseURL: baseURL
+                )
+            )
         }
     }
 
@@ -57,6 +84,86 @@ final class NurioStudyTests: XCTestCase {
                 )
             )
         }
+    }
+
+    func testAIPracticeMicrophoneGrantRequiresMainFrameTrustedSessionAndAudioOnly() {
+        let baseURL = URL(string: "https://study.nurio.kr")!
+        let sessionURL = URL(string: "https://study.nurio.kr/practice/42?lang=ko")!
+        let staleSameOriginFrameURL = URL(string: "https://study.nurio.kr/dashboard")!
+
+        XCTAssertTrue(
+            AiPracticeNativePolicy.shouldGrantMicrophoneCapture(
+                type: .microphone,
+                originProtocol: "https",
+                originHost: "study.nurio.kr",
+                originPort: 443,
+                isMainFrame: true,
+                frameURL: staleSameOriginFrameURL,
+                webViewURL: sessionURL,
+                baseURL: baseURL
+            )
+        )
+        XCTAssertTrue(
+            AiPracticeNativePolicy.shouldGrantMicrophoneCapture(
+                type: .microphone,
+                originProtocol: "https",
+                originHost: "study.nurio.kr",
+                originPort: 0,
+                isMainFrame: true,
+                frameURL: nil,
+                webViewURL: sessionURL,
+                baseURL: baseURL
+            )
+        )
+    }
+
+    func testAIPracticeMicrophoneGrantRejectsUntrustedCaptureEvidence() {
+        let baseURL = URL(string: "https://study.nurio.kr")!
+        let sessionURL = URL(string: "https://study.nurio.kr/practice/42")!
+        let trustedFrameURL = URL(string: "https://study.nurio.kr/practice/42")!
+
+        func shouldGrant(
+            type: WKMediaCaptureType = .microphone,
+            originHost: String = "study.nurio.kr",
+            isMainFrame: Bool = true,
+            frameURL: URL? = trustedFrameURL,
+            webViewURL: URL?
+        ) -> Bool {
+            AiPracticeNativePolicy.shouldGrantMicrophoneCapture(
+                type: type,
+                originProtocol: "https",
+                originHost: originHost,
+                originPort: 443,
+                isMainFrame: isMainFrame,
+                frameURL: frameURL,
+                webViewURL: webViewURL,
+                baseURL: baseURL
+            )
+        }
+
+        XCTAssertFalse(shouldGrant(isMainFrame: false, webViewURL: sessionURL))
+        XCTAssertFalse(
+            shouldGrant(
+                frameURL: URL(string: "https://evil.example/practice/42")!,
+                webViewURL: sessionURL
+            )
+        )
+        XCTAssertFalse(shouldGrant(webViewURL: nil))
+        XCTAssertFalse(
+            shouldGrant(webViewURL: URL(string: "https://study.nurio.kr/sign_in")!)
+        )
+        XCTAssertFalse(
+            shouldGrant(webViewURL: URL(string: "https://study.nurio.kr/dashboard")!)
+        )
+        XCTAssertFalse(
+            shouldGrant(webViewURL: URL(string: "https://study.nurio.kr/practice/42/review")!)
+        )
+        XCTAssertFalse(
+            shouldGrant(webViewURL: URL(string: "https://evil.example/practice/42")!)
+        )
+        XCTAssertFalse(shouldGrant(originHost: "evil.example", webViewURL: sessionURL))
+        XCTAssertFalse(shouldGrant(type: .camera, webViewURL: sessionURL))
+        XCTAssertFalse(shouldGrant(type: .cameraAndMicrophone, webViewURL: sessionURL))
     }
 
     func testAIPracticeNativeConfigurationIsBundled() throws {

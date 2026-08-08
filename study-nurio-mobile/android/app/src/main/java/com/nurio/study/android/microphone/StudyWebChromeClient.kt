@@ -8,41 +8,80 @@ import java.util.IdentityHashMap
 
 class StudyWebChromeClient(
     session: Session,
-    private val microphonePermissionHost: MicPermissionHost,
-    private val trustedBaseUrl: String
+    microphonePermissionHost: MicPermissionHost,
+    trustedBaseUrl: String,
+    currentLocation: () -> String?
 ) : HotwireWebChromeClient(session) {
-    private val pendingRequests = Collections.newSetFromMap(
-        IdentityHashMap<PermissionRequest, Boolean>()
+    private val microphonePermissionCoordinator = AiPracticeMicrophonePermissionCoordinator(
+        microphonePermissionHost = microphonePermissionHost,
+        trustedBaseUrl = trustedBaseUrl,
+        currentLocation = currentLocation,
+        audioCaptureResource = PermissionRequest.RESOURCE_AUDIO_CAPTURE
     )
 
     override fun onPermissionRequest(request: PermissionRequest) {
-        val audioResources = AiPracticeNativePolicy.grantableAudioResources(
-            request.resources,
-            PermissionRequest.RESOURCE_AUDIO_CAPTURE
+        microphonePermissionCoordinator.handle(
+            requestKey = request,
+            origin = request.origin?.toString(),
+            requestedResources = request.resources,
+            grant = { resources -> request.grant(resources) },
+            deny = request::deny
         )
-        if (audioResources.isEmpty() || !AiPracticeNativePolicy.isTrustedMicrophoneRequest(
-                request.origin?.toString(),
-                trustedBaseUrl
-            )
-        ) {
-            request.deny()
+    }
+
+    override fun onPermissionRequestCanceled(request: PermissionRequest) {
+        microphonePermissionCoordinator.cancel(request)
+        super.onPermissionRequestCanceled(request)
+    }
+}
+
+internal class AiPracticeMicrophonePermissionCoordinator(
+    private val microphonePermissionHost: MicPermissionHost,
+    private val trustedBaseUrl: String,
+    private val currentLocation: () -> String?,
+    private val audioCaptureResource: String
+) {
+    private val pendingRequests = Collections.newSetFromMap(
+        IdentityHashMap<Any, Boolean>()
+    )
+
+    fun handle(
+        requestKey: Any,
+        origin: String?,
+        requestedResources: Array<out String>,
+        grant: (Array<String>) -> Unit,
+        deny: () -> Unit
+    ) {
+        val audioResources = AiPracticeNativePolicy.grantableAudioResources(
+            requestedResources,
+            audioCaptureResource
+        )
+        if (audioResources.isEmpty() || !isTrustedRequest(origin)) {
+            deny()
             return
         }
 
-        if (!pendingRequests.add(request)) return
-        microphonePermissionHost.requestMicrophonePermission { granted ->
-            if (!pendingRequests.remove(request)) return@requestMicrophonePermission
+        if (!pendingRequests.add(requestKey)) return
+        microphonePermissionHost.requestMicrophonePermission { osPermissionGranted ->
+            if (!pendingRequests.remove(requestKey)) return@requestMicrophonePermission
 
-            if (granted) {
-                request.grant(audioResources)
+            if (osPermissionGranted && isTrustedRequest(origin)) {
+                grant(audioResources)
             } else {
-                request.deny()
+                deny()
             }
         }
     }
 
-    override fun onPermissionRequestCanceled(request: PermissionRequest) {
-        pendingRequests.remove(request)
-        super.onPermissionRequestCanceled(request)
+    fun cancel(requestKey: Any) {
+        pendingRequests.remove(requestKey)
+    }
+
+    private fun isTrustedRequest(origin: String?): Boolean {
+        return AiPracticeNativePolicy.isTrustedMicrophoneRequest(
+            origin = origin,
+            currentLocation = currentLocation(),
+            trustedBaseUrl = trustedBaseUrl
+        )
     }
 }

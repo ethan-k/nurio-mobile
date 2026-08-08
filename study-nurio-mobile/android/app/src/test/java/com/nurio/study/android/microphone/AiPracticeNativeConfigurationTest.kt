@@ -40,6 +40,15 @@ class AiPracticeNativeConfigurationTest {
         assertFalse(properties.getValue("pull_to_refresh_enabled").jsonPrimitive.boolean)
     }
 
+    @Test
+    fun `web fragment supplies the live shared WebView location to microphone policy`() {
+        val fragment = projectFile(
+            "src/main/java/com/nurio/study/android/fragments/WebFragment.kt"
+        ).readText()
+
+        assertTrue(fragment.contains("currentLocation = { session.webView.url }"))
+    }
+
     private fun projectFile(relativePath: String): File {
         return listOf(File(relativePath), File("app/$relativePath")).firstOrNull(File::isFile)
             ?: error("Missing Android project file: $relativePath")

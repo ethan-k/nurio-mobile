@@ -18,6 +18,7 @@ class AiPracticeNativePolicyTest {
             "https://study.nurio.kr/practice",
             "https://study.nurio.kr/practice/new",
             "https://study.nurio.kr/practice/42/review",
+            "https://study.nurio.kr/practice/%34%32",
             "not a url"
         ).forEach { location ->
             assertFalse(location, AiPracticeNativePolicy.isSessionLocation(location))
@@ -25,37 +26,65 @@ class AiPracticeNativePolicyTest {
     }
 
     @Test
-    fun `trusts microphone capture only from the configured HTTPS origin`() {
-        assertTrue(AiPracticeNativePolicy.isTrustedMicrophoneRequest(baseUrl, baseUrl))
+    fun `trusts microphone capture only on a configured-origin practice session`() {
         assertTrue(
             AiPracticeNativePolicy.isTrustedMicrophoneRequest(
-                "https://STUDY.NURIO.KR:443",
-                baseUrl
+                origin = baseUrl,
+                currentLocation = "$baseUrl/practice/42?lang=ko",
+                trustedBaseUrl = baseUrl
+            )
+        )
+        assertTrue(
+            AiPracticeNativePolicy.isTrustedMicrophoneRequest(
+                origin = "https://STUDY.NURIO.KR:443",
+                currentLocation = "https://STUDY.NURIO.KR:443/practice/42",
+                trustedBaseUrl = baseUrl
             )
         )
 
-        listOf(
-            "http://study.nurio.kr",
-            "https://evil.example",
-            "https://study.nurio.kr:8443",
-            "https://attacker@study.nurio.kr"
-        ).forEach { origin ->
-            assertFalse(origin, AiPracticeNativePolicy.isTrustedMicrophoneRequest(origin, baseUrl))
+        val rejectedRequests = listOf(
+            baseUrl to "$baseUrl/sign_in",
+            baseUrl to "$baseUrl/dashboard",
+            baseUrl to "$baseUrl/practice/42/review",
+            baseUrl to "https://evil.example/practice/42",
+            "http://study.nurio.kr" to "$baseUrl/practice/42",
+            "https://evil.example" to "$baseUrl/practice/42",
+            "https://study.nurio.kr:8443" to "$baseUrl/practice/42",
+            "https://attacker@study.nurio.kr" to "$baseUrl/practice/42"
+        )
+        rejectedRequests.forEach { (origin, currentLocation) ->
+            assertFalse(
+                "$origin from $currentLocation",
+                AiPracticeNativePolicy.isTrustedMicrophoneRequest(
+                    origin = origin,
+                    currentLocation = currentLocation,
+                    trustedBaseUrl = baseUrl
+                )
+            )
         }
+
+        assertFalse(AiPracticeNativePolicy.isTrustedMicrophoneRequest(null, "$baseUrl/practice/42", baseUrl))
+        assertFalse(AiPracticeNativePolicy.isTrustedMicrophoneRequest(baseUrl, null, baseUrl))
     }
 
     @Test
-    fun `grants audio capture without granting other requested resources`() {
+    fun `grants only audio-only capture requests`() {
         assertArrayEquals(
             arrayOf(audioResource),
             AiPracticeNativePolicy.grantableAudioResources(
-                arrayOf(audioResource, "android.webkit.resource.VIDEO_CAPTURE", audioResource),
+                arrayOf(audioResource, audioResource),
                 audioResource
             )
         )
         assertTrue(
             AiPracticeNativePolicy.grantableAudioResources(
                 arrayOf("android.webkit.resource.VIDEO_CAPTURE"),
+                audioResource
+            ).isEmpty()
+        )
+        assertTrue(
+            AiPracticeNativePolicy.grantableAudioResources(
+                arrayOf(audioResource, "android.webkit.resource.VIDEO_CAPTURE"),
                 audioResource
             ).isEmpty()
         )

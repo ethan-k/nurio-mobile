@@ -6,22 +6,34 @@ internal object AiPracticeNativePolicy {
     private val sessionPath = Regex("^/practice/\\d+/?$")
 
     fun isSessionLocation(location: String): Boolean {
-        return runCatching { URI(location).path }
+        return runCatching { URI(location).rawPath }
             .getOrNull()
             ?.matches(sessionPath) == true
     }
 
-    fun isTrustedMicrophoneRequest(origin: String?, trustedBaseUrl: String): Boolean {
+    fun isTrustedMicrophoneRequest(
+        origin: String?,
+        currentLocation: String?,
+        trustedBaseUrl: String
+    ): Boolean {
         val requestedOrigin = origin?.let(::normalizedHttpsOrigin) ?: return false
         val trustedOrigin = normalizedHttpsOrigin(trustedBaseUrl) ?: return false
-        return requestedOrigin == trustedOrigin
+        val currentOrigin = currentLocation?.let(::normalizedHttpsOrigin) ?: return false
+
+        return requestedOrigin == trustedOrigin &&
+            currentOrigin == trustedOrigin &&
+            isSessionLocation(currentLocation)
     }
 
     fun grantableAudioResources(
         requestedResources: Array<out String>,
         audioCaptureResource: String
     ): Array<String> {
-        return requestedResources.filter { it == audioCaptureResource }.distinct().toTypedArray()
+        if (requestedResources.isEmpty() || requestedResources.any { it != audioCaptureResource }) {
+            return emptyArray()
+        }
+
+        return arrayOf(audioCaptureResource)
     }
 
     private fun normalizedHttpsOrigin(location: String): Origin? {

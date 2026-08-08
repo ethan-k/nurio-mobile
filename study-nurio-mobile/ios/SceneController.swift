@@ -8,7 +8,18 @@ enum AiPracticeNativePolicy {
     private static let sessionPathPattern = #"^/practice/[0-9]+/?$"#
 
     static func isSessionURL(_ url: URL) -> Bool {
-        url.path.range(of: sessionPathPattern, options: .regularExpression) != nil
+        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+            return false
+        }
+
+        return components.percentEncodedPath.range(
+            of: sessionPathPattern,
+            options: .regularExpression
+        ) != nil
+    }
+
+    static func isTrustedSessionURL(_ url: URL, baseURL: URL) -> Bool {
+        isSessionURL(url) && hasTrustedHTTPSOrigin(url, baseURL: baseURL)
     }
 
     static func isTrustedMicrophoneOrigin(
@@ -22,6 +33,41 @@ enum AiPracticeNativePolicy {
             host: host,
             port: port == 0 ? nil : port
         ), let trustedOrigin = Origin(url: baseURL) else {
+            return false
+        }
+
+        return requestedOrigin == trustedOrigin && requestedOrigin.scheme == "https"
+    }
+
+    static func shouldGrantMicrophoneCapture(
+        type: WKMediaCaptureType,
+        originProtocol: String,
+        originHost: String,
+        originPort: Int,
+        isMainFrame: Bool,
+        frameURL: URL?,
+        webViewURL: URL?,
+        baseURL: URL
+    ) -> Bool {
+        guard type == .microphone,
+              isMainFrame,
+              isTrustedMicrophoneOrigin(
+                  protocol: originProtocol,
+                  host: originHost,
+                  port: originPort,
+                  baseURL: baseURL
+              ),
+              let webViewURL,
+              isTrustedSessionURL(webViewURL, baseURL: baseURL) else {
+            return false
+        }
+
+        return frameURL.map { hasTrustedHTTPSOrigin($0, baseURL: baseURL) } ?? true
+    }
+
+    private static func hasTrustedHTTPSOrigin(_ url: URL, baseURL: URL) -> Bool {
+        guard let requestedOrigin = Origin(url: url),
+              let trustedOrigin = Origin(url: baseURL) else {
             return false
         }
 
@@ -71,10 +117,14 @@ final class StudyWKUIController: WKUIController {
         type: WKMediaCaptureType,
         decisionHandler: @escaping (WKPermissionDecision) -> Void
     ) {
-        let trustedRequest = type == .microphone && AiPracticeNativePolicy.isTrustedMicrophoneOrigin(
-            protocol: origin.`protocol`,
-            host: origin.host,
-            port: origin.port,
+        let trustedRequest = AiPracticeNativePolicy.shouldGrantMicrophoneCapture(
+            type: type,
+            originProtocol: origin.`protocol`,
+            originHost: origin.host,
+            originPort: origin.port,
+            isMainFrame: frame.isMainFrame,
+            frameURL: frame.request.url,
+            webViewURL: webView.url,
             baseURL: trustedBaseURL
         )
         decisionHandler(trustedRequest ? .grant : .deny)
