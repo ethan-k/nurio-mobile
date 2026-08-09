@@ -14,7 +14,7 @@
     </style>
 
     <style name="Theme.Nurio.Splash" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">@color/bottom_nav_background</item>
+        <item name="windowSplashScreenBackground">@color/background</item>
         <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
         <item name="postSplashScreenTheme">@style/Theme.Nurio</item>
     </style>

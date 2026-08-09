@@ -62,6 +62,14 @@ Archive for release after signing is configured:
 xcodebuild -project ios/Nurio.xcodeproj -scheme Nurio -configuration Release -destination 'generic/platform=iOS' -archivePath build/Nurio.xcarchive archive
 ```
 
+## Customer launch identity
+
+- The customer iOS and Android launcher icons use the compact blue `n` mark.
+- `ios/nurio_splash.json` and `android/app/src/main/assets/animations/nurio_splash.json` share the 1.5-second Lottie reveal for the full lowercase `nurio` wordmark.
+- The operating-system launch surface remains static white. iOS starts the Lottie overlay after its app window connects, while Android hands off from the system splash icon to the in-app animation.
+
+This applies only to the top-level customer `ios/` and `android/` targets. Study, Study Leader, and Tutor retain their independent visual identities.
+
 ## Tutor Android Hotwire Shell
 
 The tutor-facing Android Hotwire shell lives in `tutors-nurio-mobile/android`.

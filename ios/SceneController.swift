@@ -46,7 +46,7 @@ final class SceneController: UIResponder {
     private func showSplashAnimation(in window: UIWindow) {
         let container = UIView(frame: window.bounds)
         container.autoresizingMask = [ .flexibleWidth, .flexibleHeight ]
-        container.backgroundColor = .systemBackground
+        container.backgroundColor = .white
 
         let animationView = LottieAnimationView(name: "nurio_splash")
         animationView.frame = container.bounds
