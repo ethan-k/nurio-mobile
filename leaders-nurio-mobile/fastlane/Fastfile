@@ -316,7 +316,10 @@ end
   def leader_bump_version_code!(json_key_data:)
     current = leader_read_version_code
     play_max = leader_play_max_version_code(json_key_data: json_key_data)
-    next_code = [current + 1, play_max + 1].max
+    # Preserve the required first Play release at 1.0.0 (1). Once Play has an
+    # accepted code, every later upload advances beyond both local and store
+    # state as usual.
+    next_code = current == 1 && play_max.zero? ? 1 : [current + 1, play_max + 1].max
     File.write(
       leader_gradle_file,
       File.read(leader_gradle_file).sub(/versionCode\s*=\s*\d+/, "versionCode = #{next_code}")
