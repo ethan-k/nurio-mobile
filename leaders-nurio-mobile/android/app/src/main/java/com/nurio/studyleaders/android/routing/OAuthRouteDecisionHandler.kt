@@ -1,8 +1,6 @@
 package com.nurio.studyleaders.android.routing
 
-import androidx.browser.customtabs.CustomTabColorSchemeParams
-import androidx.browser.customtabs.CustomTabsIntent
-import androidx.core.net.toUri
+import com.nurio.studyleaders.android.MainActivity
 import com.nurio.studyleaders.android.auth.SocialAuthRoute
 import dev.hotwire.core.turbo.visit.VisitProposal
 import dev.hotwire.navigation.activities.HotwireActivity
@@ -31,16 +29,7 @@ class OAuthRouteDecisionHandler : Router.RouteDecisionHandler {
             proposal.location,
             configuration.startLocation
         ) ?: return Router.Decision.CANCEL
-        val colorParams = CustomTabColorSchemeParams.Builder()
-            .build()
-
-        CustomTabsIntent.Builder()
-            .setShowTitle(true)
-            .setShareState(CustomTabsIntent.SHARE_STATE_OFF)
-            .setUrlBarHidingEnabled(false)
-            .setDefaultColorSchemeParams(colorParams)
-            .build()
-            .launchUrl(activity, route.url.toUri())
+        (activity as? MainActivity)?.dispatchSocialAuth(route)
 
         return Router.Decision.CANCEL
     }

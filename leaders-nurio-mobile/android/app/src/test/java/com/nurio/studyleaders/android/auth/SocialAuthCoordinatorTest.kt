@@ -5,7 +5,7 @@ import org.junit.Test
 
 class SocialAuthCoordinatorTest {
     @Test
-    fun `Kakao uses native SDK while Google and Naver use system auth`() {
+    fun `Kakao uses native SDK while Google Naver and Apple use system auth`() {
         var kakaoStartCount = 0
         val systemUrls = mutableListOf<String>()
         val coordinator = SocialAuthCoordinator(
@@ -31,12 +31,19 @@ class SocialAuthCoordinatorTest {
                 url = "https://studyleaders.nurio.kr/auth/naver"
             )
         )
+        coordinator.start(
+            SocialAuthRoute(
+                provider = SocialAuthProvider.APPLE,
+                url = "https://studyleaders.nurio.kr/auth/apple"
+            )
+        )
 
         assertEquals(1, kakaoStartCount)
         assertEquals(
             listOf(
                 "https://studyleaders.nurio.kr/auth/google_oauth2",
-                "https://studyleaders.nurio.kr/auth/naver"
+                "https://studyleaders.nurio.kr/auth/naver",
+                "https://studyleaders.nurio.kr/auth/apple"
             ),
             systemUrls
         )

@@ -28,8 +28,12 @@ For release signing, copy `keystore.properties.example` to the ignored `keystore
 - The web `sign-in-with-oauth` bridge must provide the provider `startPath`;
   native code rejects non-provider paths and foreign origins before dispatch.
 - Kakao uses the native Kakao SDK and exchanges its access token with Rails.
-  Google and Naver use a secure Custom Tab, matching the learner Study Android
-  app, and all successful flows return through the strict callback parser.
+  Google, Naver, and Apple use a secure Custom Tab, matching the learner Study
+  Android app, and all successful flows return through the strict callback
+  parser.
+- For Android production/BVT Apple login, Rails must use the web Services ID
+  `APPLE_CLIENT_ID=com.nurio.signin.web.production`. Android opens the Rails
+  Apple route in the Custom Tab; this identifier is not embedded in the APK.
 - Inject `NURIO_STUDY_LEADER_KAKAO_NATIVE_APP_KEY` from the developer or CI
   environment; never commit it to `gradle.properties`.
 - The Material action bar and Hotwire toolbar remain hidden; web navigation owns the visible chrome.
