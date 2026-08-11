@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Nurio Study Leader</string>
+    <string name="app_name">nurio leader</string>
     <string name="push_notification_channel_name">Nurio Study Leader notifications</string>
     <string name="push_notification_channel_description">Leader updates, reminders, and account activity</string>
 </resources>
