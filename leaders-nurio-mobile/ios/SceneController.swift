@@ -52,6 +52,15 @@ final class SceneController: UIResponder {
         rootNav.setNavigationBarHidden(true, animated: false)
         rootNav.delegate = self
     }
+
+    // The main stack hides the navigation bar and the web pages pad for the
+    // status bar with env(safe-area-inset-top). Without this, UIKit adds its
+    // own safe-area content inset on top of the CSS padding, doubling the gap
+    // and misplacing the sticky web app bar. Modal stack keeps its native nav
+    // bar, so its web view is left with the default behavior.
+    private func disableMainStackSafeAreaInset() {
+        navigator.session.webView.scrollView.contentInsetAdjustmentBehavior = .never
+    }
 }
 
 extension SceneController: UIWindowSceneDelegate {
@@ -64,6 +73,7 @@ extension SceneController: UIWindowSceneDelegate {
         self.window = window
 
         hideNavigationBarOnMainStack()
+        disableMainStackSafeAreaInset()
 
         if let launchURL = connectionOptions.urlContexts.first?.url {
             if GIDSignIn.sharedInstance.handle(launchURL) {
@@ -109,7 +119,10 @@ extension SceneController: UINavigationControllerDelegate {
 
 extension SceneController: NavigatorDelegate {
     func handle(proposal: VisitProposal, from navigator: Navigator) -> ProposalResult {
-        .accept
+        // Reapplied per visit because the Navigator recreates the session's
+        // web view after a web content process termination.
+        disableMainStackSafeAreaInset()
+        return .accept
     }
 
     func visitableDidFailRequest(_ visitable: any Visitable, error: any Error, retryHandler: RetryBlock?) {

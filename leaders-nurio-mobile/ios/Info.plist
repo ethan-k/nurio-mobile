@@ -4,6 +4,21 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<!-- lvh.me resolves to 127.0.0.1; allows the documented NURIO_BASE_URL
+		     local-dev override (subdomain routing needs a 3-part host). -->
+		<key>NSExceptionDomains</key>
+		<dict>
+			<key>lvh.me</key>
+			<dict>
+				<key>NSIncludesSubdomains</key>
+				<true/>
+				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<true/>
+			</dict>
+		</dict>
+	</dict>
 	<key>CFBundleDisplayName</key>
 	<string>nurio leader</string>
 	<key>CFBundleExecutable</key>
