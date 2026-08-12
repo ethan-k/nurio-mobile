@@ -1,0 +1,12 @@
+# iOS
+app_identifier("com.nurio.ios")
+team_id(ENV["APPLE_TEAM_ID"]) if ENV["APPLE_TEAM_ID"]
+apple_id(ENV["APPLE_ID"]) if ENV["APPLE_ID"]
+
+# Android
+package_name("com.nurio.android")
+
+# The Play publisher key is not a file. It is resolved per-lane in the Fastfile
+# from the shared PLAY_SERVICE_ACCOUNT_JSON_BASE64 env var and passed to supply
+# as json_key_data, so no json_key_file default is declared here (an empty one
+# makes supply fall back to Application Default Credentials).

@@ -32,7 +32,7 @@ tasks:
     cmds:
       - open {{.IOS_PROJECT}}
 
-  ios:build:
+  ios:build:simulator:
     desc: Build the standalone Hotwire Native iOS shell for the default simulator
     cmds:
       - xcodebuild -project {{.IOS_PROJECT}} -scheme {{.IOS_SCHEME}} -destination '{{.IOS_DESTINATION}}' build
@@ -70,25 +70,25 @@ tasks:
     cmds:
       - ./scripts/bump-ios-version.sh patch
 
+  ios:validate:
+    desc: Check the Nurio app App Store Connect API key without building
+    cmds:
+      - mise exec ruby -- ruby -S bundle exec fastlane ios validate
+
+  ios:build:
+    desc: Build the Nurio app signed App Store IPA (no upload)
+    cmds:
+      - mise exec ruby -- ruby -S bundle exec fastlane ios build
+
+  ios:beta:
+    desc: Build and upload the Nurio app to TestFlight
+    cmds:
+      - mise exec ruby -- ruby -S bundle exec fastlane ios beta
+
   ios:release:
-    desc: Build iOS archive for App Store Connect (with optional version bump)
+    desc: Build and upload the Nurio app to App Store Connect for release review
     cmds:
-      - ./scripts/ios-release.sh
-
-  ios:archive:
-    desc: Build iOS archive without version bump
-    cmds:
-      - xcodebuild -project {{.IOS_PROJECT}} -scheme {{.IOS_SCHEME}} -archivePath {{.IOS_DIR}}/build/Nurio.xcarchive -destination "generic/platform=iOS" archive
-
-  ios:upload:
-    desc: Upload iOS archive to App Store Connect (requires archive + credentials)
-    cmds:
-      - ./scripts/ios-upload.sh
-
-  ios:deploy:
-    desc: Complete deployment workflow - bump version, build archive, and upload to App Store Connect
-    cmds:
-      - ./scripts/ios-release.sh && ./scripts/ios-upload.sh
+      - mise exec ruby -- ruby -S bundle exec fastlane ios release
 
   study:validate:
     desc: Check Study app store credentials for both platforms (iOS + Android)
@@ -145,27 +145,37 @@ tasks:
     cmds:
       - mise exec ruby -- ruby -S bundle exec fastlane android promote
 
+  android:validate:
+    desc: Check the Nurio app Play publisher service account without building
+    cmds:
+      - mise exec ruby -- ruby -S bundle exec fastlane android validate
+
   android:build:
+    desc: Build the Nurio app signed release AAB (no upload)
+    cmds:
+      - mise exec ruby -- ruby -S bundle exec fastlane android build
+
+  android:build:debug:
     desc: Build debug APK for the Android app
     cmds:
       - task: legacy:build
 
-  android:build:release:
-    desc: Bump Android version and build release AAB
+  android:beta:
+    desc: Build and upload the Nurio app AAB to the Play internal track
     cmds:
-      - task: legacy:build:release
+      - mise exec ruby -- ruby -S bundle exec fastlane android beta
 
-  android:build:release:raw:
-    desc: Build renamed release AAB for the Android app without bumping version
+  android:promote:
+    desc: Promote the Nurio app Play internal build to production
     cmds:
-      - task: legacy:build:release:raw
+      - mise exec ruby -- ruby -S bundle exec fastlane android promote
 
   android:build:release:apk:
     desc: Build release APK for the Android app without bumping version
     dir: "{{.LEGACY_ANDROID_DIR}}"
     preconditions:
       - sh: test -f {{.LEGACY_ANDROID_DIR}}/keystore.properties
-        msg: "keystore.properties not found. See scripts/build-release.sh for format."
+        msg: "keystore.properties not found. See android/keystore.properties.example for format."
     cmds:
       - ./gradlew assembleRelease
       - echo "Release APK -> {{.LEGACY_ANDROID_DIR}}/app/build/outputs/apk/release/app-release.apk"
@@ -174,6 +184,26 @@ tasks:
     desc: Show Android version
     cmds:
       - task: legacy:version
+
+  android:version:bump:
+    desc: Bump Android versionCode only (versionName unchanged)
+    cmds:
+      - ./scripts/bump-android-version.sh code
+
+  android:version:bump:major:
+    desc: Bump Android major version (1.0.0 -> 2.0.0) and increment versionCode
+    cmds:
+      - ./scripts/bump-android-version.sh major
+
+  android:version:bump:minor:
+    desc: Bump Android minor version (1.0.0 -> 1.1.0) and increment versionCode
+    cmds:
+      - ./scripts/bump-android-version.sh minor
+
+  android:version:bump:patch:
+    desc: Bump Android patch version (1.0.0 -> 1.0.1) and increment versionCode
+    cmds:
+      - ./scripts/bump-android-version.sh patch
 
   android:clean:
     desc: Clean Android build outputs
@@ -186,27 +216,6 @@ tasks:
     cmds:
       - ./gradlew assembleDebug
       - echo "Debug APK -> {{.LEGACY_APK_OUTPUT}}"
-
-  legacy:build:release:
-    desc: Bump legacy Hotwire Android version and build release AAB
-    preconditions:
-      - sh: test -f {{.LEGACY_ANDROID_DIR}}/keystore.properties
-        msg: "keystore.properties not found. See scripts/build-release.sh for format."
-    cmds:
-      - ./scripts/build-release.sh
-
-  legacy:build:release:raw:
-    desc: Build renamed release AAB for legacy Hotwire Android app without bumping version
-    preconditions:
-      - sh: test -f {{.LEGACY_ANDROID_DIR}}/keystore.properties
-        msg: "keystore.properties not found. See scripts/build-release.sh for format."
-    cmds:
-      - |
-        cd {{.LEGACY_ANDROID_DIR}}
-        ./gradlew bundleRelease
-      - |
-        RENAMED_AAB=$(./scripts/rename-android-release-aab.sh)
-        echo "Release AAB -> $RENAMED_AAB"
 
   legacy:version:
     desc: Show legacy Hotwire Android version

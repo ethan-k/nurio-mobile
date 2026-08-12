@@ -20,6 +20,7 @@ android/*.keystore
 android/*.jks
 
 # Fastlane
+/fastlane/report.xml
 android/fastlane/play-store-service-account.json
 android/fastlane/report.xml
 android/vendor/
