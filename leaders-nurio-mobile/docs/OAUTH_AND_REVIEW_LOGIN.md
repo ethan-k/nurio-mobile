@@ -169,7 +169,7 @@ the normal admin/operations tools.
 Reviewer instructions:
 
 1. Open the Study Leader login screen.
-2. Tap the Nurio Study Leader brand five times within four seconds.
+2. Tap the Nurio Study Leader brand once.
 3. Enter the review email and password supplied in the store console.
 4. The app opens the populated leader Today workspace.
 
@@ -201,7 +201,7 @@ them after a review cycle or immediately if they are exposed.
 - A callback with a wrong scheme, host, duplicated token/state, path, port, or
   fragment is rejected.
 - Replaying an already consumed callback fails.
-- The five-tap review login works in TestFlight and an internal Play build.
+- The single-tap review login works in TestFlight and an internal Play build.
 - A non-leader account cannot use the review endpoint.
 - Removing either review secret changes `/review_login` to 404.
 

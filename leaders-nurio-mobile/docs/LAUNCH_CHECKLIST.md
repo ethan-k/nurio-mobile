@@ -20,7 +20,7 @@
 - [ ] Confirm iOS Google and both Kakao clients exchange native provider tokens through the Rails native-auth endpoints.
 - [ ] Create a stable approved-leader review account with no real personal or financial data.
 - [ ] Populate that account with safe sample Today, Schedule, Notifications, Sessions, and Earnings content.
-- [ ] Confirm the five-tap brand gesture reveals the review form in TestFlight and an internal Play build.
+- [ ] Confirm the single-tap brand gesture reveals the review form in TestFlight and an internal Play build.
 - [ ] Confirm wrong credentials, a non-leader review account, and missing review secrets cannot establish a session.
 - [ ] Put exact review credentials and any required navigation steps in both store consoles.
 - [ ] Verify account deletion can be initiated from Leader Settings.
