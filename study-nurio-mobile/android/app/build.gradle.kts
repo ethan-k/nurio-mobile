@@ -66,6 +66,22 @@ val kakaoNativeAppKey = providers
 val kakaoManifestAppKey = kakaoNativeAppKey.ifBlank { "not_configured" }
 val kakaoAuthEnabled = kakaoNativeAppKey.isNotBlank()
 
+val verifyKakaoNativeAppKey = tasks.register("verifyKakaoNativeAppKey") {
+    doLast {
+        if (!kakaoAuthEnabled) {
+            throw GradleException(
+                "NURIO_STUDY_KAKAO_NATIVE_APP_KEY is required for production and release builds"
+            )
+        }
+    }
+}
+
+tasks.matching {
+    it.name == "preProductionDebugBuild" || it.name == "preReleaseBuild"
+}.configureEach {
+    dependsOn(verifyKakaoNativeAppKey)
+}
+
 fun String.asBuildConfigString(): String =
     "\"" +
         replace("\\", "\\\\")
