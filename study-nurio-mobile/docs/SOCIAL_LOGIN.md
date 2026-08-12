@@ -9,8 +9,9 @@ This runbook covers social login for the customer-facing Hotwire Native iOS and 
 | Kakao | Kakao SDK opens KakaoTalk when available. Both apps use Kakao Account when KakaoTalk is unavailable; Android also falls back after a non-cancellation KakaoTalk failure, while iOS reports that provider failure so the user can retry. | The app exchanges the Kakao access token at `POST /auth/kakao/native`. |
 | Google | iOS uses GoogleSignIn SDK and exchanges the Google ID token with Rails. Android currently keeps the system authentication session. Browser Google login is unchanged. | iOS posts to `POST /auth/google/native`; Android/browser keep `/auth/google_oauth2` and its HTTPS callback. |
 | Naver | A system authentication session opens the Rails OmniAuth flow. | `/auth/naver` returns through `https://study.nurio.kr/auth/naver/callback`. |
+| Apple | iOS uses AuthenticationServices and exchanges the Apple identity token with Rails. Android uses the system authentication session. | iOS posts to `POST /auth/apple/native`; Android/browser keep `/auth/apple` and its HTTPS callback. |
 
-Do not enable or embed Kakao web **Simple Login** inside the native authentication sheet. The Study Kakao button is owned by the native bridge and must use the Kakao SDK. On iOS, the Study Google button is also owned by the native bridge and must use GoogleSignIn SDK; Naver still uses `ASWebAuthenticationSession`. Android Google and Naver currently use Custom Tabs.
+Do not enable or embed Kakao web **Simple Login** inside the native authentication sheet. The Study Kakao button is owned by the native bridge and must use the Kakao SDK. On iOS, the Study Google and Apple buttons use their native SDKs; Naver still uses `ASWebAuthenticationSession`. Android Google, Naver, and Apple currently use Custom Tabs.
 
 After a native provider succeeds, Rails issues a short-lived, one-time token and state. Study creates an in-memory `nuriostudy://auth-callback`, converts it to an HTTPS request to `/auth/native/token_auth`, and lets the Rails session cookie persist in the Hotwire web view. The Google SDK's own reversed-client-ID callback is handled directly by the SDK; it is not the Rails handoff callback. The main Nurio app keeps its separate `nurio://auth-callback` handoff.
 
@@ -110,13 +111,14 @@ cd study-nurio-mobile/android
 
 If a local Gradle property is required, place it only in an ignored user-level Gradle properties file and never commit it. With no value, `BuildConfig.KAKAO_NATIVE_APP_KEY` remains empty and the exported Kakao callback activity is disabled with a non-secret placeholder scheme.
 
-## Google and Naver consoles
+## Google, Naver, and Apple consoles
 
 The existing Google Web OAuth client remains the server audience and browser credential. Keep these production callbacks registered for browser, Android system-session, and Naver login:
 
 ```text
 Google: https://study.nurio.kr/auth/google_oauth2/callback
 Naver:  https://study.nurio.kr/auth/naver/callback
+Apple:  https://study.nurio.kr/auth/apple/callback
 ```
 
 For native iOS Google login, create an additional **iOS OAuth client** in the same Google Cloud project:
@@ -133,6 +135,7 @@ On the Rails deployment side, keep the provider names in both `config/deploy.yml
 - `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`
 - `KAKAO_CLIENT_ID`, `KAKAO_CLIENT_SECRET`, and `KAKAO_APP_ID`
 - `NAVER_CLIENT_ID` and `NAVER_CLIENT_SECRET`
+- `APPLE_LOGIN_ENABLED`, `APPLE_CLIENT_ID`, `APPLE_TEAM_ID`, `APPLE_KEY_ID`, and `APPLE_PRIVATE_KEY`
 
 Never put the Study Native app key in Rails logs or substitute it for `KAKAO_APP_ID`.
 
@@ -176,8 +179,10 @@ Use a non-production test account where possible. Exercise the signed iOS and An
 - [ ] KakaoTalk absent: Kakao Account fallback completes and signs in.
 - [ ] Kakao cancellation: cancellation returns safely, creates no session, and a later attempt still works.
 - [ ] iOS Google opens the native GoogleSignIn SDK flow, returns to Study, and creates the WebView Rails session.
+- [ ] iOS Apple opens the native AuthenticationServices flow, returns to Study, and creates the WebView Rails session.
 - [ ] Android Google completes through the system authentication session and returns to Study.
 - [ ] Naver completes through the system authentication session and returns to Study.
+- [ ] Android Apple completes through the system authentication session and returns to Study.
 - [ ] Relaunch after each successful provider login preserves the Rails session.
 - [ ] Main Nurio and Nurio Study installed together: Study callbacks return only to Study and main-app callbacks still return only to main Nurio.
 - [ ] No provider flow opens an embedded Kakao web Simple Login page.
@@ -190,6 +195,6 @@ Use a non-production test account where possible. Exercise the signed iOS and An
 - **KakaoTalk does not return to Android:** confirm package `com.nurio.study.android`, the correct build-variant key hash, and that the signed build received the Native app key.
 - **iOS Google reports that sign-in is not configured:** confirm all three Google build settings are present in the protected `.xcconfig`, and that `GOOGLE_SERVER_CLIENT_ID` exactly matches Rails `GOOGLE_CLIENT_ID`.
 - **iOS Google returns an audience error from Rails:** the SDK was configured with the wrong server client ID. Use the existing Web OAuth client ID as `GOOGLE_SERVER_CLIENT_ID`; keep the iOS client ID only in `GOOGLE_IOS_CLIENT_ID` and the reversed URL scheme.
-- **Google or Naver reports a redirect mismatch:** compare the provider console value character-for-character with the HTTPS callback above, including `study.nurio.kr`, provider name, and `/callback`.
+- **Google, Naver, or Apple reports a redirect mismatch:** compare the provider console value character-for-character with the HTTPS callback above, including `study.nurio.kr`, provider name, and `/callback`.
 - **The wrong Nurio app opens:** Study must use `nuriostudy://auth-callback`; `nurio://auth-callback` belongs to the main app. Recheck the signed app's callback registration with both apps installed.
 - **Login succeeds but relaunch is signed out:** confirm the callback reached `/auth/native/token_auth` inside the Study Hotwire session and that cookies were not cleared. Do not log the handoff token, state, provider access token, cookies, or full callback URL while diagnosing.
