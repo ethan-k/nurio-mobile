@@ -1,0 +1,3 @@
+// Debug builds inherit production identifiers, then allow developer-only overrides.
+#include "NativeAuth.xcconfig"
+#include? "NativeAuth.local.xcconfig"

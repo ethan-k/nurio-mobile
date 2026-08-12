@@ -89,6 +89,7 @@
 		D00000000000000000000033 /* RegisterDeviceTokenComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterDeviceTokenComponent.swift; sourceTree = "<group>"; };
 		D00000000000000000000034 /* NurioStudy.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NurioStudy.entitlements; sourceTree = "<group>"; };
 		D00000000000000000000036 /* NativeAuth.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = NativeAuth.xcconfig; sourceTree = "<group>"; };
+		D00000000000000000000037 /* NativeAuth.debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = NativeAuth.debug.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -206,6 +207,7 @@
 			isa = PBXGroup;
 			children = (
 				5429D25C300B829E000D72A5 /* NativeAuth.local.xcconfig */,
+				D00000000000000000000037 /* NativeAuth.debug.xcconfig */,
 				D00000000000000000000036 /* NativeAuth.xcconfig */,
 			);
 			path = Config;
@@ -218,6 +220,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = A000000000000000000000B9 /* Build configuration list for PBXNativeTarget "NurioStudy" */;
 			buildPhases = (
+				D00000000000000000000085 /* Verify Study Google auth configuration */,
 				A00000000000000000000080 /* Sources */,
 				A00000000000000000000050 /* Frameworks */,
 				A00000000000000000000081 /* Resources */,
@@ -328,6 +331,23 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		D00000000000000000000085 /* Verify Study Google auth configuration */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/Config/NativeAuth.xcconfig",
+				"$(SRCROOT)/../scripts/verify_ios_google_auth_release_config.sh",
+			);
+			name = "Verify Study Google auth configuration";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/../scripts/verify_ios_google_auth_release_config.sh\"\n";
+		};
 		D00000000000000000000084 /* Copy Study Firebase configuration */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
@@ -546,14 +566,14 @@
 		};
 		A000000000000000000000B2 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = D00000000000000000000036 /* NativeAuth.xcconfig */;
+			baseConfigurationReference = D00000000000000000000037 /* NativeAuth.debug.xcconfig */;
 			buildSettings = {
 				APS_ENVIRONMENT = development;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = NurioStudy.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = M83USWXB66;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Info.plist;
@@ -584,7 +604,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = NurioStudy.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = M83USWXB66;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Info.plist;
