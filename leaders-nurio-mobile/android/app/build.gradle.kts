@@ -23,6 +23,15 @@ val kakaoNativeAppKey = providers
     .trim()
 val kakaoManifestAppKey = kakaoNativeAppKey.ifBlank { "not_configured" }
 val kakaoAuthEnabled = kakaoNativeAppKey.isNotBlank()
+// Keep release builds pinned to production while allowing an explicit local
+// server override for debug emulator QA (for example, -PNURIO_BASE_URL=...).
+val debugBaseUrl = providers
+    .gradleProperty("NURIO_BASE_URL")
+    .orElse(providers.environmentVariable("NURIO_BASE_URL"))
+    .orElse("https://studyleaders.nurio.kr")
+    .get()
+    .trim()
+    .trimEnd('/')
 
 val verifyKakaoNativeAppKey = tasks.register("verifyKakaoNativeAppKey") {
     doLast {
@@ -84,12 +93,12 @@ android {
 
     buildTypes {
         debug {
-            buildConfigField("String", "BASE_URL", "\"https://studyleaders.nurio.kr\"")
+            buildConfigField("String", "BASE_URL", debugBaseUrl.asBuildConfigString())
             buildConfigField("Boolean", "DEBUG_LOGGING", "true")
         }
         create("productionDebug") {
             initWith(getByName("debug"))
-            buildConfigField("String", "BASE_URL", "\"https://studyleaders.nurio.kr\"")
+            buildConfigField("String", "BASE_URL", debugBaseUrl.asBuildConfigString())
             isDebuggable = true
             signingConfig = signingConfigs.getByName("debug")
         }
