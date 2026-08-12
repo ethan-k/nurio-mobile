@@ -2,6 +2,7 @@ package com.nurio.study.android
 
 import android.app.Application
 import dev.hotwire.core.bridge.BridgeComponentFactory
+import dev.hotwire.core.bridge.KotlinXJsonConverter
 import dev.hotwire.core.config.Hotwire
 import dev.hotwire.core.turbo.config.PathConfiguration
 import dev.hotwire.navigation.config.defaultFragmentDestination
@@ -11,6 +12,7 @@ import dev.hotwire.navigation.config.registerRouteDecisionHandlers
 import dev.hotwire.navigation.routing.AppNavigationRouteDecisionHandler
 import dev.hotwire.navigation.routing.BrowserTabRouteDecisionHandler
 import dev.hotwire.navigation.routing.SystemNavigationRouteDecisionHandler
+import kotlinx.serialization.json.Json
 import com.nurio.study.android.bridge.SignInWithOAuthComponent
 import com.nurio.study.android.bridge.RegisterDeviceTokenComponent
 import com.nurio.study.android.fragments.WebFragment
@@ -34,6 +36,13 @@ class StudyApplication : Application() {
         Hotwire.config.webViewDebuggingEnabled = BuildConfig.DEBUG
 
         Hotwire.config.applicationUserAgentPrefix = "Nurio Study Android"
+
+        // Bridge components (sign-in-with-oauth, register-device-token) decode/encode
+        // message JSON through Hotwire.config.jsonConverter. It is null by default, so
+        // Message.data<T>() throws IllegalArgumentException unless we set one here.
+        Hotwire.config.jsonConverter = KotlinXJsonConverter(
+            Json { ignoreUnknownKeys = true }
+        )
 
         Hotwire.registerRouteDecisionHandlers(
             OAuthRouteDecisionHandler(),
