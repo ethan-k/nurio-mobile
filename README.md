@@ -110,8 +110,8 @@ The Study Leader target is a separate app for approved and candidate leaders.
 
 - Start URL: `https://studyleaders.nurio.kr`
 - OAuth callback: `nurioleaders://auth-callback`
-- iOS bundle identifier: `com.nurio.studyleader.ios`
-- Android application identifier: `com.nurio.studyleader.android`
+- iOS bundle identifier: `com.nurio.studyleaders.ios`
+- Android application identifier: `com.nurio.studyleaders.android`
 - Implementation and release plan: `leaders-nurio-mobile/docs/IMPLEMENTATION_PLAN.md`
 - Launch gates: `leaders-nurio-mobile/docs/LAUNCH_CHECKLIST.md`
 - Store metadata and screenshot plan: `leaders-nurio-mobile/docs/ASO.md`
