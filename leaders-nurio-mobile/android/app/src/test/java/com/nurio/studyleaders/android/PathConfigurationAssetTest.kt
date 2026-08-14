@@ -5,14 +5,14 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class PathConfigurationAssetTest {
     @Test
-    fun `bundled path configuration exists and keeps auth routes modal`() {
+    fun `bundled path configuration exists and keeps login a full page`() {
         val asset = listOf(
             File("src/main/assets/json/path-configuration.json"),
             File("app/src/main/assets/json/path-configuration.json")
@@ -30,29 +30,25 @@ class PathConfigurationAssetTest {
             properties["uri"]?.jsonPrimitive?.content == "hotwire://fragment/web"
         })
 
-        val authRule = rules.firstOrNull { rule ->
-            val patterns = rule.jsonObject.getValue("patterns").jsonArray
-                .map { it.jsonPrimitive.content }
-            "/login.*" in patterns && "/signup.*" in patterns && "/auth/.*" in patterns
-        } ?: error("Study Leader login/auth modal rule is missing")
+        // Login, signup, and /auth/* must stay regular navigations. The
+        // logged-out root redirects to /login, so a modal rule here would
+        // auto-present the login sheet whenever the app opens — and would
+        // also stack a modal on /auth/native/token_auth after every native
+        // login. The learner Study app keeps /login a full page too.
+        val modalPatterns = rules
+            .filter { rule ->
+                val properties = rule.jsonObject.getValue("properties").jsonObject
+                properties["context"]?.jsonPrimitive?.content == "modal"
+            }
+            .flatMap { rule ->
+                rule.jsonObject.getValue("patterns").jsonArray.map { it.jsonPrimitive.content }
+            }
 
-        assertEquals(
-            "hotwire://fragment/web/modal",
-            authRule.jsonObject
-                .getValue("properties")
-                .jsonObject
-                .getValue("uri")
-                .jsonPrimitive
-                .content
-        )
-        assertEquals(
-            "false",
-            authRule.jsonObject
-                .getValue("properties")
-                .jsonObject
-                .getValue("pull_to_refresh_enabled")
-                .jsonPrimitive
-                .content
-        )
+        listOf("/login.*", "/signup.*", "/auth/.*").forEach { pattern ->
+            assertFalse(
+                "$pattern must not be presented as a modal",
+                pattern in modalPatterns
+            )
+        }
     }
 }

@@ -24,18 +24,6 @@
         "context": "modal",
         "uri": "hotwire://fragment/web/modal"
       }
-    },
-    {
-      "patterns": [
-        "/login.*",
-        "/signup.*",
-        "/auth/.*"
-      ],
-      "properties": {
-        "context": "modal",
-        "uri": "hotwire://fragment/web/modal",
-        "pull_to_refresh_enabled": false
-      }
     }
   ]
 }
