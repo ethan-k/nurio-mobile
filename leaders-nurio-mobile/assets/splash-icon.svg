@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Splash icon for the Android system splash screen.
+     Canvas is 288x288 (the splash icon view size); the artwork stays inside the
+     centred 192dp circle that androidx.core.splashscreen masks the icon with. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="288" height="288" viewBox="0 0 288 288">
+  <g transform="translate(144 144) scale(.64) translate(-180 -180.4)">
+    <g transform="translate(49.4 106.6) scale(.88)">
+      <g fill="none" stroke="#172033" stroke-linecap="round" stroke-linejoin="round" stroke-width="16">
+        <path d="M14 60V31C14 11 58 11 58 31V60"/>
+        <path d="M87 22V47C87 67 125 67 125 47V22"/>
+        <path d="M155 60V27C164 17 178 16 188 22"/>
+        <path d="M211 27V60"/>
+        <circle cx="261" cy="41" r="22"/>
+      </g>
+      <circle cx="211" cy="10" r="8" fill="#3182F6"/>
+      <text x="150" y="164" fill="#172033" font-family="DM Sans, Arial, sans-serif" font-size="92" font-weight="700" text-anchor="middle" textLength="270" lengthAdjust="spacingAndGlyphs">leader</text>
+    </g>
+  </g>
+</svg>

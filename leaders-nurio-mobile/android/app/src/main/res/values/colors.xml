@@ -9,5 +9,7 @@
     <color name="on_background">#172033</color>
     <color name="on_surface">#172033</color>
 
+    <color name="splash_background">#FFFFFF</color>
+
     <color name="bottom_nav_background">#FFFFFF</color>
 </resources>
