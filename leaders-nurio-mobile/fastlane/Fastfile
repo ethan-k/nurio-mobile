@@ -206,7 +206,7 @@ platform :ios do
       sku: "nurioStudyLeader",
       primary_locale: "en",
       bundle_id: bundle_id,
-      platforms: [Spaceship::ConnectAPI::Platform.map("ios")]
+      platforms: [ Spaceship::ConnectAPI::Platform.map("ios") ]
     )
     UI.success("Created app '#{app.name}' (#{app.id}) for #{bundle_id}")
   end
