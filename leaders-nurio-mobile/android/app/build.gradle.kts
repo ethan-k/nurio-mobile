@@ -15,6 +15,34 @@ if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 }
 
+// Release signing comes from the shared vault environment, the same source the
+// Fastlane lanes read. keystore.properties stays as a local-only fallback so a
+// checkout without the vault exported can still produce a signed build.
+fun signingSetting(variableName: String, propertyName: String): String {
+    val fromEnvironment = providers
+        .gradleProperty(variableName)
+        .orElse(providers.environmentVariable(variableName))
+        .orElse("")
+        .get()
+        .trim()
+    if (fromEnvironment.isNotBlank()) return fromEnvironment
+    return (keystoreProperties[propertyName] as String? ?: "").trim()
+}
+
+val releaseStoreFile = signingSetting("NURIO_STUDY_LEADER_ANDROID_KEYSTORE_PATH", "storeFile")
+val releaseKeyAlias = signingSetting("NURIO_STUDY_LEADER_ANDROID_KEYSTORE_ALIAS", "keyAlias")
+val releaseStorePassword =
+    signingSetting("NURIO_STUDY_LEADER_ANDROID_KEYSTORE_STORE_PASSWORD", "storePassword")
+// The upload keystore is PKCS12, a format that carries a single password for the
+// store and every key inside it. Gradle still requires keyPassword to be set, so
+// it is the store password by definition; there is no separate value to source.
+val releaseKeyPassword = releaseStorePassword
+val releaseSigningConfigured = listOf(
+    releaseStoreFile,
+    releaseKeyAlias,
+    releaseStorePassword
+).none { it.isBlank() }
+
 val kakaoNativeAppKey = providers
     .gradleProperty("NURIO_STUDY_LEADER_KAKAO_NATIVE_APP_KEY")
     .orElse(providers.environmentVariable("NURIO_STUDY_LEADER_KAKAO_NATIVE_APP_KEY"))
@@ -82,11 +110,11 @@ android {
 
     signingConfigs {
         create("release") {
-            if (keystorePropertiesFile.exists()) {
-                keyAlias = keystoreProperties["keyAlias"] as String
-                keyPassword = keystoreProperties["keyPassword"] as String
-                storeFile = rootProject.file(keystoreProperties["storeFile"] as String)
-                storePassword = keystoreProperties["storePassword"] as String
+            if (releaseSigningConfigured) {
+                keyAlias = releaseKeyAlias
+                keyPassword = releaseKeyPassword
+                storeFile = rootProject.file(releaseStoreFile)
+                storePassword = releaseStorePassword
             }
         }
     }
@@ -110,7 +138,7 @@ android {
             )
             buildConfigField("String", "BASE_URL", "\"https://studyleaders.nurio.kr\"")
             buildConfigField("Boolean", "DEBUG_LOGGING", "false")
-            if (keystorePropertiesFile.exists()) {
+            if (releaseSigningConfigured) {
                 signingConfig = signingConfigs.getByName("release")
             }
         }
