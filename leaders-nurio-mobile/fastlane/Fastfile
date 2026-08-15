@@ -57,7 +57,7 @@ module NurioCredentials
   end
 
   def fetch!(name)
-    require!([name])
+    require!([ name ])
     ENV.fetch(name)
   end
 

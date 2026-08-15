@@ -51,7 +51,7 @@ module NurioCredentials
   end
 
   def fetch!(name)
-    require!([name])
+    require!([ name ])
     ENV.fetch(name)
   end
 
@@ -249,7 +249,7 @@ end
   def study_bump_version_code!(json_key_data:)
     current = study_read_version_code
     play_max = study_play_max_version_code(json_key_data: json_key_data)
-    next_code = [current + 1, play_max + 1].max
+    next_code = [ current + 1, play_max + 1 ].max
     File.write(
       study_gradle_file,
       File.read(study_gradle_file).sub(/versionCode\s*=\s*\d+/, "versionCode = #{next_code}")
