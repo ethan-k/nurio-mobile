@@ -2,6 +2,7 @@ package com.nurio.android
 
 import android.app.Application
 import dev.hotwire.core.bridge.BridgeComponentFactory
+import dev.hotwire.core.bridge.KotlinXJsonConverter
 import dev.hotwire.core.config.Hotwire
 import dev.hotwire.core.turbo.config.PathConfiguration
 import dev.hotwire.navigation.config.defaultFragmentDestination
@@ -19,6 +20,7 @@ import com.nurio.android.notifications.NotificationChannels
 import com.nurio.android.routing.CheckoutColdBootRouteDecisionHandler
 import com.nurio.android.routing.OAuthRouteDecisionHandler
 import com.nurio.android.webview.NurioHotwireWebView
+import kotlinx.serialization.json.Json
 
 class NurioApplication : Application() {
     override fun onCreate() {
@@ -33,6 +35,13 @@ class NurioApplication : Application() {
         Hotwire.config.makeCustomWebView = { context -> NurioHotwireWebView(context) }
 
         Hotwire.config.applicationUserAgentPrefix = "Nurio Android; NurioPaymentReturn/1"
+
+        // Bridge components (sign-in-with-oauth, register-device-token) decode/encode
+        // message JSON through Hotwire.config.jsonConverter. It is null by default, so
+        // Message.data<T>() throws IllegalArgumentException unless we set one here.
+        Hotwire.config.jsonConverter = KotlinXJsonConverter(
+            Json { ignoreUnknownKeys = true }
+        )
 
         Hotwire.registerRouteDecisionHandlers(
             // Must run before AppNavigationRouteDecisionHandler so checkout
