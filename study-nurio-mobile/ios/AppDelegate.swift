@@ -1,4 +1,5 @@
 import FirebaseCore
+import FirebaseCrashlytics
 import FirebaseMessaging
 import GoogleSignIn
 import HotwireNative
@@ -70,6 +71,9 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         }
 
         FirebaseApp.configure(options: options)
+#if DEBUG
+        Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(false)
+#endif
         Messaging.messaging().delegate = self
         UNUserNotificationCenter.current().delegate = self
     }

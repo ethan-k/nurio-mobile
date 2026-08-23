@@ -141,6 +141,22 @@ def nurio_asc_api_key
   )
 end
 
+# fastlane runs lanes with Dir.pwd set to <project>/fastlane, so resolve against
+# the project root (parent of fastlane/) at runtime, matching nurio_gradle_file.
+# The path is pinned rather than left to Xcode's hashed default because SPM
+# checks firebase-ios-sdk out underneath it, and that is where upload-symbols
+# lives.
+def nurio_ios_derived_data_path
+  File.expand_path("../ios/build/derived_data", Dir.pwd)
+end
+
+def nurio_ios_crashlytics_upload_symbols
+  File.join(
+    nurio_ios_derived_data_path,
+    "SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/upload-symbols"
+  )
+end
+
 platform :ios do
   desc "Check App Store Connect credentials without building or uploading"
   lane :validate do
@@ -169,6 +185,7 @@ platform :ios do
 
     build_app(
       project: "ios/Nurio.xcodeproj",
+      derived_data_path: nurio_ios_derived_data_path,
       scheme: "Nurio",
       configuration: "Release",
       export_method: "app-store",
@@ -192,6 +209,43 @@ platform :ios do
       skip_waiting_for_build_processing: true,
       distribute_external: false
     )
+  end
+
+  desc "Upload App Store Connect dSYMs to Crashlytics (run after TestFlight finishes processing)"
+  lane :refresh_dsyms do |options|
+    api_key = nurio_asc_api_key
+
+    upload_symbols = nurio_ios_crashlytics_upload_symbols
+    unless File.executable?(upload_symbols)
+      UI.user_error!(
+        "upload-symbols is missing at #{upload_symbols}. Run `fastlane ios build` " \
+        "first so SPM resolves firebase-ios-sdk into the pinned derived data path."
+      )
+    end
+
+    # beta returns before App Store Connect finishes processing, so the dSYMs it
+    # generates do not exist yet when that lane exits. Without this follow-up the
+    # build-phase dSYM covers only locally archived symbols and TestFlight
+    # crashes stay unsymbolicated.
+    download_dsyms(
+      api_key: api_key,
+      version: options[:version] || "latest",
+      build_number: options[:build_number],
+      wait_for_dsym_processing: true,
+      wait_timeout: 1800
+    )
+
+    if Actions.lane_context[SharedValues::DSYM_PATHS].to_a.empty?
+      UI.important("No new dSYMs to upload")
+      next
+    end
+
+    upload_symbols_to_crashlytics(
+      gsp_path: File.expand_path("../ios/GoogleService-Info.plist", Dir.pwd),
+      binary_path: upload_symbols
+    )
+
+    clean_build_artifacts
   end
 
   desc "Build and upload to App Store Connect for release review (metadata untouched)"

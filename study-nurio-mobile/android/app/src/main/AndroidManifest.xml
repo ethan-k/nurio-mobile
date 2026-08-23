@@ -31,6 +31,10 @@
             android:name="com.google.firebase.messaging.default_notification_channel_id"
             android:value="nurio_study_notifications" />
 
+        <meta-data
+            android:name="firebase_crashlytics_collection_enabled"
+            android:value="${crashlyticsCollectionEnabled}" />
+
         <service
             android:name=".notifications.StudyFirebaseMessagingService"
             android:exported="false">

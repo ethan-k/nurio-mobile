@@ -44,6 +44,7 @@ val prepareStudyFirebaseConfig = tasks.register("prepareStudyFirebaseConfig") {
 }
 
 apply(plugin = "com.google.gms.google-services")
+apply(plugin = "com.google.firebase.crashlytics")
 
 tasks.matching {
     it.name.startsWith("process") && it.name.endsWith("GoogleServices")
@@ -103,6 +104,7 @@ android {
         versionName = "1.0.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        manifestPlaceholders["crashlyticsCollectionEnabled"] = true
         buildConfigField(
             "String",
             "KAKAO_NATIVE_APP_KEY",
@@ -126,16 +128,19 @@ android {
 
     buildTypes {
         debug {
+            manifestPlaceholders["crashlyticsCollectionEnabled"] = false
             buildConfigField("String", "BASE_URL", "\"https://study.nurio.kr\"")
             buildConfigField("Boolean", "DEBUG_LOGGING", "false")
         }
         create("productionDebug") {
             initWith(getByName("debug"))
+            manifestPlaceholders["crashlyticsCollectionEnabled"] = false
             buildConfigField("String", "BASE_URL", "\"https://study.nurio.kr\"")
             isDebuggable = true
             signingConfig = signingConfigs.getByName("debug")
         }
         release {
+            manifestPlaceholders["crashlyticsCollectionEnabled"] = true
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -188,6 +193,7 @@ dependencies {
 
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.messaging)
+    implementation(libs.firebase.crashlytics)
 
     testImplementation(libs.junit)
 }

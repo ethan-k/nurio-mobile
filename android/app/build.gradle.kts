@@ -9,6 +9,7 @@ plugins {
 
 if (file("google-services.json").exists()) {
     apply(plugin = "com.google.gms.google-services")
+    apply(plugin = "com.google.firebase.crashlytics")
 }
 
 val keystorePropertiesFile = rootProject.file("keystore.properties")
@@ -29,6 +30,7 @@ android {
         versionName = "1.0.10"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        manifestPlaceholders["crashlyticsCollectionEnabled"] = true
     }
 
     signingConfigs {
@@ -44,16 +46,19 @@ android {
 
     buildTypes {
         debug {
+            manifestPlaceholders["crashlyticsCollectionEnabled"] = false
             buildConfigField("String", "BASE_URL", "\"https://nurio.kr\"")
             buildConfigField("Boolean", "DEBUG_LOGGING", "true")
         }
         create("productionDebug") {
             initWith(getByName("debug"))
+            manifestPlaceholders["crashlyticsCollectionEnabled"] = false
             buildConfigField("String", "BASE_URL", "\"https://nurio.kr\"")
             isDebuggable = true
             signingConfig = signingConfigs.getByName("debug")
         }
         release {
+            manifestPlaceholders["crashlyticsCollectionEnabled"] = true
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -105,6 +110,7 @@ dependencies {
 
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.messaging)
+    implementation(libs.firebase.crashlytics)
 
     testImplementation("junit:junit:4.13.2")
 }

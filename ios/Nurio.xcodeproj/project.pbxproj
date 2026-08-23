@@ -10,6 +10,7 @@
 		54AD91C72FB3F8D000BF72BB /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 54AD91C62FB3F8D000BF72BB /* GoogleService-Info.plist */; };
 		54AD91CA2FB3FE0600BF72BB /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 54AD91C92FB3FE0600BF72BB /* FirebaseCore */; };
 		54AD91CC2FB3FE0600BF72BB /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 54AD91CB2FB3FE0600BF72BB /* FirebaseMessaging */; };
+		54AD91D02FB3FE0600BF72BB /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 54AD91D02FB3FE0600BF72BC /* FirebaseCrashlytics */; };
 		A00000000000000000000001 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000031 /* AppDelegate.swift */; };
 		A00000000000000000000002 /* SceneController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000032 /* SceneController.swift */; };
 		A00000000000000000000003 /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000033 /* AppEnvironment.swift */; };
@@ -93,6 +94,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				54AD91CC2FB3FE0600BF72BB /* FirebaseMessaging in Frameworks */,
+				54AD91D02FB3FE0600BF72BB /* FirebaseCrashlytics in Frameworks */,
 				54AD91CA2FB3FE0600BF72BB /* FirebaseCore in Frameworks */,
 				C00000000000000000000005 /* KakaoSDKCommon in Frameworks */,
 				C00000000000000000000006 /* KakaoSDKAuth in Frameworks */,
@@ -215,6 +217,7 @@
 				A00000000000000000000080 /* Sources */,
 				A00000000000000000000050 /* Frameworks */,
 				A00000000000000000000081 /* Resources */,
+				54AD91D02FB3FE0600BF72BD /* Upload Crashlytics dSYMs */,
 			);
 			buildRules = (
 			);
@@ -225,6 +228,7 @@
 				A000000000000000000000C1 /* HotwireNative */,
 				54AD91C92FB3FE0600BF72BB /* FirebaseCore */,
 				54AD91CB2FB3FE0600BF72BB /* FirebaseMessaging */,
+				54AD91D02FB3FE0600BF72BC /* FirebaseCrashlytics */,
 				C00000000000000000000002 /* KakaoSDKCommon */,
 				C00000000000000000000003 /* KakaoSDKAuth */,
 				C00000000000000000000004 /* KakaoSDKUser */,
@@ -318,6 +322,24 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		54AD91D02FB3FE0600BF72BD /* Upload Crashlytics dSYMs */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Upload Crashlytics dSYMs";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -eu\n\nRUN_SCRIPT=\"${BUILD_DIR%/Build/*}/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run\"\n\nif [ \"${DEBUG_INFORMATION_FORMAT:-}\" != \"dwarf-with-dsym\" ]; then\n  echo \"note: DEBUG_INFORMATION_FORMAT=${DEBUG_INFORMATION_FORMAT:-unset}; skipping Crashlytics dSYM upload\"\n  exit 0\nfi\n\nif [ ! -x \"$RUN_SCRIPT\" ]; then\n  echo \"warning: Crashlytics run script missing at $RUN_SCRIPT; skipping dSYM upload\"\n  exit 0\nfi\n\n\"$RUN_SCRIPT\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		A00000000000000000000080 /* Sources */ = {
@@ -669,6 +691,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 54AD91C82FB3FE0600BF72BB /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseMessaging;
+		};
+		54AD91D02FB3FE0600BF72BC /* FirebaseCrashlytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 54AD91C82FB3FE0600BF72BB /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCrashlytics;
 		};
 		A000000000000000000000C1 /* HotwireNative */ = {
 			isa = XCSwiftPackageProductDependency;

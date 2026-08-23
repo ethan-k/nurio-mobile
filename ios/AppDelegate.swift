@@ -1,4 +1,5 @@
 import FirebaseCore
+import FirebaseCrashlytics
 import FirebaseMessaging
 import HotwireNative
 import KakaoSDKCommon
@@ -47,6 +48,9 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
     private func configureFirebase(_ application: UIApplication) {
         FirebaseApp.configure()
+#if DEBUG
+        Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(false)
+#endif
         Messaging.messaging().delegate = self
         UNUserNotificationCenter.current().delegate = self
 

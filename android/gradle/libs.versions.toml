@@ -11,6 +11,7 @@ splashscreen = "1.0.1"
 browser = "1.8.0"
 lottie = "6.6.6"
 firebaseBom = "34.13.0"
+firebaseCrashlyticsPlugin = "3.0.8"
 googleServices = "4.4.4"
 
 [libraries]
@@ -27,9 +28,11 @@ hotwire-core = { group = "dev.hotwire", name = "core", version.ref = "hotwireNat
 hotwire-navigation-fragments = { group = "dev.hotwire", name = "navigation-fragments", version.ref = "hotwireNative" }
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
 firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging" }
+firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
+firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebaseCrashlyticsPlugin" }

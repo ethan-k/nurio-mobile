@@ -40,6 +40,7 @@
 		D00000000000000000000003 /* RegisterDeviceTokenComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000033 /* RegisterDeviceTokenComponent.swift */; };
 		D00000000000000000000004 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = D000000000000000000000C1 /* FirebaseCore */; };
 		D00000000000000000000005 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = D000000000000000000000C2 /* FirebaseMessaging */; };
+		D00000000000000000000200 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = D00000000000000000000201 /* FirebaseCrashlytics */; };
 		E00000000000000000000001 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = E00000000000000000000003 /* GoogleSignIn */; };
 /* End PBXBuildFile section */
 
@@ -100,6 +101,7 @@
 				E00000000000000000000001 /* GoogleSignIn in Frameworks */,
 				D00000000000000000000004 /* FirebaseCore in Frameworks */,
 				D00000000000000000000005 /* FirebaseMessaging in Frameworks */,
+				D00000000000000000000200 /* FirebaseCrashlytics in Frameworks */,
 				C00000000000000000000005 /* KakaoSDKCommon in Frameworks */,
 				C00000000000000000000006 /* KakaoSDKAuth in Frameworks */,
 				C00000000000000000000007 /* KakaoSDKUser in Frameworks */,
@@ -225,6 +227,7 @@
 				A00000000000000000000050 /* Frameworks */,
 				A00000000000000000000081 /* Resources */,
 				D00000000000000000000084 /* Copy Study Firebase configuration */,
+				D00000000000000000000202 /* Upload Crashlytics dSYMs */,
 			);
 			buildRules = (
 			);
@@ -238,6 +241,7 @@
 				C00000000000000000000004 /* KakaoSDKUser */,
 				D000000000000000000000C1 /* FirebaseCore */,
 				D000000000000000000000C2 /* FirebaseMessaging */,
+				D00000000000000000000201 /* FirebaseCrashlytics */,
 				E00000000000000000000003 /* GoogleSignIn */,
 			);
 			productName = NurioStudy;
@@ -364,6 +368,21 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "set -eu\nif [ ! -f \"${SCRIPT_INPUT_FILE_0}\" ]; then\n  echo \"Study production Firebase configuration is missing\" >&2\n  exit 1\nfi\nconfigured_project_id=$(/usr/bin/plutil -extract PROJECT_ID raw -o - \"${SCRIPT_INPUT_FILE_0}\")\nconfigured_bundle_id=$(/usr/bin/plutil -extract BUNDLE_ID raw -o - \"${SCRIPT_INPUT_FILE_0}\")\nif [ \"${configured_project_id}\" != \"nurio-prod\" ] || [ \"${configured_bundle_id}\" != \"com.nurio.study.ios\" ]; then\n  echo \"Study Firebase configuration must target nurio-prod and com.nurio.study.ios\" >&2\n  exit 1\nfi\nmkdir -p \"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}\"\ncp \"${SCRIPT_INPUT_FILE_0}\" \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+		};
+		D00000000000000000000202 /* Upload Crashlytics dSYMs */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Upload Crashlytics dSYMs";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -eu\n\nRUN_SCRIPT=\"${BUILD_DIR%/Build/*}/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run\"\n\nif [ \"${DEBUG_INFORMATION_FORMAT:-}\" != \"dwarf-with-dsym\" ]; then\n  echo \"note: DEBUG_INFORMATION_FORMAT=${DEBUG_INFORMATION_FORMAT:-unset}; skipping Crashlytics dSYM upload\"\n  exit 0\nfi\n\nif [ ! -x \"$RUN_SCRIPT\" ]; then\n  echo \"warning: Crashlytics run script missing at $RUN_SCRIPT; skipping dSYM upload\"\n  exit 0\nfi\n\n\"$RUN_SCRIPT\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -757,6 +776,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = D000000000000000000000C0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseMessaging;
+		};
+		D00000000000000000000201 /* FirebaseCrashlytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D000000000000000000000C0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCrashlytics;
 		};
 		E00000000000000000000003 /* GoogleSignIn */ = {
 			isa = XCSwiftPackageProductDependency;
