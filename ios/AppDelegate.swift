@@ -80,6 +80,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             SignInWithOAuthComponent.self,
             RegisterDeviceTokenComponent.self,
             PaymentTelemetryComponent.self,
+            KeyboardInsetsComponent.self,
         ])
 
         Hotwire.registerRouteDecisionHandlers([
