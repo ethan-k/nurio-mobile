@@ -32,7 +32,7 @@ Ship an iPhone and Android phone app that gives approved Study leaders a focused
 
 - Add a review/demo leader with populated Today, Schedule, Sessions, Notifications, and Earnings states.
 - Run authenticated device QA for safe areas, keyboard/forms, Turbo navigation, file uploads, calendar editing, logout, and cold-start deep links.
-- Add leader-scoped push registration only after dedicated Apple/FCM credentials and token-routing policy are ready; do not reuse the learner app package configuration.
+- Push registration is implemented via the shared `nurio-prod` FCM project (`RegisterDeviceTokenComponent` bridge + APNs entitlements on iOS, `StudyLeaderFirebaseMessagingService` on Android). Tokens flow to `POST /api/v1/device_tokens`; see `docs/PUSH_NOTIFICATIONS.md` before changing credentials or routing.
 - Capture final native screenshots from the production-signed candidates, then complete privacy/data-safety declarations from actual runtime behavior.
 
 ## Interfaces and Invariants

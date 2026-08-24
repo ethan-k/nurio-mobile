@@ -1,3 +1,4 @@
+import HotwireNative
 import UIKit
 import XCTest
 @testable import NurioStudyLeader
@@ -173,6 +174,143 @@ final class NurioStudyLeaderTests: XCTestCase {
         XCTAssertFalse(isCallback)
         XCTAssertFalse(detectorCalled)
     }
+
+    func testNotificationDestinationAcceptsOnlySafeLeaderLocations() {
+        let baseURL = URL(string: "https://studyleaders.nurio.kr")!
+
+        XCTAssertEqual(
+            NotificationDestination.resolve(path: "/notifications?filter=unread", url: nil, baseURL: baseURL),
+            URL(string: "https://studyleaders.nurio.kr/notifications?filter=unread")
+        )
+        XCTAssertEqual(
+            NotificationDestination.resolve(
+                path: nil,
+                url: "https://STUDYLEADERS.NURIO.KR/schedule",
+                baseURL: baseURL
+            ),
+            URL(string: "https://studyleaders.nurio.kr/schedule")
+        )
+        XCTAssertEqual(
+            NotificationDestination.resolve(
+                path: "//evil.example/sessions",
+                url: "/earnings",
+                baseURL: baseURL
+            ),
+            URL(string: "https://studyleaders.nurio.kr/earnings")
+        )
+    }
+
+    func testNotificationDestinationFallsBackForUntrustedLocations() {
+        let baseURL = URL(string: "https://studyleaders.nurio.kr")!
+        let rejected = [
+            "//evil.example/sessions",
+            "http://studyleaders.nurio.kr/sessions",
+            "https://evil.example/sessions",
+            "https://attacker:secret@studyleaders.nurio.kr/sessions",
+            "https://studyleaders.nurio.kr:8443/sessions",
+            "/sessions/42#fragment",
+            "/%61dmin/events",
+            "/sessions/../admin",
+            "/sessions/./details",
+            "/admin/events",
+            "/tutoring/sessions",
+            "/tutors/42",
+        ]
+
+        for destination in rejected {
+            XCTAssertEqual(
+                NotificationDestination.resolve(path: destination, url: nil, baseURL: baseURL),
+                baseURL,
+                "\(destination) must fall back to leader root"
+            )
+        }
+    }
+
+    @MainActor
+    func testNotificationRouteQueuesUntilHandlerIsInstalledAndThenRoutesImmediately() {
+        let coordinator = AppRouteCoordinator()
+        let handler = NavigationHandlerSpy()
+
+        coordinator.handleNotification(path: "/notifications/1", url: nil)
+        coordinator.handleNotification(path: "/notifications/2", url: nil)
+        XCTAssertTrue(handler.routedURLs.isEmpty)
+
+        coordinator.installNavigationHandler(handler)
+        XCTAssertEqual(
+            handler.routedURLs,
+            [URL(string: "https://studyleaders.nurio.kr/notifications/2")!]
+        )
+
+        coordinator.handleNotification(path: "/schedule", url: nil)
+        XCTAssertEqual(
+            handler.routedURLs,
+            [
+                URL(string: "https://studyleaders.nurio.kr/notifications/2")!,
+                URL(string: "https://studyleaders.nurio.kr/schedule")!,
+            ]
+        )
+    }
+
+    @MainActor
+    func testNativePushTokenStoreReturnsStablePayloads() {
+        let store = NativePushTokenStore()
+
+        XCTAssertEqual(
+            store.tokenData(),
+            NativePushTokenStore.TokenData(
+                token: nil,
+                platform: "ios",
+                error: "token_unavailable"
+            )
+        )
+
+        store.update(token: "  ")
+        XCTAssertEqual(store.tokenData().error, "token_unavailable")
+
+        store.update(token: " fcm-token ")
+        XCTAssertEqual(
+            store.tokenData(),
+            NativePushTokenStore.TokenData(
+                token: "fcm-token",
+                platform: "ios",
+                error: nil
+            )
+        )
+    }
+
+    @MainActor
+    func testNativePushTokenStoreExposesOnlyStableErrors() {
+        let store = NativePushTokenStore()
+
+        for error in NativePushRegistrationError.allCases {
+            XCTAssertEqual(store.tokenData(error: error).error, error.rawValue)
+            XCTAssertFalse(store.tokenData(error: error).error?.contains("Exception") == true)
+        }
+
+        store.update(token: "cached-token")
+        XCTAssertEqual(
+            store.tokenData(error: .notificationPermissionDenied),
+            NativePushTokenStore.TokenData(
+                token: nil,
+                platform: "ios",
+                error: "notification_permission_denied"
+            )
+        )
+    }
+
+    func testNativePushAuthorizationResultSeparatesFailureFromDenial() {
+        XCTAssertNil(
+            NativePushRegistrationError.authorizationError(granted: true, requestFailed: false)
+        )
+        XCTAssertEqual(
+            NativePushRegistrationError.authorizationError(granted: false, requestFailed: false),
+            .notificationPermissionDenied
+        )
+        XCTAssertEqual(
+            NativePushRegistrationError.authorizationError(granted: false, requestFailed: true),
+            .notificationPermissionFailed
+        )
+    }
 }
 
 @MainActor
@@ -182,6 +320,17 @@ private final class KakaoSignInStarterSpy: KakaoSignInStarting {
     func start(completion: @escaping SocialAuthCompletion) {
         startInvocationCount += 1
     }
+}
+
+@MainActor
+private final class NavigationHandlerSpy: @preconcurrency NavigationHandler {
+    private(set) var routedURLs: [URL] = []
+
+    func route(_ url: URL) {
+        routedURLs.append(url)
+    }
+
+    func route(_ proposal: VisitProposal) {}
 }
 
 @MainActor

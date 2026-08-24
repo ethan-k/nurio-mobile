@@ -1,8 +1,12 @@
+import FirebaseCore
+import FirebaseCrashlytics
+import FirebaseMessaging
 import GoogleSignIn
 import HotwireNative
 import KakaoSDKAuth
 import KakaoSDKCommon
 import UIKit
+import UserNotifications
 
 @main
 final class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -10,10 +14,26 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
+        configureFirebase()
         configureAppearance()
         configureHotwire()
         configureKakaoSDK()
         return true
+    }
+
+    func application(
+        _ application: UIApplication,
+        didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
+    ) {
+        guard FirebaseApp.app() != nil else { return }
+        Messaging.messaging().apnsToken = deviceToken
+    }
+
+    func application(
+        _ application: UIApplication,
+        didFailToRegisterForRemoteNotificationsWithError error: Error
+    ) {
+        NSLog("Nurio Study Leader remote notification registration failed")
     }
 
     func application(
@@ -42,6 +62,24 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         UITabBar.appearance().scrollEdgeAppearance = .init()
     }
 
+    private func configureFirebase() {
+        guard let options = FirebaseOptions.defaultOptions(),
+              options.projectID == "nurio-prod",
+              options.bundleID == Bundle.main.bundleIdentifier else {
+            NSLog("Nurio Study Leader Firebase configuration unavailable or mismatched")
+            return
+        }
+
+        FirebaseApp.configure(options: options)
+#if DEBUG
+        Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(false)
+#endif
+        Crashlytics.crashlytics().setCustomValue("nurio_study_leader", forKey: "app_surface")
+        Crashlytics.crashlytics().setCustomValue("ios", forKey: "native_platform")
+        Messaging.messaging().delegate = self
+        UNUserNotificationCenter.current().delegate = self
+    }
+
     private func configureHotwire() {
         Hotwire.loadPathConfiguration(from: [
             .file(Bundle.main.url(forResource: AppEnvironment.pathConfigurationResourceName, withExtension: "json")!)
@@ -53,6 +91,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
         Hotwire.registerBridgeComponents([
             SignInWithOAuthComponent.self,
+            RegisterDeviceTokenComponent.self,
         ])
 
         Hotwire.registerRouteDecisionHandlers([
@@ -71,5 +110,36 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     private func configureKakaoSDK() {
         guard let appKey = KakaoSDKConfiguration.appKey else { return }
         KakaoSDK.initSDK(appKey: appKey)
+    }
+}
+
+extension AppDelegate: MessagingDelegate {
+    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
+        guard let fcmToken else { return }
+        NativePushTokenStore.shared.update(token: fcmToken)
+        NSLog("Nurio Study Leader FCM token refreshed")
+    }
+}
+
+extension AppDelegate: UNUserNotificationCenterDelegate {
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        willPresent notification: UNNotification,
+        withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
+    ) {
+        completionHandler([ .banner, .sound, .badge ])
+    }
+
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse,
+        withCompletionHandler completionHandler: @escaping () -> Void
+    ) {
+        let userInfo = response.notification.request.content.userInfo
+        AppRouteCoordinator.shared.handleNotification(
+            path: userInfo["path"] as? String,
+            url: userInfo["url"] as? String
+        )
+        completionHandler()
     }
 }
