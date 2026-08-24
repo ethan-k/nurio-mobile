@@ -1,6 +1,7 @@
 package com.nurio.studyleaders.android
 
 import android.app.Application
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.kakao.sdk.common.KakaoSdk
 import dev.hotwire.core.bridge.BridgeComponentFactory
 import dev.hotwire.core.bridge.KotlinXJsonConverter
@@ -26,11 +27,23 @@ import com.nurio.studyleaders.android.routing.OAuthRouteDecisionHandler
 class StudyLeaderApplication : Application() {
     override fun onCreate() {
         super.onCreate()
+        configureCrashReportingContext()
         if (BuildConfig.KAKAO_NATIVE_APP_KEY.isNotBlank()) {
             KakaoSdk.init(this, BuildConfig.KAKAO_NATIVE_APP_KEY)
         }
         NotificationChannels.ensureCreated(this)
         configureHotwire()
+    }
+
+    private fun configureCrashReportingContext() {
+        try {
+            FirebaseCrashlytics.getInstance().apply {
+                setCustomKey("app_surface", "nurio_study_leader")
+                setCustomKey("native_platform", "android")
+            }
+        } catch (_: Exception) {
+            // Diagnostics are optional and must never block app startup.
+        }
     }
 
     private fun configureHotwire() {

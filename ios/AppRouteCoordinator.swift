@@ -16,6 +16,14 @@ final class AppRouteCoordinator {
     private init() {}
 
     func handleIncoming(_ url: URL) {
+        if NativePaymentCallback.isCallbackURL(url) {
+            let paymentID = NativePaymentCallback.paymentID(from: url)
+            PaymentCrashTelemetry.markCallbackReceived(paymentReference: paymentID)
+            if paymentID == nil {
+                PaymentCrashTelemetry.reportTechnicalFailure(.malformedCallback)
+            }
+        }
+
         route(Self.destinationURL(for: url, baseURL: AppEnvironment.baseURL))
     }
 

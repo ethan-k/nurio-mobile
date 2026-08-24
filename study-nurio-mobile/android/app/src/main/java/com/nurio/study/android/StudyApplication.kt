@@ -15,15 +15,18 @@ import dev.hotwire.navigation.routing.SystemNavigationRouteDecisionHandler
 import kotlinx.serialization.json.Json
 import com.nurio.study.android.bridge.SignInWithOAuthComponent
 import com.nurio.study.android.bridge.RegisterDeviceTokenComponent
+import com.nurio.study.android.bridge.PaymentTelemetryComponent
 import com.nurio.study.android.fragments.WebFragment
 import com.nurio.study.android.fragments.WebModalFragment
 import com.nurio.study.android.routing.OAuthRouteDecisionHandler
 import com.kakao.sdk.common.KakaoSdk
 import com.nurio.study.android.notifications.NotificationChannels
+import com.nurio.study.android.payments.PaymentCrashTelemetry
 
 class StudyApplication : Application() {
     override fun onCreate() {
         super.onCreate()
+        PaymentCrashTelemetry.reset()
         if (BuildConfig.KAKAO_NATIVE_APP_KEY.isNotBlank()) {
             KakaoSdk.init(this, BuildConfig.KAKAO_NATIVE_APP_KEY)
         }
@@ -53,6 +56,7 @@ class StudyApplication : Application() {
 
         Hotwire.registerBridgeComponents(
             BridgeComponentFactory("sign-in-with-oauth", ::SignInWithOAuthComponent),
+            BridgeComponentFactory("payment-telemetry", ::PaymentTelemetryComponent),
             BridgeComponentFactory("register-device-token", ::RegisterDeviceTokenComponent)
         )
 

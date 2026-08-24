@@ -13,6 +13,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.webkit.WebResourceErrorCompat
 import androidx.webkit.WebViewClientCompat
+import com.nurio.android.payments.PaymentCrashTelemetry
 import dev.hotwire.core.turbo.webview.HotwireWebView
 
 class NurioHotwireWebView @JvmOverloads constructor(
@@ -38,7 +39,7 @@ private class PaymentAwareWebViewClient(
 ) : WebViewClientCompat() {
     override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
         if (PaymentNavigation.shouldStayInWebView(request.url, view.url)) return false
-        if (PaymentNavigation.openExternalPaymentApp(view.context, request.url)) return true
+        if (PaymentNavigation.openExternalPaymentApp(view.context, request.url).consumed) return true
 
         return delegate.shouldOverrideUrlLoading(view, request)
     }
@@ -47,7 +48,7 @@ private class PaymentAwareWebViewClient(
     override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
         val uri = android.net.Uri.parse(url)
         if (PaymentNavigation.shouldStayInWebView(uri, view.url)) return false
-        if (PaymentNavigation.openExternalPaymentApp(view.context, uri)) return true
+        if (PaymentNavigation.openExternalPaymentApp(view.context, uri).consumed) return true
 
         return delegate.shouldOverrideUrlLoading(view, url)
     }
@@ -125,6 +126,7 @@ private class PaymentAwareWebViewClient(
     }
 
     override fun onRenderProcessGone(view: WebView, detail: RenderProcessGoneDetail): Boolean {
+        PaymentCrashTelemetry.reportRendererTermination()
         return delegate.onRenderProcessGone(view, detail)
     }
 }

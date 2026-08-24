@@ -83,6 +83,82 @@ final class NurioTests: XCTestCase {
         )
     }
 
+    func testMalformedPaymentCallbackFallsBackToTickets() {
+        let callbackURL = URL(string: "nurio://payment-complete?tx_id=tx-456")!
+
+        XCTAssertEqual(
+            NativePaymentCallback.completeURL(
+                from: callbackURL,
+                baseURL: URL(string: "https://nurio.kr")!
+            )?.absoluteString,
+            "https://nurio.kr/settings/tickets"
+        )
+    }
+
+    func testPaymentCallbackUsesNonemptySnakeCaseIDWhenCamelCaseIDIsBlank() {
+        let callbackURL = URL(string: "nurio://payment-complete?paymentId=&payment_id=payment-123")!
+        let completeURL = NativePaymentCallback.completeURL(
+            from: callbackURL,
+            baseURL: URL(string: "https://nurio.kr")!
+        )
+        let paymentIDs = URLComponents(
+            url: completeURL!,
+            resolvingAgainstBaseURL: false
+        )?.queryItems?.filter { $0.name == "paymentId" }.compactMap(\.value)
+
+        XCTAssertEqual(paymentIDs, ["payment-123"])
+    }
+
+    func testPaymentCrashContextHashesReferenceAndClearsState() {
+        let reporter = RecordingPaymentCrashReporter()
+        let context = PaymentCrashContext(reporter: reporter, appSurface: "nurio")
+
+        context.track(
+            stage: "payment_requested",
+            orderKind: "ticket",
+            paymentReference: "payment-123",
+            handoff: "webview",
+            failureKind: "none",
+            reportNonfatal: false
+        )
+
+        XCTAssertTrue(context.isActive)
+        XCTAssertEqual(reporter.values["payment_reference"] as? String, "0220adf67b8fcdc0")
+        XCTAssertNotEqual(reporter.values["payment_reference"] as? String, "payment-123")
+
+        context.track(
+            stage: "flow_finished",
+            orderKind: nil,
+            paymentReference: nil,
+            handoff: nil,
+            failureKind: nil,
+            reportNonfatal: false
+        )
+
+        XCTAssertFalse(context.isActive)
+        XCTAssertEqual(reporter.values["payment_reference"] as? String, "none")
+        XCTAssertEqual(reporter.values["payment_provider"] as? String, "none")
+    }
+
+    func testPaymentCrashReporterFailureCannotEscapeTelemetry() {
+        let context = PaymentCrashContext(
+            reporter: ThrowingPaymentCrashReporter(),
+            appSurface: "nurio"
+        )
+
+        context.reset()
+        context.track(
+            stage: "payment_requested",
+            orderKind: "ticket",
+            paymentReference: "payment-123",
+            handoff: "webview",
+            failureKind: "sdk_request",
+            reportNonfatal: true
+        )
+
+        XCTAssertTrue(context.isActive)
+    }
+
     func testScopePolicyBlocksAdminAndTutorPaths() {
         XCTAssertTrue(CustomerScopePolicy.isBlocked(URL(string: "https://nurio.kr/admin/events")!))
         XCTAssertTrue(CustomerScopePolicy.isBlocked(URL(string: "https://nurio.kr/tutoring/sessions")!))
@@ -128,5 +204,41 @@ final class NurioTests: XCTestCase {
         )
 
         XCTAssertEqual(webURL?.absoluteString, "https://nurio.kr/events")
+    }
+}
+
+private final class RecordingPaymentCrashReporter: PaymentCrashReporting {
+    var values: [String: Any] = [:]
+    var logs: [String] = []
+    var errors: [Error] = []
+
+    func setCustomValue(_ value: Any, forKey key: String) throws {
+        values[key] = value
+    }
+
+    func log(_ message: String) throws {
+        logs.append(message)
+    }
+
+    func record(error: Error) throws {
+        errors.append(error)
+    }
+}
+
+private final class ThrowingPaymentCrashReporter: PaymentCrashReporting {
+    private enum ReportingError: Error {
+        case unavailable
+    }
+
+    func setCustomValue(_ value: Any, forKey key: String) throws {
+        throw ReportingError.unavailable
+    }
+
+    func log(_ message: String) throws {
+        throw ReportingError.unavailable
+    }
+
+    func record(error: Error) throws {
+        throw ReportingError.unavailable
     }
 }

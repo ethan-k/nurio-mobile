@@ -42,6 +42,8 @@
 		F10000000000000000000002 /* NativeLocaleBootstrap.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000032 /* NativeLocaleBootstrap.swift */; };
 		F20000000000000000000001 /* SceneStartupCoordinatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F20000000000000000000031 /* SceneStartupCoordinatorTests.swift */; };
 		F20000000000000000000002 /* SceneStartupCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F20000000000000000000032 /* SceneStartupCoordinator.swift */; };
+		F30000000000000000000001 /* PaymentCrashContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = F30000000000000000000031 /* PaymentCrashContext.swift */; };
+		F30000000000000000000002 /* PaymentTelemetryComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = F30000000000000000000032 /* PaymentTelemetryComponent.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -86,6 +88,8 @@
 		F10000000000000000000032 /* NativeLocaleBootstrap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeLocaleBootstrap.swift; sourceTree = "<group>"; };
 		F20000000000000000000031 /* SceneStartupCoordinatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneStartupCoordinatorTests.swift; sourceTree = "<group>"; };
 		F20000000000000000000032 /* SceneStartupCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneStartupCoordinator.swift; sourceTree = "<group>"; };
+		F30000000000000000000031 /* PaymentCrashContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentCrashContext.swift; sourceTree = "<group>"; };
+		F30000000000000000000032 /* PaymentTelemetryComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentTelemetryComponent.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -185,6 +189,7 @@
 			children = (
 				A0000000000000000000003B /* SignInWithOAuthComponent.swift */,
 				B000000000000000000000032 /* RegisterDeviceTokenComponent.swift */,
+				F30000000000000000000032 /* PaymentTelemetryComponent.swift */,
 			);
 			path = Bridge;
 			sourceTree = "<group>";
@@ -203,6 +208,7 @@
 			isa = PBXGroup;
 			children = (
 				B000000000000000000000033 /* CheckoutColdBootWebViewPolicyDecisionHandler.swift */,
+				F30000000000000000000031 /* PaymentCrashContext.swift */,
 			);
 			path = Payments;
 			sourceTree = "<group>";
@@ -364,6 +370,8 @@
 				B000000000000000000000002 /* RegisterDeviceTokenComponent.swift in Sources */,
 				B000000000000000000000003 /* CheckoutColdBootWebViewPolicyDecisionHandler.swift in Sources */,
 				F10000000000000000000002 /* NativeLocaleBootstrap.swift in Sources */,
+				F30000000000000000000001 /* PaymentCrashContext.swift in Sources */,
+				F30000000000000000000002 /* PaymentTelemetryComponent.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -52,16 +52,17 @@ enum NativePaymentCallback {
     static func completeURL(from callbackURL: URL, baseURL: URL) -> URL? {
         guard isCallbackURL(callbackURL) else { return nil }
         guard let callbackComponents = URLComponents(url: callbackURL, resolvingAgainstBaseURL: false) else {
-            return nil
+            return ticketsURL(for: baseURL)
         }
 
         var queryItems = callbackComponents.queryItems ?? []
-        if !queryItems.contains(where: { $0.name == "paymentId" }) {
-            guard let paymentId = queryItems.first(where: { $0.name == "payment_id" })?.value, !paymentId.isEmpty else {
-                return nil
-            }
+        guard let paymentID = paymentID(from: callbackURL) else {
+            return ticketsURL(for: baseURL)
+        }
 
-            queryItems.append(URLQueryItem(name: "paymentId", value: paymentId))
+        if !queryItems.contains(where: { $0.name == "paymentId" && !($0.value ?? "").isEmpty }) {
+            queryItems.removeAll(where: { $0.name == "paymentId" })
+            queryItems.append(URLQueryItem(name: "paymentId", value: paymentID))
         }
 
         let completeURL = baseURL
@@ -76,5 +77,20 @@ enum NativePaymentCallback {
 
     static func isCallbackURL(_ url: URL) -> Bool {
         url.scheme?.lowercased() == AppEnvironment.callbackScheme && url.host == "payment-complete"
+    }
+
+    static func paymentID(from callbackURL: URL) -> String? {
+        guard isCallbackURL(callbackURL) else { return nil }
+
+        return URLComponents(url: callbackURL, resolvingAgainstBaseURL: false)?
+            .queryItems?
+            .first(where: {
+                ($0.name == "paymentId" || $0.name == "payment_id") && !($0.value ?? "").isEmpty
+            })?
+            .value
+    }
+
+    private static func ticketsURL(for baseURL: URL) -> URL {
+        baseURL.appendingPathComponent("settings").appendingPathComponent("tickets")
     }
 }

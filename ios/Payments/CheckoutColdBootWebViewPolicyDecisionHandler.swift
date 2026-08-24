@@ -41,6 +41,8 @@ struct CheckoutColdBootWebViewPolicyDecisionHandler: WebViewPolicyDecisionHandle
                 }
 
                 if let stuckGatewayURL {
+                    PaymentCrashTelemetry.logRetryColdBoot()
+
                     // Drop the abandoned gateway's cookies/session so the retry starts
                     // clean — Korean PGs (KG Inicis) reject a reused session with
                     // "비정상적인 접근" even when the order id is fresh.

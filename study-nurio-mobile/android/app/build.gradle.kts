@@ -12,14 +12,11 @@ val firebaseSourceFile = rootProject.file(
     "../../../nurio_study/mobile_certs/nurio-study-google-services.json"
 )
 val firebaseStagedFile = file("google-services.json")
+val firebaseConfigured = firebaseSourceFile.isFile
 
-if (!firebaseSourceFile.isFile) {
-    throw GradleException("Study production Firebase configuration is missing")
+val firebaseConfig = firebaseSourceFile.takeIf { it.isFile }?.let { source ->
+    runCatching { JsonSlurper().parse(source) as? Map<*, *> }.getOrNull()
 }
-
-val firebaseConfig = runCatching {
-    JsonSlurper().parse(firebaseSourceFile) as? Map<*, *>
-}.getOrNull()
 val firebaseProjectInfo = firebaseConfig?.get("project_info") as? Map<*, *>
 val firebaseProjectId = firebaseProjectInfo?.get("project_id") as? String
 val firebaseClients = firebaseConfig?.get("client") as? List<*>
@@ -29,27 +26,48 @@ val firebasePackageNames = firebaseClients.orEmpty().mapNotNull { client ->
     androidClientInfo?.get("package_name") as? String
 }
 
-if (firebaseProjectId != "nurio-prod" || "com.nurio.study.android" !in firebasePackageNames) {
+if (firebaseConfigured &&
+    (firebaseProjectId != "nurio-prod" || "com.nurio.study.android" !in firebasePackageNames)
+) {
     throw GradleException(
         "Study Firebase configuration must target nurio-prod and com.nurio.study.android"
     )
 }
 
 val prepareStudyFirebaseConfig = tasks.register("prepareStudyFirebaseConfig") {
-    inputs.file(firebaseSourceFile)
+    if (firebaseConfigured) inputs.file(firebaseSourceFile)
     outputs.file(firebaseStagedFile)
     doLast {
+        if (!firebaseConfigured) {
+            throw GradleException("Study production Firebase configuration is missing")
+        }
         firebaseSourceFile.copyTo(firebaseStagedFile, overwrite = true)
     }
 }
 
-apply(plugin = "com.google.gms.google-services")
-apply(plugin = "com.google.firebase.crashlytics")
+if (firebaseConfigured) {
+    apply(plugin = "com.google.gms.google-services")
+    apply(plugin = "com.google.firebase.crashlytics")
+
+    tasks.matching {
+        it.name.startsWith("process") && it.name.endsWith("GoogleServices")
+    }.configureEach {
+        dependsOn(prepareStudyFirebaseConfig)
+    }
+}
+
+val verifyStudyFirebaseConfig = tasks.register("verifyStudyFirebaseConfig") {
+    doLast {
+        if (!firebaseConfigured) {
+            throw GradleException("Study production Firebase configuration is missing")
+        }
+    }
+}
 
 tasks.matching {
-    it.name.startsWith("process") && it.name.endsWith("GoogleServices")
+    it.name == "preProductionDebugBuild" || it.name == "preReleaseBuild"
 }.configureEach {
-    dependsOn(prepareStudyFirebaseConfig)
+    dependsOn(verifyStudyFirebaseConfig)
 }
 
 val keystorePropertiesFile = rootProject.file("keystore.properties")
@@ -110,7 +128,7 @@ android {
             "KAKAO_NATIVE_APP_KEY",
             kakaoNativeAppKey.asBuildConfigString()
         )
-        buildConfigField("Boolean", "FIREBASE_CONFIGURED", "true")
+        buildConfigField("Boolean", "FIREBASE_CONFIGURED", firebaseConfigured.toString())
         manifestPlaceholders["KAKAO_NATIVE_APP_KEY"] = kakaoManifestAppKey
         manifestPlaceholders["KAKAO_AUTH_ENABLED"] = kakaoAuthEnabled.toString()
     }

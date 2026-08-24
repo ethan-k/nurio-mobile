@@ -44,3 +44,10 @@ xcodebuild -project ios/NurioStudy.xcodeproj -scheme NurioStudy -configuration R
 ## Submission
 
 For the full App Store Connect and TestFlight workflow, see `docs/SUBMISSION.md`.
+
+## Crash reporting
+
+Debug builds can run without the external Firebase plist and continue with
+Crashlytics disabled. Release builds still require and validate the production
+plist. Shared identity, payment-context privacy, non-blocking behavior, and
+dashboard verification are documented in `../../docs/CRASH_REPORTING.md`.

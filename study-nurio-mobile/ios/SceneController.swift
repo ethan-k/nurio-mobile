@@ -399,6 +399,8 @@ extension SceneController: NavigatorDelegate {
             return
         }
 
+        PaymentCrashTelemetry.reportNativeRequestFailure()
+
         if let errorPresenter = visitable as? ErrorPresenter {
             errorPresenter.presentError(error) {
                 retryHandler?()

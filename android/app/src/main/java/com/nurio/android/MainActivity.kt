@@ -17,6 +17,8 @@ import androidx.core.os.ConfigurationCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.airbnb.lottie.LottieAnimationView
 import com.nurio.android.localization.LocaleCookieBootstrapper
+import com.nurio.android.payments.PaymentCrashTelemetry
+import com.nurio.android.payments.PaymentFailureKind
 import com.nurio.android.startup.MainActivityStartupCoordinator
 import dev.hotwire.navigation.activities.HotwireActivity
 import dev.hotwire.navigation.navigator.Navigator
@@ -111,10 +113,18 @@ class MainActivity : HotwireActivity() {
     }
 
     private fun handlePaymentCallbackIntent(intent: Intent?): Boolean {
-        val completeUrl = intent?.data
+        val callbackUri = intent?.data
             ?.takeIf { it.scheme == "nurio" && it.host == "payment-complete" }
-            ?.let(::buildPaymentCompleteUrl)
             ?: return false
+
+        val paymentId = callbackUri.getQueryParameter("paymentId")
+            ?: callbackUri.getQueryParameter("payment_id")
+        PaymentCrashTelemetry.markCallbackReceived(paymentId)
+        if (paymentId.isNullOrBlank()) {
+            PaymentCrashTelemetry.reportTechnicalFailure(PaymentFailureKind.MALFORMED_CALLBACK)
+        }
+
+        val completeUrl = buildPaymentCompleteUrl(callbackUri)
 
         routeWhenReady(completeUrl)
         return true
@@ -178,9 +188,11 @@ class MainActivity : HotwireActivity() {
             .toString()
     }
 
-    private fun buildPaymentCompleteUrl(callbackUri: Uri): String? {
-        val paymentId = callbackUri.getQueryParameter("paymentId")
-            ?: callbackUri.getQueryParameter("payment_id")
+    private fun buildPaymentCompleteUrl(callbackUri: Uri): String {
+        val camelCasePaymentId = callbackUri.getQueryParameter("paymentId")
+            ?.takeIf { it.isNotBlank() }
+        val paymentId = camelCasePaymentId
+            ?: callbackUri.getQueryParameter("payment_id")?.takeIf { it.isNotBlank() }
 
         // A payment-complete callback with no payment id means the gateway
         // returned without a payment (e.g. the user backed out). Send the user
@@ -191,12 +203,14 @@ class MainActivity : HotwireActivity() {
 
         val builder = Uri.parse("${BuildConfig.BASE_URL.trimEnd('/')}/payments/portone/complete").buildUpon()
         callbackUri.queryParameterNames.forEach { name ->
+            if (name == "paymentId" && camelCasePaymentId == null) return@forEach
+
             callbackUri.getQueryParameters(name).forEach { value ->
                 builder.appendQueryParameter(name, value)
             }
         }
 
-        if (!callbackUri.queryParameterNames.contains("paymentId")) {
+        if (camelCasePaymentId == null) {
             builder.appendQueryParameter("paymentId", paymentId)
         }
 

@@ -65,7 +65,7 @@ private class PaymentPopupWebViewClient(
             return
         }
 
-        if (PaymentNavigation.openExternalPaymentApp(parentWebView.context, uri)) {
+        if (PaymentNavigation.openExternalPaymentApp(parentWebView.context, uri).consumed) {
             popupWebView.destroy()
             return
         }

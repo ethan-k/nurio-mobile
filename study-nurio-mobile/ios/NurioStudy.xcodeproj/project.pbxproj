@@ -42,6 +42,8 @@
 		D00000000000000000000005 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = D000000000000000000000C2 /* FirebaseMessaging */; };
 		D00000000000000000000200 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = D00000000000000000000201 /* FirebaseCrashlytics */; };
 		E00000000000000000000001 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = E00000000000000000000003 /* GoogleSignIn */; };
+		F30000000000000000000001 /* PaymentCrashContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = F30000000000000000000031 /* PaymentCrashContext.swift */; };
+		F30000000000000000000002 /* PaymentTelemetryComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = F30000000000000000000032 /* PaymentTelemetryComponent.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -91,6 +93,8 @@
 		D00000000000000000000034 /* NurioStudy.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NurioStudy.entitlements; sourceTree = "<group>"; };
 		D00000000000000000000036 /* NativeAuth.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = NativeAuth.xcconfig; sourceTree = "<group>"; };
 		D00000000000000000000037 /* NativeAuth.debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = NativeAuth.debug.xcconfig; sourceTree = "<group>"; };
+		F30000000000000000000031 /* PaymentCrashContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentCrashContext.swift; sourceTree = "<group>"; };
+		F30000000000000000000032 /* PaymentTelemetryComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentTelemetryComponent.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -144,6 +148,7 @@
 				A00000000000000000000063 /* Support */,
 				A00000000000000000000064 /* Routing */,
 				A00000000000000000000065 /* Bridge */,
+				F30000000000000000000040 /* Payments */,
 				A00000000000000000000031 /* AppDelegate.swift */,
 				A00000000000000000000032 /* SceneController.swift */,
 				D00000000000000000000031 /* NotificationDestination.swift */,
@@ -193,8 +198,17 @@
 			children = (
 				A0000000000000000000003B /* SignInWithOAuthComponent.swift */,
 				D00000000000000000000033 /* RegisterDeviceTokenComponent.swift */,
+				F30000000000000000000032 /* PaymentTelemetryComponent.swift */,
 			);
 			path = Bridge;
+			sourceTree = "<group>";
+		};
+		F30000000000000000000040 /* Payments */ = {
+			isa = PBXGroup;
+			children = (
+				F30000000000000000000031 /* PaymentCrashContext.swift */,
+			);
+			path = Payments;
 			sourceTree = "<group>";
 		};
 		A00000000000000000000066 /* Tests */ = {
@@ -367,7 +381,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "set -eu\nif [ ! -f \"${SCRIPT_INPUT_FILE_0}\" ]; then\n  echo \"Study production Firebase configuration is missing\" >&2\n  exit 1\nfi\nconfigured_project_id=$(/usr/bin/plutil -extract PROJECT_ID raw -o - \"${SCRIPT_INPUT_FILE_0}\")\nconfigured_bundle_id=$(/usr/bin/plutil -extract BUNDLE_ID raw -o - \"${SCRIPT_INPUT_FILE_0}\")\nif [ \"${configured_project_id}\" != \"nurio-prod\" ] || [ \"${configured_bundle_id}\" != \"com.nurio.study.ios\" ]; then\n  echo \"Study Firebase configuration must target nurio-prod and com.nurio.study.ios\" >&2\n  exit 1\nfi\nmkdir -p \"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}\"\ncp \"${SCRIPT_INPUT_FILE_0}\" \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			shellScript = "set -eu\nif [ ! -f \"${SCRIPT_INPUT_FILE_0}\" ]; then\n  if [ \"${CONFIGURATION:-}\" = \"Debug\" ]; then\n    echo \"note: Study Firebase configuration missing; continuing without Firebase in Debug\"\n    exit 0\n  fi\n\n  echo \"Study production Firebase configuration is missing\" >&2\n  exit 1\nfi\nconfigured_project_id=$(/usr/bin/plutil -extract PROJECT_ID raw -o - \"${SCRIPT_INPUT_FILE_0}\")\nconfigured_bundle_id=$(/usr/bin/plutil -extract BUNDLE_ID raw -o - \"${SCRIPT_INPUT_FILE_0}\")\nif [ \"${configured_project_id}\" != \"nurio-prod\" ] || [ \"${configured_bundle_id}\" != \"com.nurio.study.ios\" ]; then\n  echo \"Study Firebase configuration must target nurio-prod and com.nurio.study.ios\" >&2\n  exit 1\nfi\nmkdir -p \"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}\"\ncp \"${SCRIPT_INPUT_FILE_0}\" \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 		};
 		D00000000000000000000202 /* Upload Crashlytics dSYMs */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -411,6 +425,8 @@
 				A00000000000000000000015 /* SocialAuthCoordinator.swift in Sources */,
 				A00000000000000000000016 /* NativeGoogleSignInCoordinator.swift in Sources */,
 				A00000000000000000000017 /* NativeAppleSignInCoordinator.swift in Sources */,
+				F30000000000000000000001 /* PaymentCrashContext.swift in Sources */,
+				F30000000000000000000002 /* PaymentTelemetryComponent.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

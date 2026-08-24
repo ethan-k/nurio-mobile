@@ -3,6 +3,7 @@ package com.nurio.android.routing
 import android.webkit.CookieManager
 import android.webkit.WebStorage
 import androidx.core.net.toUri
+import com.nurio.android.payments.PaymentCrashTelemetry
 import dev.hotwire.navigation.activities.HotwireActivity
 import dev.hotwire.navigation.navigator.NavigatorConfiguration
 import dev.hotwire.navigation.routing.Router
@@ -52,6 +53,7 @@ class CheckoutColdBootRouteDecisionHandler : Router.RouteDecisionHandler {
         val baseHost = configuration.startLocation.toUri().host?.lowercase()
 
         if (session != null && stuckUrl != null && baseHost != null && isOffOrigin(stuckUrl, baseHost)) {
+            PaymentCrashTelemetry.logRetryColdBoot()
             clearGatewayWebData(stuckUrl)
             session.reset()
         }

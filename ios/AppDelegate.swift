@@ -51,6 +51,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 #if DEBUG
         Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(false)
 #endif
+        PaymentCrashTelemetry.configure(appSurface: "nurio")
         Messaging.messaging().delegate = self
         UNUserNotificationCenter.current().delegate = self
 
@@ -78,6 +79,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         Hotwire.registerBridgeComponents([
             SignInWithOAuthComponent.self,
             RegisterDeviceTokenComponent.self,
+            PaymentTelemetryComponent.self,
         ])
 
         Hotwire.registerRouteDecisionHandlers([

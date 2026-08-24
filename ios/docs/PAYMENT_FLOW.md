@@ -97,6 +97,20 @@ is satisfied by construction.
 
 ## Debugging
 
+### Crashlytics context is best-effort
+
+Rails sends allowlisted checkout stages through the `payment-telemetry` Hotwire
+bridge. `PaymentCrashContext` hashes the merchant UID before setting Crashlytics
+keys and records non-fatals only for technical shell failures. Expected cancel,
+decline, and empty SDK responses are not native exceptions.
+
+No telemetry call participates in a payment promise or navigation decision.
+Bridge/reporter failures are ignored, app startup clears stale keys, and the
+instrumentation never intercepts or replays the outbound Inicis POST. The shared
+privacy and release-verification contract is in `../../docs/CRASH_REPORTING.md`.
+
+### WebView diagnostics
+
 Run a Debug build from Xcode (`debugLoggingEnabled` is on) and watch for:
 
 - `[ColdBootVisit] startVisit https://nurio.kr/orders/new…` on checkout

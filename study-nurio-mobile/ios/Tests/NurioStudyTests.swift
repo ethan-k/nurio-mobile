@@ -5,6 +5,55 @@ import XCTest
 @testable import NurioStudy
 
 final class NurioStudyTests: XCTestCase {
+    func testPaymentCrashContextHashesReferenceAndClearsState() {
+        let reporter = RecordingPaymentCrashReporter()
+        let context = PaymentCrashContext(reporter: reporter, appSurface: "nurio_study")
+
+        context.track(
+            stage: "payment_requested",
+            orderKind: "pass_package",
+            paymentReference: "payment-123",
+            handoff: "webview",
+            failureKind: "none",
+            reportNonfatal: false
+        )
+
+        XCTAssertTrue(context.isActive)
+        XCTAssertEqual(reporter.values["payment_reference"] as? String, "0220adf67b8fcdc0")
+        XCTAssertNotEqual(reporter.values["payment_reference"] as? String, "payment-123")
+
+        context.track(
+            stage: "flow_finished",
+            orderKind: nil,
+            paymentReference: nil,
+            handoff: nil,
+            failureKind: nil,
+            reportNonfatal: false
+        )
+
+        XCTAssertFalse(context.isActive)
+        XCTAssertEqual(reporter.values["payment_reference"] as? String, "none")
+    }
+
+    func testPaymentCrashReporterFailureCannotEscapeTelemetry() {
+        let context = PaymentCrashContext(
+            reporter: ThrowingPaymentCrashReporter(),
+            appSurface: "nurio_study"
+        )
+
+        context.reset()
+        context.track(
+            stage: "payment_requested",
+            orderKind: "pass_package",
+            paymentReference: "payment-123",
+            handoff: "webview",
+            failureKind: "sdk_request",
+            reportNonfatal: true
+        )
+
+        XCTAssertTrue(context.isActive)
+    }
+
     func testAIPracticeNativePolicyRecognizesOnlySessionURLs() {
         XCTAssertTrue(
             AiPracticeNativePolicy.isSessionURL(URL(string: "https://study.nurio.kr/practice/42")!)
@@ -918,6 +967,36 @@ final class NurioStudyTests: XCTestCase {
             NativePushRegistrationError.authorizationError(granted: false, requestFailed: true),
             .notificationPermissionFailed
         )
+    }
+}
+
+private final class RecordingPaymentCrashReporter: PaymentCrashReporting {
+    var values: [String: Any] = [:]
+
+    func setCustomValue(_ value: Any, forKey key: String) throws {
+        values[key] = value
+    }
+
+    func log(_ message: String) throws {}
+
+    func record(error: Error) throws {}
+}
+
+private final class ThrowingPaymentCrashReporter: PaymentCrashReporting {
+    private enum ReportingError: Error {
+        case unavailable
+    }
+
+    func setCustomValue(_ value: Any, forKey key: String) throws {
+        throw ReportingError.unavailable
+    }
+
+    func log(_ message: String) throws {
+        throw ReportingError.unavailable
+    }
+
+    func record(error: Error) throws {
+        throw ReportingError.unavailable
     }
 }
 
