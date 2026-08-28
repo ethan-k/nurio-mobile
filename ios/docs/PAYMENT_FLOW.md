@@ -130,7 +130,21 @@ through route decision handlers, and `Session.reset()` is public API that
 forces the next visit to cold-boot — so there is no equivalent of the iOS
 "reload re-visits the gateway visitable" trap (constraint 2). The handler
 clears the stuck gateway's cookies/storage and resets the session, then returns
-`NAVIGATE`. `MainActivity.buildPaymentCompleteUrl` routes paymentId-less
-`nurio://payment-complete` callbacks to `/settings/tickets`, mirroring
-`NativePaymentCallback` on iOS. Constraints 1–4 above apply to Android all the
-same.
+`NAVIGATE`. Direct checkout entry from an exact `/events/:id` page or the pass
+package index is covered as well as the dedicated payment-summary routes.
+
+Android keeps a two-hour, app-private recovery record containing only the active
+merchant reference and, when available, an exact `/events/:id` path. It is not
+sent to Crashlytics or logs. A separate `payment-recovery` bridge owns that
+state; the `payment-telemetry` bridge remains diagnostics-only. When an external
+app cannot launch, or the app resumes without a callback, `MainActivity` makes a
+single marked visit to `/payments/portone/complete`. The route handler cold-boots
+that visit only when the current WebView is foreign, and Rails queries PortOne
+before deciding success/failure. A paymentId-less callback uses the active
+recovery record; `/settings/tickets` remains only the last-resort fallback when
+there is no recoverable attempt.
+
+During an active payment, every HTTP/HTTPS popup step stays in the payment
+WebView. Only `intent://` and other non-web schemes are handed to Android. Never
+reload, intercept, or replay the outbound Inicis POST. Constraints 1–4 above
+apply to Android all the same.

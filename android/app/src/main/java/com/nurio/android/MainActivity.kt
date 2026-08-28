@@ -8,6 +8,8 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.View
 import androidx.activity.enableEdgeToEdge
@@ -19,13 +21,23 @@ import com.airbnb.lottie.LottieAnimationView
 import com.nurio.android.localization.LocaleCookieBootstrapper
 import com.nurio.android.payments.PaymentCrashTelemetry
 import com.nurio.android.payments.PaymentFailureKind
+import com.nurio.android.payments.PaymentRecovery
+import com.nurio.android.payments.PaymentRecoveryHost
+import com.nurio.android.payments.PendingPaymentRecovery
 import com.nurio.android.startup.MainActivityStartupCoordinator
+import com.google.android.material.snackbar.Snackbar
 import dev.hotwire.navigation.activities.HotwireActivity
 import dev.hotwire.navigation.navigator.Navigator
 import dev.hotwire.navigation.navigator.NavigatorConfiguration
 
-class MainActivity : HotwireActivity() {
+class MainActivity : HotwireActivity(), PaymentRecoveryHost {
     private lateinit var startupCoordinator: MainActivityStartupCoordinator
+    private val paymentRecoveryHandler = Handler(Looper.getMainLooper())
+    private val paymentRecoveryRunnable = Runnable {
+        val recovery = PaymentRecovery.takeExternalAppReturnRecovery() ?: return@Runnable
+        showPaymentMessage(R.string.payment_status_checking, Snackbar.LENGTH_LONG)
+        routeWhenReady(buildPaymentRecoveryUrl(recovery))
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
@@ -81,6 +93,28 @@ class MainActivity : HotwireActivity() {
         handleLaunchIntent(intent)
     }
 
+    override fun onResume() {
+        super.onResume()
+        if (!PaymentRecovery.hasPendingExternalAppHandoff()) return
+
+        paymentRecoveryHandler.removeCallbacks(paymentRecoveryRunnable)
+        paymentRecoveryHandler.postDelayed(paymentRecoveryRunnable, PAYMENT_RETURN_GRACE_PERIOD_MILLIS)
+    }
+
+    override fun onDestroy() {
+        paymentRecoveryHandler.removeCallbacks(paymentRecoveryRunnable)
+        super.onDestroy()
+    }
+
+    override fun onExternalPaymentLaunchFailed() {
+        paymentRecoveryHandler.removeCallbacks(paymentRecoveryRunnable)
+        val recovery = PaymentRecovery.takeLaunchFailureRecovery()
+        showPaymentMessage(R.string.payment_app_launch_failed, Snackbar.LENGTH_INDEFINITE)
+        if (recovery != null) {
+            routeWhenReady(buildPaymentRecoveryUrl(recovery))
+        }
+    }
+
     override fun onNavigatorReady(navigator: Navigator) {
         super.onNavigatorReady(navigator)
         startupCoordinator.onNavigatorReady()
@@ -119,12 +153,15 @@ class MainActivity : HotwireActivity() {
 
         val paymentId = callbackUri.getQueryParameter("paymentId")
             ?: callbackUri.getQueryParameter("payment_id")
-        PaymentCrashTelemetry.markCallbackReceived(paymentId)
-        if (paymentId.isNullOrBlank()) {
+        paymentRecoveryHandler.removeCallbacks(paymentRecoveryRunnable)
+        val recovery = PaymentRecovery.resolveCallback(paymentId)
+        val resolvedPaymentId = recovery?.paymentId ?: paymentId
+        PaymentCrashTelemetry.markCallbackReceived(resolvedPaymentId)
+        if (resolvedPaymentId.isNullOrBlank()) {
             PaymentCrashTelemetry.reportTechnicalFailure(PaymentFailureKind.MALFORMED_CALLBACK)
         }
 
-        val completeUrl = buildPaymentCompleteUrl(callbackUri)
+        val completeUrl = buildPaymentCompleteUrl(callbackUri, recovery)
 
         routeWhenReady(completeUrl)
         return true
@@ -188,10 +225,14 @@ class MainActivity : HotwireActivity() {
             .toString()
     }
 
-    private fun buildPaymentCompleteUrl(callbackUri: Uri): String {
+    private fun buildPaymentCompleteUrl(
+        callbackUri: Uri,
+        recovery: PendingPaymentRecovery?,
+    ): String {
         val camelCasePaymentId = callbackUri.getQueryParameter("paymentId")
             ?.takeIf { it.isNotBlank() }
-        val paymentId = camelCasePaymentId
+        val paymentId = recovery?.paymentId
+            ?: camelCasePaymentId
             ?: callbackUri.getQueryParameter("payment_id")?.takeIf { it.isNotBlank() }
 
         // A payment-complete callback with no payment id means the gateway
@@ -213,8 +254,30 @@ class MainActivity : HotwireActivity() {
         if (camelCasePaymentId == null) {
             builder.appendQueryParameter("paymentId", paymentId)
         }
+        if (callbackUri.getQueryParameter("redirect_uri").isNullOrBlank() && recovery?.eventPath != null) {
+            builder.appendQueryParameter("redirect_uri", recovery.eventPath)
+        }
 
         return builder.build().toString()
+    }
+
+    private fun buildPaymentRecoveryUrl(recovery: PendingPaymentRecovery): String {
+        return Uri.parse("${BuildConfig.BASE_URL.trimEnd('/')}/payments/portone/complete")
+            .buildUpon()
+            .appendQueryParameter("paymentId", recovery.paymentId)
+            .appendQueryParameter("native_recovery", "1")
+            .apply {
+                recovery.eventPath?.let { appendQueryParameter("redirect_uri", it) }
+            }
+            .build()
+            .toString()
+    }
+
+    private fun showPaymentMessage(messageResId: Int, duration: Int) {
+        val container = findViewById<View>(R.id.main_container) ?: return
+        Snackbar.make(container, messageResId, duration)
+            .setAction(R.string.dismiss) {}
+            .show()
     }
 
     private fun buildAppUrl(path: String): String {
@@ -277,6 +340,7 @@ class MainActivity : HotwireActivity() {
     companion object {
         private const val TAG = "MainActivity"
         private const val NOTIFICATION_PERMISSION_REQUEST_CODE = 1001
+        private const val PAYMENT_RETURN_GRACE_PERIOD_MILLIS = 2_000L
         private val blockedPathPrefixes = listOf(
             "/admin",
             "/tutoring",

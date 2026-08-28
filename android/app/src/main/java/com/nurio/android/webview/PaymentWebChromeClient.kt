@@ -7,6 +7,8 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.core.net.toUri
+import com.nurio.android.payments.PaymentRecovery
+import com.nurio.android.payments.findPaymentRecoveryHost
 import dev.hotwire.core.turbo.session.Session
 import dev.hotwire.core.turbo.webview.HotwireWebChromeClient
 
@@ -38,6 +40,8 @@ class PaymentWebChromeClient(session: Session) : HotwireWebChromeClient(session)
 private class PaymentPopupWebViewClient(
     private val parentWebView: WebView
 ) : WebViewClient() {
+    private var routed = false
+
     override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
         routePopupLocation(view, request.url.toString())
         return true
@@ -55,22 +59,40 @@ private class PaymentPopupWebViewClient(
     }
 
     private fun routePopupLocation(popupWebView: WebView, location: String) {
+        if (routed) return
+
         val uri = location.toUri()
 
         if (PaymentNavigation.isIgnoredUrl(uri)) return
 
         if (PaymentNavigation.shouldStayInWebView(uri, parentWebView.url)) {
+            routed = true
             parentWebView.loadUrl(location)
             popupWebView.destroy()
             return
         }
 
-        if (PaymentNavigation.openExternalPaymentApp(parentWebView.context, uri).consumed) {
+        if (PaymentRoutePolicy.shouldKeepPaymentPopupWebUrl(uri.scheme, PaymentRecovery.hasActiveAttempt())) {
+            routed = true
+            parentWebView.loadUrl(location)
+            popupWebView.destroy()
+            return
+        }
+
+        val externalOutcome = PaymentNavigation.openExternalPaymentApp(parentWebView.context, uri)
+        if (externalOutcome.consumed) {
+            routed = true
+            if (externalOutcome.webFallbackUrl != null) {
+                parentWebView.loadUrl(externalOutcome.webFallbackUrl)
+            } else if (!externalOutcome.launched) {
+                parentWebView.context.findPaymentRecoveryHost()?.onExternalPaymentLaunchFailed()
+            }
             popupWebView.destroy()
             return
         }
 
         if (PaymentNavigation.openExternalWebUrl(parentWebView.context, uri)) {
+            routed = true
             popupWebView.destroy()
         }
     }

@@ -4,6 +4,7 @@ import android.webkit.CookieManager
 import android.webkit.WebStorage
 import androidx.core.net.toUri
 import com.nurio.android.payments.PaymentCrashTelemetry
+import com.nurio.android.webview.PaymentRoutePolicy
 import dev.hotwire.navigation.activities.HotwireActivity
 import dev.hotwire.navigation.navigator.NavigatorConfiguration
 import dev.hotwire.navigation.routing.Router
@@ -40,7 +41,11 @@ class CheckoutColdBootRouteDecisionHandler : Router.RouteDecisionHandler {
         val host = locationUri.host?.lowercase() ?: return false
         if (host != baseHost && host != "www.$baseHost") return false
 
-        return isCheckoutEntryPath(locationUri.path.orEmpty())
+        val path = locationUri.path.orEmpty()
+        return isCheckoutEntryPath(path) || PaymentRoutePolicy.isNativeRecoveryEntry(
+            path = path,
+            recoveryMarker = locationUri.getQueryParameter("native_recovery"),
+        )
     }
 
     override fun handle(
@@ -62,9 +67,7 @@ class CheckoutColdBootRouteDecisionHandler : Router.RouteDecisionHandler {
     }
 
     private fun isCheckoutEntryPath(path: String): Boolean {
-        return path == "/orders/new" ||
-            path.endsWith("/payment_summary") ||
-            path.endsWith("/purchase")
+        return PaymentRoutePolicy.isCheckoutEntryPath(path)
     }
 
     private fun isOffOrigin(url: String, baseHost: String): Boolean {

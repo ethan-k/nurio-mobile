@@ -27,6 +27,11 @@ owns the checkout lifecycle events; native code owns hashing, Crashlytics keys,
 native handoff/callback context, and technical non-fatals. The Leader app has no
 customer payment flow and therefore sets only product/platform identity.
 
+Customer Android also registers a separate `payment-recovery` bridge. Recovery
+state and navigation must never be added to `payment-telemetry`; raw merchant
+references used privately for provider reconciliation must never enter logs or
+Crashlytics.
+
 Payment diagnostics are strictly best-effort:
 
 - no bridge callback or Firebase result participates in a payment promise;

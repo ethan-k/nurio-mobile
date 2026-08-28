@@ -121,6 +121,14 @@
                 <data android:scheme="nurio" android:host="payment-complete" />
             </intent-filter>
 
+            <!-- PortOne may return through appScheme without the redirectUrl host. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="nurio" />
+            </intent-filter>
+
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />

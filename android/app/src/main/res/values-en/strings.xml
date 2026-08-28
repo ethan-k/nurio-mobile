@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Nurio</string>
+    <string name="app_name_korean">Nurio</string>
+    <string name="nav_home">Home</string>
+    <string name="nav_events">Events</string>
+    <string name="nav_profile">Profile</string>
+    <string name="push_notification_channel_name">Nurio notifications</string>
+    <string name="push_notification_channel_description">Event reminders and account notifications</string>
+    <string name="payment_app_launch_failed">The payment app could not be opened. Check that it is installed. We’ll verify the payment status.</string>
+    <string name="payment_status_checking">Checking your payment result.</string>
+    <string name="dismiss">Dismiss</string>
+</resources>

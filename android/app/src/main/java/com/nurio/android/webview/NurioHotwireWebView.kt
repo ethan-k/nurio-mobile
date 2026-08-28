@@ -14,6 +14,7 @@ import android.webkit.WebViewClient
 import androidx.webkit.WebResourceErrorCompat
 import androidx.webkit.WebViewClientCompat
 import com.nurio.android.payments.PaymentCrashTelemetry
+import com.nurio.android.payments.findPaymentRecoveryHost
 import dev.hotwire.core.turbo.webview.HotwireWebView
 
 class NurioHotwireWebView @JvmOverloads constructor(
@@ -39,7 +40,15 @@ private class PaymentAwareWebViewClient(
 ) : WebViewClientCompat() {
     override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
         if (PaymentNavigation.shouldStayInWebView(request.url, view.url)) return false
-        if (PaymentNavigation.openExternalPaymentApp(view.context, request.url).consumed) return true
+        val outcome = PaymentNavigation.openExternalPaymentApp(view.context, request.url)
+        if (outcome.consumed) {
+            if (outcome.webFallbackUrl != null) {
+                view.loadUrl(outcome.webFallbackUrl)
+            } else if (!outcome.launched) {
+                view.context.findPaymentRecoveryHost()?.onExternalPaymentLaunchFailed()
+            }
+            return true
+        }
 
         return delegate.shouldOverrideUrlLoading(view, request)
     }
@@ -48,7 +57,15 @@ private class PaymentAwareWebViewClient(
     override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
         val uri = android.net.Uri.parse(url)
         if (PaymentNavigation.shouldStayInWebView(uri, view.url)) return false
-        if (PaymentNavigation.openExternalPaymentApp(view.context, uri).consumed) return true
+        val outcome = PaymentNavigation.openExternalPaymentApp(view.context, uri)
+        if (outcome.consumed) {
+            if (outcome.webFallbackUrl != null) {
+                view.loadUrl(outcome.webFallbackUrl)
+            } else if (!outcome.launched) {
+                view.context.findPaymentRecoveryHost()?.onExternalPaymentLaunchFailed()
+            }
+            return true
+        }
 
         return delegate.shouldOverrideUrlLoading(view, url)
     }

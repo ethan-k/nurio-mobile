@@ -9,11 +9,13 @@ import androidx.core.net.toUri
 import com.nurio.android.BuildConfig
 import com.nurio.android.payments.PaymentCrashTelemetry
 import com.nurio.android.payments.PaymentFailureKind
+import com.nurio.android.payments.PaymentRecovery
 
 internal data class ExternalPaymentNavigationOutcome(
     val consumed: Boolean,
     val launched: Boolean,
     val failureKind: PaymentFailureKind? = null,
+    val webFallbackUrl: String? = null,
 )
 
 object PaymentNavigation {
@@ -87,9 +89,7 @@ object PaymentNavigation {
         if (host != baseHost && host != "www.$baseHost") return false
 
         val path = uri.path.orEmpty()
-        return path == "/orders/new" ||
-            path.endsWith("/payment_summary") ||
-            path.endsWith("/purchase")
+        return PaymentRoutePolicy.isCheckoutEntryPath(path)
     }
 
     private fun openIntentUri(context: Context, location: String): ExternalPaymentNavigationOutcome {
@@ -115,9 +115,19 @@ object PaymentNavigation {
 
         val fallbackUrl = intent.getStringExtra("browser_fallback_url")
         if (!fallbackUrl.isNullOrBlank()) {
-            val fallbackLaunch = launch(context, Intent(Intent.ACTION_VIEW, fallbackUrl.toUri()))
+            val fallbackUri = fallbackUrl.toUri()
+            if (isWebUrl(fallbackUri)) {
+                return ExternalPaymentNavigationOutcome(
+                    consumed = true,
+                    launched = false,
+                    failureKind = primaryLaunch.failureKind,
+                    webFallbackUrl = fallbackUrl,
+                )
+            }
+
+            val fallbackLaunch = launch(context, Intent(Intent.ACTION_VIEW, fallbackUri))
             if (fallbackLaunch == LaunchOutcome.LAUNCHED) {
-                PaymentCrashTelemetry.markExternalAppHandoff()
+                markExternalAppHandoff()
                 return ExternalPaymentNavigationOutcome(
                     consumed = true,
                     launched = true,
@@ -133,7 +143,7 @@ object PaymentNavigation {
                 Intent(Intent.ACTION_VIEW, "market://details?id=$packageName".toUri()),
             )
             if (marketLaunch == LaunchOutcome.LAUNCHED) {
-                PaymentCrashTelemetry.markExternalAppHandoff()
+                markExternalAppHandoff()
                 return ExternalPaymentNavigationOutcome(
                     consumed = true,
                     launched = true,
@@ -151,7 +161,7 @@ object PaymentNavigation {
 
     private fun paymentOutcome(launch: LaunchOutcome): ExternalPaymentNavigationOutcome {
         if (launch == LaunchOutcome.LAUNCHED) {
-            PaymentCrashTelemetry.markExternalAppHandoff()
+            markExternalAppHandoff()
         } else {
             reportLaunchFailure(launch)
         }
@@ -161,6 +171,11 @@ object PaymentNavigation {
             launched = launch == LaunchOutcome.LAUNCHED,
             failureKind = launch.failureKind,
         )
+    }
+
+    private fun markExternalAppHandoff() {
+        PaymentCrashTelemetry.markExternalAppHandoff()
+        PaymentRecovery.markExternalAppHandoff()
     }
 
     private fun reportLaunchFailure(launch: LaunchOutcome) {
