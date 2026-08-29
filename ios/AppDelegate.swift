@@ -160,7 +160,9 @@ enum PushNotificationRoute {
             guard !value.isEmpty else { continue }
 
             if value.hasPrefix("/") && !value.hasPrefix("//") {
-                return URL(string: value, relativeTo: baseURL)?.absoluteURL
+                guard let url = URL(string: value, relativeTo: baseURL)?.absoluteURL else { continue }
+
+                return NativeAppOpenURL.webURL(from: url, baseURL: baseURL)
             }
 
             if let url = URL(string: value),

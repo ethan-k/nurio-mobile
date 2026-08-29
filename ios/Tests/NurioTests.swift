@@ -229,6 +229,15 @@ final class NurioTests: XCTestCase {
 
         XCTAssertNil(destination)
     }
+
+    func testPushNotificationRouteRejectsBlockedCustomerPaths() {
+        let destination = PushNotificationRoute.destinationURL(
+            from: [ "path": "/admin/events" ],
+            baseURL: URL(string: "https://nurio.kr")!
+        )
+
+        XCTAssertNil(destination)
+    }
 }
 
 private final class RecordingPaymentCrashReporter: PaymentCrashReporting {

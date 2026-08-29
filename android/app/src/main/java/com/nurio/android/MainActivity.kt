@@ -19,6 +19,7 @@ import androidx.core.os.ConfigurationCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.airbnb.lottie.LottieAnimationView
 import com.nurio.android.localization.LocaleCookieBootstrapper
+import com.nurio.android.notifications.NotificationRoute
 import com.nurio.android.payments.PaymentCrashTelemetry
 import com.nurio.android.payments.PaymentFailureKind
 import com.nurio.android.payments.PaymentRecovery
@@ -99,6 +100,16 @@ class MainActivity : HotwireActivity(), PaymentRecoveryHost {
 
         paymentRecoveryHandler.removeCallbacks(paymentRecoveryRunnable)
         paymentRecoveryHandler.postDelayed(paymentRecoveryRunnable, PAYMENT_RETURN_GRACE_PERIOD_MILLIS)
+    }
+
+    override fun onPostResume() {
+        super.onPostResume()
+        startupCoordinator.onHostResumed()
+    }
+
+    override fun onPause() {
+        startupCoordinator.onHostPaused()
+        super.onPause()
     }
 
     override fun onDestroy() {
@@ -197,8 +208,10 @@ class MainActivity : HotwireActivity(), PaymentRecoveryHost {
 
     private fun handleNotificationIntent(intent: Intent?): Boolean {
         val path = intent?.getStringExtra("path")?.takeIf { it.isNotBlank() } ?: return false
+        val destination = NotificationRoute.destination(path, BuildConfig.BASE_URL)
+            ?: "${BuildConfig.BASE_URL.trimEnd('/')}/events"
 
-        routeWhenReady(buildAppUrl(path))
+        routeWhenReady(destination)
         return true
     }
 
@@ -278,18 +291,6 @@ class MainActivity : HotwireActivity(), PaymentRecoveryHost {
         Snackbar.make(container, messageResId, duration)
             .setAction(R.string.dismiss) {}
             .show()
-    }
-
-    private fun buildAppUrl(path: String): String {
-        return if (path.startsWith("http://") || path.startsWith("https://")) {
-            Uri.parse(path)
-                .takeIf(::isCustomerWebUri)
-                ?.let(::normalizeAppUri)
-                ?.toString()
-                ?: "${BuildConfig.BASE_URL}/events"
-        } else {
-            "${BuildConfig.BASE_URL.trimEnd('/')}/${path.trimStart('/')}"
-        }
     }
 
     private fun isCustomerWebUri(uri: Uri): Boolean {

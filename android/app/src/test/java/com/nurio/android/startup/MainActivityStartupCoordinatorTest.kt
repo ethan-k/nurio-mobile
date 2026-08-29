@@ -39,7 +39,7 @@ class MainActivityStartupCoordinatorTest {
     }
 
     @Test
-    fun `route before navigator readiness is delivered once afterward`() {
+    fun `route before navigator and host readiness is delivered once after both`() {
         val routedUrls = mutableListOf<String>()
         val coordinator = coordinator(route = routedUrls::add)
 
@@ -47,16 +47,21 @@ class MainActivityStartupCoordinatorTest {
         assertTrue(routedUrls.isEmpty())
 
         coordinator.onNavigatorReady()
+        assertTrue(routedUrls.isEmpty())
+
+        coordinator.onHostResumed()
         coordinator.onNavigatorReady()
+        coordinator.onHostResumed()
 
         assertEquals(listOf("https://nurio.kr/events/1"), routedUrls)
     }
 
     @Test
-    fun `route after readiness is routed immediately`() {
+    fun `route after navigator and host readiness is routed immediately`() {
         val routedUrls = mutableListOf<String>()
         val coordinator = coordinator(route = routedUrls::add)
         coordinator.onNavigatorReady()
+        coordinator.onHostResumed()
 
         coordinator.routeWhenReady("https://nurio.kr/settings/tickets")
 
@@ -71,8 +76,39 @@ class MainActivityStartupCoordinatorTest {
         coordinator.routeWhenReady("https://nurio.kr/events/first")
         coordinator.routeWhenReady("https://nurio.kr/events/latest")
         coordinator.onNavigatorReady()
+        coordinator.onHostResumed()
 
         assertEquals(listOf("https://nurio.kr/events/latest"), routedUrls)
+    }
+
+    @Test
+    fun `host readiness before navigator readiness also drains the pending route`() {
+        val routedUrls = mutableListOf<String>()
+        val coordinator = coordinator(route = routedUrls::add)
+
+        coordinator.routeWhenReady("https://nurio.kr/events/1")
+        coordinator.onHostResumed()
+        assertTrue(routedUrls.isEmpty())
+
+        coordinator.onNavigatorReady()
+
+        assertEquals(listOf("https://nurio.kr/events/1"), routedUrls)
+    }
+
+    @Test
+    fun `route received while host is paused waits for the next resume`() {
+        val routedUrls = mutableListOf<String>()
+        val coordinator = coordinator(route = routedUrls::add)
+        coordinator.onNavigatorReady()
+        coordinator.onHostResumed()
+        coordinator.onHostPaused()
+
+        coordinator.routeWhenReady("https://nurio.kr/events/2")
+        assertTrue(routedUrls.isEmpty())
+
+        coordinator.onHostResumed()
+
+        assertEquals(listOf("https://nurio.kr/events/2"), routedUrls)
     }
 
     private fun coordinator(

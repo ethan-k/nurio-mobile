@@ -8,6 +8,7 @@ internal class MainActivityStartupCoordinator(
 ) {
     private var started = false
     private var navigatorReady = false
+    private var hostResumed = false
     private var pendingRouteUrl: String? = null
 
     fun start() {
@@ -24,7 +25,7 @@ internal class MainActivityStartupCoordinator(
     }
 
     fun routeWhenReady(url: String) {
-        if (navigatorReady) {
+        if (navigatorReady && hostResumed) {
             route(url)
         } else {
             pendingRouteUrl = url
@@ -33,6 +34,20 @@ internal class MainActivityStartupCoordinator(
 
     fun onNavigatorReady() {
         navigatorReady = true
+        drainPendingRouteIfReady()
+    }
+
+    fun onHostResumed() {
+        hostResumed = true
+        drainPendingRouteIfReady()
+    }
+
+    fun onHostPaused() {
+        hostResumed = false
+    }
+
+    private fun drainPendingRouteIfReady() {
+        if (!navigatorReady || !hostResumed) return
 
         val routeUrl = pendingRouteUrl ?: return
         pendingRouteUrl = null
