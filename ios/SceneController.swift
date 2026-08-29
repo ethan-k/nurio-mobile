@@ -86,6 +86,14 @@ extension SceneController: UIWindowSceneDelegate {
         window.makeKeyAndVisible()
         self.window = window
 
+        PushNotificationResponseRouter.shared.attach { [weak self] url in
+            self?.startupCoordinator.handleIncoming(url)
+        }
+
+        if let notificationResponse = connectionOptions.notificationResponse {
+            PushNotificationResponseRouter.shared.receive(notificationResponse)
+        }
+
         showSplashAnimation(in: window)
         hideNavigationBarOnMainStack()
 
@@ -115,6 +123,10 @@ extension SceneController: UIWindowSceneDelegate {
     func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
         guard let url = Self.url(from: userActivity) else { return }
         startupCoordinator.handleIncoming(url)
+    }
+
+    func sceneDidDisconnect(_ scene: UIScene) {
+        PushNotificationResponseRouter.shared.detach()
     }
 }
 

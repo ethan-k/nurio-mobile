@@ -135,4 +135,83 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     ) {
         completionHandler([ .banner, .sound, .badge ])
     }
+
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse,
+        withCompletionHandler completionHandler: @escaping () -> Void
+    ) {
+        Task { @MainActor in
+            PushNotificationResponseRouter.shared.receive(response)
+            completionHandler()
+        }
+    }
+}
+
+enum PushNotificationRoute {
+    nonisolated static func destinationURL(
+        from userInfo: [AnyHashable: Any],
+        baseURL: URL
+    ) -> URL? {
+        for key in [ "path", "url" ] {
+            guard let rawValue = userInfo[key] as? String else { continue }
+
+            let value = rawValue.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !value.isEmpty else { continue }
+
+            if value.hasPrefix("/") && !value.hasPrefix("//") {
+                return URL(string: value, relativeTo: baseURL)?.absoluteURL
+            }
+
+            if let url = URL(string: value),
+               let normalizedURL = NativeAppOpenURL.webURL(from: url, baseURL: baseURL) {
+                return normalizedURL
+            }
+        }
+
+        return nil
+    }
+}
+
+@MainActor
+final class PushNotificationResponseRouter {
+    static let shared = PushNotificationResponseRouter()
+
+    private var routeHandler: ((URL) -> Void)?
+    private var queuedDestinations: [URL] = []
+    private var consumedRequestIdentifiers = Set<String>()
+
+    private init() {}
+
+    func attach(routeHandler: @escaping (URL) -> Void) {
+        self.routeHandler = routeHandler
+
+        let destinations = queuedDestinations
+        queuedDestinations.removeAll()
+        destinations.forEach(routeHandler)
+    }
+
+    func detach() {
+        routeHandler = nil
+    }
+
+    func receive(_ response: UNNotificationResponse) {
+        guard response.actionIdentifier == UNNotificationDefaultActionIdentifier else { return }
+
+        let requestIdentifier = response.notification.request.identifier
+        if !requestIdentifier.isEmpty {
+            guard consumedRequestIdentifiers.insert(requestIdentifier).inserted else { return }
+        }
+
+        guard let destination = PushNotificationRoute.destinationURL(
+            from: response.notification.request.content.userInfo,
+            baseURL: AppEnvironment.baseURL
+        ) else { return }
+
+        if let routeHandler {
+            routeHandler(destination)
+        } else {
+            queuedDestinations.append(destination)
+        }
+    }
 }

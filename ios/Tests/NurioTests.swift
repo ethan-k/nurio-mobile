@@ -205,6 +205,30 @@ final class NurioTests: XCTestCase {
 
         XCTAssertEqual(webURL?.absoluteString, "https://nurio.kr/events")
     }
+
+    func testPushNotificationPathRoutesToDedicatedFeedbackPage() {
+        let destination = PushNotificationRoute.destinationURL(
+            from: [
+                "path": "/events/42/feedback/new?t=signed-token&src=push",
+                "url": ""
+            ],
+            baseURL: URL(string: "https://nurio.kr")!
+        )
+
+        XCTAssertEqual(
+            destination?.absoluteString,
+            "https://nurio.kr/events/42/feedback/new?t=signed-token&src=push"
+        )
+    }
+
+    func testPushNotificationRouteRejectsExternalDestinations() {
+        let destination = PushNotificationRoute.destinationURL(
+            from: [ "url": "https://example.com/phishing" ],
+            baseURL: URL(string: "https://nurio.kr")!
+        )
+
+        XCTAssertNil(destination)
+    }
 }
 
 private final class RecordingPaymentCrashReporter: PaymentCrashReporting {
