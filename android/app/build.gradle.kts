@@ -26,7 +26,7 @@ android {
         applicationId = "com.nurio.android"
         minSdk = 28
         targetSdk = 36
-        versionCode = 16
+        versionCode = 17
         versionName = "1.0.12"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
