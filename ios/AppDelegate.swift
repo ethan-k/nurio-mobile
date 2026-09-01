@@ -149,6 +149,8 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
 }
 
 enum PushNotificationRoute {
+    static let refreshQueryItemName = "_native_refresh"
+
     nonisolated static func destinationURL(
         from userInfo: [AnyHashable: Any],
         baseURL: URL
@@ -172,6 +174,27 @@ enum PushNotificationRoute {
         }
 
         return nil
+    }
+
+    nonisolated static func refreshingURL(_ url: URL, token: String) -> URL {
+        guard var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+            return url
+        }
+
+        var existingItems = components.percentEncodedQuery?
+            .split(separator: "&", omittingEmptySubsequences: true)
+            .map(String.init) ?? []
+        existingItems.removeAll { item in
+            item.split(separator: "=", maxSplits: 1).first?.removingPercentEncoding == refreshQueryItemName
+        }
+
+        var refreshComponents = URLComponents()
+        refreshComponents.queryItems = [ URLQueryItem(name: refreshQueryItemName, value: token) ]
+        guard let refreshItem = refreshComponents.percentEncodedQuery else { return url }
+
+        components.percentEncodedQuery = (existingItems + [ refreshItem ]).joined(separator: "&")
+
+        return components.url ?? url
     }
 }
 
@@ -209,11 +232,14 @@ final class PushNotificationResponseRouter {
             from: response.notification.request.content.userInfo,
             baseURL: AppEnvironment.baseURL
         ) else { return }
+        let refreshToken = requestIdentifier.isEmpty ? UUID().uuidString : requestIdentifier
+        // A unique query plus the bundled path rule bypasses back-stack snapshot restoration.
+        let refreshingDestination = PushNotificationRoute.refreshingURL(destination, token: refreshToken)
 
         if let routeHandler {
-            routeHandler(destination)
+            routeHandler(refreshingDestination)
         } else {
-            queuedDestinations.append(destination)
+            queuedDestinations.append(refreshingDestination)
         }
     }
 }

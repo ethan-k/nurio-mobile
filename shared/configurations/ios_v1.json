@@ -42,6 +42,14 @@
         "context": "default",
         "pull_to_refresh_enabled": true
       }
+    },
+    {
+      "patterns": [
+        ".*[?&]_native_refresh=.*"
+      ],
+      "properties": {
+        "presentation": "replace"
+      }
     }
   ]
 }

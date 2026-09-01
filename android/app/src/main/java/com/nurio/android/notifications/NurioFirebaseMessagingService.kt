@@ -21,20 +21,34 @@ class NurioFirebaseMessagingService : FirebaseMessagingService() {
             ?: return
         val path = message.data["path"] ?: "/"
         val tag = message.data["tag"] ?: path
+        val notificationId = message.messageId ?: "${message.sentTime}:$tag"
 
-        showNotification(title = title, body = body, path = path, tag = tag)
+        showNotification(
+            title = title,
+            body = body,
+            path = path,
+            tag = tag,
+            notificationId = notificationId,
+        )
     }
 
     override fun onNewToken(token: String) {
         Log.d(TAG, "FCM token refreshed")
     }
 
-    private fun showNotification(title: String, body: String, path: String, tag: String) {
+    private fun showNotification(
+        title: String,
+        body: String,
+        path: String,
+        tag: String,
+        notificationId: String,
+    ) {
         NotificationChannels.ensureCreated(this)
 
         val intent = Intent(this, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             putExtra("path", path)
+            putExtra(MainActivity.EXTRA_NOTIFICATION_ID, notificationId)
         }
 
         val pendingIntent = PendingIntent.getActivity(

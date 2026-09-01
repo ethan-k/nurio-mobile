@@ -238,6 +238,52 @@ final class NurioTests: XCTestCase {
 
         XCTAssertNil(destination)
     }
+
+    func testPushNotificationRefreshURLPreservesExistingQueryParameters() {
+        let destination = URL(string: "https://nurio.kr/events/42/chat?from=push")!
+
+        let refreshingURL = PushNotificationRoute.refreshingURL(
+            destination,
+            token: "notification-123"
+        )
+
+        XCTAssertEqual(
+            refreshingURL.absoluteString,
+            "https://nurio.kr/events/42/chat?from=push&_native_refresh=notification-123"
+        )
+    }
+
+    func testPushNotificationRefreshURLReplacesAnExistingRefreshToken() {
+        let destination = URL(
+            string: "https://nurio.kr/events/42/chat?_native_refresh=old&from=push"
+        )!
+
+        let refreshingURL = PushNotificationRoute.refreshingURL(
+            destination,
+            token: "notification-456"
+        )
+
+        XCTAssertEqual(
+            refreshingURL.absoluteString,
+            "https://nurio.kr/events/42/chat?from=push&_native_refresh=notification-456"
+        )
+    }
+
+    func testPushNotificationRefreshURLPreservesSignedQueryEncoding() {
+        let destination = URL(
+            string: "https://nurio.kr/events/42/feedback/new?t=a%2Bb%2Fc%3D"
+        )!
+
+        let refreshingURL = PushNotificationRoute.refreshingURL(
+            destination,
+            token: "notification-789"
+        )
+
+        XCTAssertEqual(
+            refreshingURL.absoluteString,
+            "https://nurio.kr/events/42/feedback/new?t=a%2Bb%2Fc%3D&_native_refresh=notification-789"
+        )
+    }
 }
 
 private final class RecordingPaymentCrashReporter: PaymentCrashReporting {

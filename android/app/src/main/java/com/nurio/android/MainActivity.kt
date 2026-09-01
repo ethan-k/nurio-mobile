@@ -12,6 +12,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.View
+import java.util.UUID
 import androidx.activity.enableEdgeToEdge
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -210,8 +211,13 @@ class MainActivity : HotwireActivity(), PaymentRecoveryHost {
         val path = intent?.getStringExtra("path")?.takeIf { it.isNotBlank() } ?: return false
         val destination = NotificationRoute.destination(path, BuildConfig.BASE_URL)
             ?: "${BuildConfig.BASE_URL.trimEnd('/')}/events"
+        val refreshToken = intent.getStringExtra(EXTRA_NOTIFICATION_ID)
+            ?.takeIf { it.isNotBlank() }
+            ?: intent.getStringExtra("google.message_id")?.takeIf { it.isNotBlank() }
+            ?: UUID.randomUUID().toString()
 
-        routeWhenReady(destination)
+        // A unique query plus the bundled path rule bypasses back-stack snapshot restoration.
+        routeWhenReady(NotificationRoute.refreshingDestination(destination, refreshToken))
         return true
     }
 
@@ -339,6 +345,8 @@ class MainActivity : HotwireActivity(), PaymentRecoveryHost {
     }
 
     companion object {
+        const val EXTRA_NOTIFICATION_ID = "notification_id"
+
         private const val TAG = "MainActivity"
         private const val NOTIFICATION_PERMISSION_REQUEST_CODE = 1001
         private const val PAYMENT_RETURN_GRACE_PERIOD_MILLIS = 2_000L

@@ -96,6 +96,14 @@
         "uri": "hotwire://fragment/web",
         "pull_to_refresh_enabled": false
       }
+    },
+    {
+      "patterns": [
+        ".*[?&]_native_refresh=.*"
+      ],
+      "properties": {
+        "presentation": "replace"
+      }
     }
   ]
 }

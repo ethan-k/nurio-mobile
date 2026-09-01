@@ -1,8 +1,12 @@
 package com.nurio.android.notifications
 
 import java.net.URI
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 internal object NotificationRoute {
+    const val REFRESH_QUERY_PARAMETER = "_native_refresh"
+
     private val blockedPathPrefixes = listOf(
         "/admin",
         "/tutoring",
@@ -45,6 +49,32 @@ internal object NotificationRoute {
             ).toString()
         } else {
             candidate.toString()
+        }
+    }
+
+    fun refreshingDestination(destination: String, token: String): String {
+        val fragment = destination.substringAfter('#', missingDelimiterValue = "")
+        val withoutFragment = destination.substringBefore('#')
+        val base = withoutFragment.substringBefore('?')
+        val existingQuery = withoutFragment.substringAfter('?', missingDelimiterValue = "")
+        val queryParts = existingQuery
+            .split('&')
+            .filter { it.isNotEmpty() }
+            .filterNot { it.substringBefore('=') == REFRESH_QUERY_PARAMETER }
+            .toMutableList()
+        val encodedToken = URLEncoder.encode(token, StandardCharsets.UTF_8.toString())
+            .replace("+", "%20")
+
+        queryParts += "$REFRESH_QUERY_PARAMETER=$encodedToken"
+
+        return buildString {
+            append(base)
+            append('?')
+            append(queryParts.joinToString("&"))
+            if (fragment.isNotEmpty()) {
+                append('#')
+                append(fragment)
+            }
         }
     }
 
