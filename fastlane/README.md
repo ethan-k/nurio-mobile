@@ -39,6 +39,14 @@ Archive and export a signed App Store IPA (no upload)
 
 Build and upload to TestFlight
 
+### ios refresh_dsyms
+
+```sh
+[bundle exec] fastlane ios refresh_dsyms
+```
+
+Upload App Store Connect dSYMs to Crashlytics (run after TestFlight finishes processing)
+
 ### ios release
 
 ```sh
@@ -74,7 +82,7 @@ Build the signed release AAB (no upload)
 [bundle exec] fastlane android beta
 ```
 
-Build and upload to the Play Console internal track (auto-bumps versionCode ahead of Play)
+Build and upload to Play internal (auto-bumps versionName patch and versionCode)
 
 ### android promote
 

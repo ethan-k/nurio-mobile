@@ -27,6 +27,7 @@ android/vendor/
 
 # iOS
 ios/build/
+/build/ios-derived-data/
 ios/DerivedData/
 ios/**/xcuserdata/
 study-nurio-mobile/ios/**/xcuserdata/

@@ -1,7 +1,7 @@
 # Nurio customer mobile deployment lanes.
 #
 # iOS lanes build and upload the version currently written in the Xcode
-# project. Android beta keeps versionName manual, but advances versionCode
+# project. Android beta advances versionName's patch component and versionCode
 # beyond both the checked-in value and the current Play tracks before upload.
 #
 # Credentials come from the shared workspace shell environment. These names
@@ -145,9 +145,10 @@ end
 # the project root (parent of fastlane/) at runtime, matching nurio_gradle_file.
 # The path is pinned rather than left to Xcode's hashed default because SPM
 # checks firebase-ios-sdk out underneath it, and that is where upload-symbols
-# lives.
+# lives. Keep it outside ios/ (Xcode's SRCROOT) so User Script Sandboxing can
+# execute Firebase's Crashlytics scripts from the SPM checkout.
 def nurio_ios_derived_data_path
-  File.expand_path("../ios/build/derived_data", Dir.pwd)
+  File.expand_path("../build/ios-derived-data", Dir.pwd)
 end
 
 def nurio_ios_crashlytics_upload_symbols
@@ -286,9 +287,20 @@ def nurio_read_version_name
   match[1]
 end
 
+def nurio_next_version_name(current)
+  match = current.match(/\A(\d+)\.(\d+)\.(\d+)\z/)
+  unless match
+    UI.user_error!(
+      "Cannot auto-bump versionName '#{current}'; expected a numeric major.minor.patch version"
+    )
+  end
+
+  "#{match[1]}.#{match[2]}.#{match[3].to_i + 1}"
+end
+
 # Refuse to auto-bump a file that already contains staged or unstaged work.
 # After this gate, staging the complete file is safe because this lane owns its
-# only worktree change: the versionCode replacement below.
+# only worktree change: the versionName and versionCode replacements below.
 def nurio_require_clean_gradle_file!
   repo_root = `git rev-parse --show-toplevel`.strip
   gradle_rel = nurio_gradle_file.delete_prefix("#{repo_root}/")
@@ -315,19 +327,25 @@ def nurio_play_max_version_code(json_key_data:)
   end.max.to_i
 end
 
-def nurio_bump_version_code!(json_key_data:)
-  current = nurio_read_version_code
+def nurio_bump_android_version!(json_key_data:)
+  current_code = nurio_read_version_code
+  current_name = nurio_read_version_name
   play_max = nurio_play_max_version_code(json_key_data: json_key_data)
-  next_code = [ current + 1, play_max + 1 ].max
+  next_code = [ current_code + 1, play_max + 1 ].max
+  next_name = nurio_next_version_name(current_name)
+  contents = File.read(nurio_gradle_file)
+  contents.sub!(/versionCode\s*=\s*\d+/, "versionCode = #{next_code}")
+  contents.sub!(/versionName\s*=\s*"[^"]+"/, "versionName = \"#{next_name}\"")
   File.write(
     nurio_gradle_file,
-    File.read(nurio_gradle_file).sub(/versionCode\s*=\s*\d+/, "versionCode = #{next_code}")
+    contents
   )
-  UI.message("versionCode #{current} (file) / #{play_max} (Play max) -> #{next_code}")
-  next_code
+  UI.message("versionCode #{current_code} (file) / #{play_max} (Play max) -> #{next_code}")
+  UI.message("versionName #{current_name} -> #{next_name}")
+  [ next_code, next_name ]
 end
 
-# Commit only the versionCode bump in build.gradle.kts after a successful upload,
+# Commit only the Android version bump in build.gradle.kts after a successful upload,
 # so the file's monotonic floor tracks what actually shipped. Scoped to that one
 # file so unrelated working-tree changes are never swept into a release commit.
 def nurio_commit_version_bump!(code:, name:)
@@ -337,7 +355,7 @@ def nurio_commit_version_bump!(code:, name:)
 
   staged = sh("git -C #{Shellwords.escape(repo_root)} diff --cached --name-only -- #{Shellwords.escape(gradle_rel)}").strip
   if staged.empty?
-    UI.message("versionCode bump already committed; nothing to commit")
+    UI.message("Android version bump already committed; nothing to commit")
     return
   end
 
@@ -362,16 +380,15 @@ platform :android do
     )
   end
 
-  desc "Build and upload to the Play Console internal track (auto-bumps versionCode ahead of Play)"
+  desc "Build and upload to Play internal (auto-bumps versionName patch and versionCode)"
   lane :beta do
     NurioCredentials.require!(ANDROID_REQUIRED_VARIABLES)
     json_key_data = NurioCredentials.play_json_key_data
     nurio_require_clean_gradle_file!
 
     # versionCode is sourced from Play itself, so the upload can never collide
-    # with a previously accepted code. versionName stays manual.
-    next_code = nurio_bump_version_code!(json_key_data: json_key_data)
-    version_name = nurio_read_version_name
+    # with a previously accepted code. versionName advances one patch release.
+    next_code, version_name = nurio_bump_android_version!(json_key_data: json_key_data)
     UI.success("Deploying Nurio Android: #{version_name} (#{next_code}) -> Play internal track")
 
     build
@@ -389,7 +406,7 @@ platform :android do
     )
 
     # Only reached on a successful upload (fastlane aborts on failure). Record the
-    # versionCode bump so the shipped state is committed.
+    # versionName and versionCode bump so the shipped state is committed.
     nurio_commit_version_bump!(code: next_code, name: version_name)
   end
 
