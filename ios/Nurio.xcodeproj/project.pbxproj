@@ -45,6 +45,9 @@
 		F30000000000000000000001 /* PaymentCrashContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = F30000000000000000000031 /* PaymentCrashContext.swift */; };
 		F30000000000000000000002 /* PaymentTelemetryComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = F30000000000000000000032 /* PaymentTelemetryComponent.swift */; };
 		D40000000000000000000001 /* KeyboardInsetsComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40000000000000000000031 /* KeyboardInsetsComponent.swift */; };
+		D50000000000000000000001 /* PaymentPopupPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = D50000000000000000000031 /* PaymentPopupPolicy.swift */; };
+		D50000000000000000000002 /* PaymentPopupWKUIController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D50000000000000000000032 /* PaymentPopupWKUIController.swift */; };
+		D50000000000000000000003 /* PaymentPopupPolicyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D50000000000000000000033 /* PaymentPopupPolicyTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -92,6 +95,9 @@
 		F30000000000000000000031 /* PaymentCrashContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentCrashContext.swift; sourceTree = "<group>"; };
 		F30000000000000000000032 /* PaymentTelemetryComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentTelemetryComponent.swift; sourceTree = "<group>"; };
 		D40000000000000000000031 /* KeyboardInsetsComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardInsetsComponent.swift; sourceTree = "<group>"; };
+		D50000000000000000000031 /* PaymentPopupPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentPopupPolicy.swift; sourceTree = "<group>"; };
+		D50000000000000000000032 /* PaymentPopupWKUIController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentPopupWKUIController.swift; sourceTree = "<group>"; };
+		D50000000000000000000033 /* PaymentPopupPolicyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentPopupPolicyTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -203,6 +209,7 @@
 				A00000000000000000000041 /* NurioTests.swift */,
 				F10000000000000000000031 /* NativeLocaleBootstrapTests.swift */,
 				F20000000000000000000031 /* SceneStartupCoordinatorTests.swift */,
+				D50000000000000000000033 /* PaymentPopupPolicyTests.swift */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -212,6 +219,8 @@
 			children = (
 				B000000000000000000000033 /* CheckoutColdBootWebViewPolicyDecisionHandler.swift */,
 				F30000000000000000000031 /* PaymentCrashContext.swift */,
+				D50000000000000000000031 /* PaymentPopupPolicy.swift */,
+				D50000000000000000000032 /* PaymentPopupWKUIController.swift */,
 			);
 			path = Payments;
 			sourceTree = "<group>";
@@ -382,6 +391,8 @@
 				F30000000000000000000001 /* PaymentCrashContext.swift in Sources */,
 				F30000000000000000000002 /* PaymentTelemetryComponent.swift in Sources */,
 				D40000000000000000000001 /* KeyboardInsetsComponent.swift in Sources */,
+				D50000000000000000000001 /* PaymentPopupPolicy.swift in Sources */,
+				D50000000000000000000002 /* PaymentPopupWKUIController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -392,6 +403,7 @@
 				A00000000000000000000010 /* NurioTests.swift in Sources */,
 				F10000000000000000000001 /* NativeLocaleBootstrapTests.swift in Sources */,
 				F20000000000000000000001 /* SceneStartupCoordinatorTests.swift in Sources */,
+				D50000000000000000000003 /* PaymentPopupPolicyTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -555,7 +567,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.12;
+				MARKETING_VERSION = 1.0.13;
 				PRODUCT_BUNDLE_IDENTIFIER = com.nurio.ios;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -587,7 +599,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.12;
+				MARKETING_VERSION = 1.0.13;
 				PRODUCT_BUNDLE_IDENTIFIER = com.nurio.ios;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
