@@ -32,6 +32,34 @@ final class NurioTests: XCTestCase {
         )
     }
 
+    // /auth/native/token_auth is visited on the main stack and redirects to /signup for a
+    // brand-new account. A modal rule for that destination makes Hotwire Native present
+    // /signup as a sheet on top of the main screen that already rendered the same page.
+    func testPathConfigurationKeepsNativeSignInDestinationsOutOfModals() throws {
+        let configurationURL = try XCTUnwrap(
+            Bundle(for: AppDelegate.self).url(forResource: AppEnvironment.pathConfigurationResourceName, withExtension: "json")
+        )
+        let configuration = try XCTUnwrap(
+            JSONSerialization.jsonObject(with: Data(contentsOf: configurationURL)) as? [String: Any]
+        )
+        let rules = try XCTUnwrap(configuration["rules"] as? [[String: Any]])
+
+        let modalPatterns = rules
+            .filter { ($0["properties"] as? [String: Any])?["context"] as? String == "modal" }
+            .flatMap { $0["patterns"] as? [String] ?? [] }
+
+        for path in [ "/signup", "/login", "/auth/native/token_auth" ] {
+            for pattern in modalPatterns {
+                let regex = try NSRegularExpression(pattern: pattern)
+                let range = NSRange(path.startIndex..., in: path)
+                XCTAssertNil(
+                    regex.firstMatch(in: path, range: range),
+                    "\(path) must not be presented as a modal, but modal pattern \(pattern) matches it"
+                )
+            }
+        }
+    }
+
     func testSignInURLUsesExistingAuthLoginRoute() {
         XCTAssertEqual(
             AppEnvironment.signInURL.absoluteString,

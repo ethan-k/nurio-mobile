@@ -29,8 +29,7 @@
       "patterns": [
         "/auth/login.*",
         "/auth/create-account.*",
-        "/auth/verify.*",
-        "/signup"
+        "/auth/verify.*"
       ],
       "properties": {
         "context": "modal",

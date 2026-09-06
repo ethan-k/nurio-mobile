@@ -18,7 +18,6 @@
         "/auth/login.*",
         "/auth/create-account.*",
         "/auth/verify.*",
-        "/signup",
         "/orders/new.*",
         "/orders/.*/payment_summary.*",
         "/pass_packages/.*/purchase.*",
