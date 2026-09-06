@@ -18,6 +18,9 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.os.ConfigurationCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import androidx.lifecycle.Lifecycle
 import com.airbnb.lottie.LottieAnimationView
 import com.nurio.android.localization.LocaleCookieBootstrapper
 import com.nurio.android.notifications.NotificationRoute
@@ -34,6 +37,12 @@ import dev.hotwire.navigation.navigator.NavigatorConfiguration
 
 class MainActivity : HotwireActivity(), PaymentRecoveryHost {
     private lateinit var startupCoordinator: MainActivityStartupCoordinator
+    private val navigationHandler = Handler(Looper.getMainLooper())
+    private val navigationLifecycleCallbacks = object : FragmentManager.FragmentLifecycleCallbacks() {
+        override fun onFragmentResumed(fragmentManager: FragmentManager, fragment: Fragment) {
+            startupCoordinator.onDestinationStateChanged()
+        }
+    }
     private val paymentRecoveryHandler = Handler(Looper.getMainLooper())
     private val paymentRecoveryRunnable = Runnable {
         val recovery = PaymentRecovery.takeExternalAppReturnRecovery() ?: return@Runnable
@@ -62,7 +71,10 @@ class MainActivity : HotwireActivity(), PaymentRecoveryHost {
             logFailure = { exception ->
                 Log.w(TAG, "Unable to initialize the UI locale", exception)
             },
+            isDestinationReady = ::isNavigationDestinationReady,
+            postNavigation = { action -> navigationHandler.post { action() } },
         )
+        supportFragmentManager.registerFragmentLifecycleCallbacks(navigationLifecycleCallbacks, true)
         startupCoordinator.start()
 
         requestNotificationPermissionIfNeeded()
@@ -114,6 +126,9 @@ class MainActivity : HotwireActivity(), PaymentRecoveryHost {
     }
 
     override fun onDestroy() {
+        startupCoordinator.onHostDestroyed()
+        navigationHandler.removeCallbacksAndMessages(null)
+        supportFragmentManager.unregisterFragmentLifecycleCallbacks(navigationLifecycleCallbacks)
         paymentRecoveryHandler.removeCallbacks(paymentRecoveryRunnable)
         super.onDestroy()
     }
@@ -223,6 +238,21 @@ class MainActivity : HotwireActivity(), PaymentRecoveryHost {
 
     private fun routeWhenReady(url: String) {
         startupCoordinator.routeWhenReady(url)
+    }
+
+    private fun isNavigationDestinationReady(): Boolean {
+        if (isFinishing || isDestroyed || supportFragmentManager.isStateSaved) return false
+
+        val navigator = delegate.currentNavigator ?: return false
+        if (navigator.host.childFragmentManager.isStateSaved) return false
+
+        val destination = navigator.currentDestination as? Fragment ?: return false
+        if (!destination.isAdded || destination.parentFragmentManager.isStateSaved) return false
+
+        // Activity.onPostResume can precede the destination's creation. The
+        // destination view's own lifecycle is the readiness boundary we need.
+        return destination.viewLifecycleOwnerLiveData.value?.lifecycle
+            ?.currentState?.isAtLeast(Lifecycle.State.RESUMED) == true
     }
 
     private fun configuredLanguageTags(): List<String> {
