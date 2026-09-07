@@ -1,6 +1,5 @@
 import HotwireNative
 import KakaoSDKAuth
-import Lottie
 import UIKit
 
 final class SceneController: UIResponder {
@@ -43,27 +42,6 @@ final class SceneController: UIResponder {
         navigator.activeNavigationController.present(alert, animated: true)
     }
 
-    private func showSplashAnimation(in window: UIWindow) {
-        let container = UIView(frame: window.bounds)
-        container.autoresizingMask = [ .flexibleWidth, .flexibleHeight ]
-        container.backgroundColor = .white
-
-        let animationView = LottieAnimationView(name: "nurio_splash")
-        animationView.frame = container.bounds
-        animationView.autoresizingMask = [ .flexibleWidth, .flexibleHeight ]
-        animationView.contentMode = .scaleAspectFit
-        container.addSubview(animationView)
-        window.addSubview(container)
-
-        animationView.play { _ in
-            UIView.animate(withDuration: 0.25, animations: {
-                container.alpha = 0
-            }, completion: { _ in
-                container.removeFromSuperview()
-            })
-        }
-    }
-
     private func hideNavigationBarOnMainStack() {
         guard let rootNav = navigator.rootViewController as? UINavigationController else { return }
         rootNav.setNavigationBarHidden(true, animated: false)
@@ -94,7 +72,6 @@ extension SceneController: UIWindowSceneDelegate {
             PushNotificationResponseRouter.shared.receive(notificationResponse)
         }
 
-        showSplashAnimation(in: window)
         hideNavigationBarOnMainStack()
 
         if let coldLaunchURL = connectionOptions.urlContexts.first?.url,

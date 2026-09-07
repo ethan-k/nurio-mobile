@@ -36,8 +36,6 @@
 		C00000000000000000000006 /* KakaoSDKAuth in Frameworks */ = {isa = PBXBuildFile; productRef = C00000000000000000000003 /* KakaoSDKAuth */; };
 		C00000000000000000000007 /* KakaoSDKUser in Frameworks */ = {isa = PBXBuildFile; productRef = C00000000000000000000004 /* KakaoSDKUser */; };
 		D00000000000000000000001 /* NativeKakaoSignInCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000031 /* NativeKakaoSignInCoordinator.swift */; };
-		E00000000000000000000003 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = E00000000000000000000002 /* Lottie */; };
-		E00000000000000000000005 /* nurio_splash.json in Resources */ = {isa = PBXBuildFile; fileRef = E00000000000000000000004 /* nurio_splash.json */; };
 		F10000000000000000000001 /* NativeLocaleBootstrapTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000031 /* NativeLocaleBootstrapTests.swift */; };
 		F10000000000000000000002 /* NativeLocaleBootstrap.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000032 /* NativeLocaleBootstrap.swift */; };
 		F20000000000000000000001 /* SceneStartupCoordinatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F20000000000000000000031 /* SceneStartupCoordinatorTests.swift */; };
@@ -84,7 +82,6 @@
 		B000000000000000000000032 /* RegisterDeviceTokenComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterDeviceTokenComponent.swift; sourceTree = "<group>"; };
 		B000000000000000000000033 /* CheckoutColdBootWebViewPolicyDecisionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckoutColdBootWebViewPolicyDecisionHandler.swift; sourceTree = "<group>"; };
 		D00000000000000000000031 /* NativeKakaoSignInCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeKakaoSignInCoordinator.swift; sourceTree = "<group>"; };
-		E00000000000000000000004 /* nurio_splash.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = nurio_splash.json; sourceTree = "<group>"; };
 		F10000000000000000000031 /* NativeLocaleBootstrapTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeLocaleBootstrapTests.swift; sourceTree = "<group>"; };
 		F10000000000000000000032 /* NativeLocaleBootstrap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeLocaleBootstrap.swift; sourceTree = "<group>"; };
 		F20000000000000000000031 /* SceneStartupCoordinatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneStartupCoordinatorTests.swift; sourceTree = "<group>"; };
@@ -106,7 +103,6 @@
 				C00000000000000000000006 /* KakaoSDKAuth in Frameworks */,
 				C00000000000000000000007 /* KakaoSDKUser in Frameworks */,
 				A0000000000000000000000F /* HotwireNative in Frameworks */,
-				E00000000000000000000003 /* Lottie in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -152,7 +148,6 @@
 				A0000000000000000000003C /* Assets.xcassets */,
 				A000000000000000000000A0 /* LaunchScreen.storyboard */,
 				A0000000000000000000003F /* ios_v1.json */,
-				E00000000000000000000004 /* nurio_splash.json */,
 				54AD91C62FB3F8D000BF72BB /* GoogleService-Info.plist */,
 			);
 			name = Nurio;
@@ -241,7 +236,6 @@
 				C00000000000000000000002 /* KakaoSDKCommon */,
 				C00000000000000000000003 /* KakaoSDKAuth */,
 				C00000000000000000000004 /* KakaoSDKUser */,
-				E00000000000000000000002 /* Lottie */,
 			);
 			productName = Nurio;
 			productReference = A00000000000000000000030 /* Nurio.app */;
@@ -297,7 +291,6 @@
 				A000000000000000000000C0 /* XCRemoteSwiftPackageReference "hotwire-native-ios" */,
 				54AD91C82FB3FE0600BF72BB /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				C00000000000000000000001 /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */,
-				E00000000000000000000001 /* XCRemoteSwiftPackageReference "lottie-ios" */,
 			);
 			productRefGroup = A00000000000000000000061 /* Products */;
 			projectDirPath = "";
@@ -318,7 +311,6 @@
 				A0000000000000000000000D /* LaunchScreen.storyboard in Resources */,
 				54AD91C72FB3F8D000BF72BB /* GoogleService-Info.plist in Resources */,
 				A0000000000000000000000E /* ios_v1.json in Resources */,
-				E00000000000000000000005 /* nurio_splash.json in Resources */,
 				A00000000000000000000011 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -689,14 +681,6 @@
 				version = 2.28.0;
 			};
 		};
-		E00000000000000000000001 /* XCRemoteSwiftPackageReference "lottie-ios" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/airbnb/lottie-ios";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 4.5.0;
-			};
-		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -734,11 +718,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = C00000000000000000000001 /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */;
 			productName = KakaoSDKUser;
-		};
-		E00000000000000000000002 /* Lottie */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = E00000000000000000000001 /* XCRemoteSwiftPackageReference "lottie-ios" */;
-			productName = Lottie;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

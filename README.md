@@ -65,8 +65,7 @@ xcodebuild -project ios/Nurio.xcodeproj -scheme Nurio -configuration Release -de
 ## Customer launch identity
 
 - The customer iOS and Android launcher icons use the compact blue `n` mark.
-- `ios/nurio_splash.json` and `android/app/src/main/assets/animations/nurio_splash.json` share the 1.5-second Lottie reveal for the full lowercase `nurio` wordmark.
-- The operating-system launch surface remains static white. iOS starts the Lottie overlay after its app window connects, while Android hands off from the system splash icon to the in-app animation.
+- Launch uses the operating-system splash only: iOS shows the static white `LaunchScreen.storyboard`, and Android shows the system splash icon via `Theme.Nurio.Splash` (AndroidX SplashScreen). There is no in-app splash overlay or animation library.
 
 This applies only to the top-level customer `ios/` and `android/` targets. Study, Study Leader, and Tutor retain their independent visual identities.
 

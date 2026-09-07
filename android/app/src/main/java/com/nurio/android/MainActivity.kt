@@ -1,8 +1,6 @@
 package com.nurio.android
 
 import android.Manifest
-import android.animation.Animator
-import android.animation.AnimatorListenerAdapter
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -21,7 +19,6 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Lifecycle
-import com.airbnb.lottie.LottieAnimationView
 import com.nurio.android.localization.LocaleCookieBootstrapper
 import com.nurio.android.notifications.NotificationRoute
 import com.nurio.android.payments.PaymentCrashTelemetry
@@ -64,7 +61,6 @@ class MainActivity : HotwireActivity(), PaymentRecoveryHost {
             },
             initializeNavigator = {
                 setContentView(R.layout.activity_main)
-                showSplashAnimation(coldStart = savedInstanceState == null)
                 delegate.setCurrentNavigator(navigatorConfigurations().first())
             },
             route = { url -> delegate.currentNavigator?.route(url) },
@@ -79,26 +75,6 @@ class MainActivity : HotwireActivity(), PaymentRecoveryHost {
 
         requestNotificationPermissionIfNeeded()
         handleLaunchIntent(intent)
-    }
-
-    private fun showSplashAnimation(coldStart: Boolean) {
-        val splashView = findViewById<LottieAnimationView>(R.id.splash_animation)
-
-        if (!coldStart) {
-            splashView.visibility = View.GONE
-            return
-        }
-
-        splashView.addAnimatorListener(object : AnimatorListenerAdapter() {
-            override fun onAnimationEnd(animation: Animator) {
-                splashView.animate()
-                    .alpha(0f)
-                    .setDuration(250)
-                    .withEndAction { splashView.visibility = View.GONE }
-                    .start()
-            }
-        })
-        splashView.playAnimation()
     }
 
     override fun onNewIntent(intent: Intent) {
