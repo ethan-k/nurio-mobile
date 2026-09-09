@@ -43,6 +43,8 @@
 		F30000000000000000000001 /* PaymentCrashContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = F30000000000000000000031 /* PaymentCrashContext.swift */; };
 		F30000000000000000000002 /* PaymentTelemetryComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = F30000000000000000000032 /* PaymentTelemetryComponent.swift */; };
 		D40000000000000000000001 /* KeyboardInsetsComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40000000000000000000031 /* KeyboardInsetsComponent.swift */; };
+		F50000000000000000000001 /* NativeImageCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = F50000000000000000000031 /* NativeImageCache.swift */; };
+		F40000000000000000000001 /* NativeImageCacheTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F40000000000000000000031 /* NativeImageCacheTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -89,6 +91,8 @@
 		F30000000000000000000031 /* PaymentCrashContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentCrashContext.swift; sourceTree = "<group>"; };
 		F30000000000000000000032 /* PaymentTelemetryComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentTelemetryComponent.swift; sourceTree = "<group>"; };
 		D40000000000000000000031 /* KeyboardInsetsComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardInsetsComponent.swift; sourceTree = "<group>"; };
+		F50000000000000000000031 /* NativeImageCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeImageCache.swift; sourceTree = "<group>"; };
+		F40000000000000000000031 /* NativeImageCacheTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeImageCacheTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -142,6 +146,7 @@
 				A00000000000000000000065 /* Bridge */,
 				B000000000000000000000040 /* Payments */,
 				A00000000000000000000031 /* AppDelegate.swift */,
+				F50000000000000000000031 /* NativeImageCache.swift */,
 				A00000000000000000000032 /* SceneController.swift */,
 				A0000000000000000000003E /* Info.plist */,
 				A00000000000000000000042 /* PrivacyInfo.xcprivacy */,
@@ -196,6 +201,7 @@
 			isa = PBXGroup;
 			children = (
 				A00000000000000000000041 /* NurioTests.swift */,
+				F40000000000000000000031 /* NativeImageCacheTests.swift */,
 				F10000000000000000000031 /* NativeLocaleBootstrapTests.swift */,
 				F20000000000000000000031 /* SceneStartupCoordinatorTests.swift */,
 			);
@@ -354,6 +360,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A00000000000000000000001 /* AppDelegate.swift in Sources */,
+				F50000000000000000000001 /* NativeImageCache.swift in Sources */,
 				A00000000000000000000002 /* SceneController.swift in Sources */,
 				F20000000000000000000002 /* SceneStartupCoordinator.swift in Sources */,
 				A00000000000000000000003 /* AppEnvironment.swift in Sources */,
@@ -382,6 +389,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A00000000000000000000010 /* NurioTests.swift in Sources */,
+				F40000000000000000000001 /* NativeImageCacheTests.swift in Sources */,
 				F10000000000000000000001 /* NativeLocaleBootstrapTests.swift in Sources */,
 				F20000000000000000000001 /* SceneStartupCoordinatorTests.swift in Sources */,
 			);

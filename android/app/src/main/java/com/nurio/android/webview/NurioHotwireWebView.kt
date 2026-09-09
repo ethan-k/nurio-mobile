@@ -15,6 +15,8 @@ import androidx.webkit.WebResourceErrorCompat
 import androidx.webkit.WebViewClientCompat
 import com.nurio.android.payments.PaymentCrashTelemetry
 import com.nurio.android.payments.findPaymentRecoveryHost
+import com.nurio.android.webview.images.NativeImageRequests
+import com.nurio.android.webview.images.NativeImageUrl
 import dev.hotwire.core.turbo.webview.HotwireWebView
 
 class NurioHotwireWebView @JvmOverloads constructor(
@@ -91,11 +93,15 @@ private class PaymentAwareWebViewClient(
         view: WebView,
         request: WebResourceRequest
     ): WebResourceResponse? {
+        if (!request.isForMainFrame && request.method == "GET" && NativeImageUrl.isImageRequest(request.url.toString())) {
+            return NativeImageRequests.intercept(view.context, request.url.toString())
+        }
         return delegate.shouldInterceptRequest(view, request)
     }
 
     @Deprecated("Deprecated in Java")
     override fun shouldInterceptRequest(view: WebView, url: String): WebResourceResponse? {
+        NativeImageRequests.intercept(view.context, url)?.let { return it }
         return delegate.shouldInterceptRequest(view, url)
     }
 

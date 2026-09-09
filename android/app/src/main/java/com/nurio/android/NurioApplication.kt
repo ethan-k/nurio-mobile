@@ -40,7 +40,7 @@ class NurioApplication : Application() {
         Hotwire.config.webViewDebuggingEnabled = BuildConfig.DEBUG
         Hotwire.config.makeCustomWebView = { context -> NurioHotwireWebView(context) }
 
-        Hotwire.config.applicationUserAgentPrefix = "Nurio Android; NurioPaymentReturn/1"
+        Hotwire.config.applicationUserAgentPrefix = "Nurio Android; NurioPaymentReturn/1; NurioImageCache/1"
 
         // Bridge components (sign-in-with-oauth, register-device-token) decode/encode
         // message JSON through Hotwire.config.jsonConverter. It is null by default, so

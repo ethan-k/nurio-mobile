@@ -106,6 +106,7 @@ dependencies {
 
     implementation(libs.hotwire.core)
     implementation(libs.hotwire.navigation.fragments)
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.messaging)

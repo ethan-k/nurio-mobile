@@ -6,6 +6,7 @@ import KakaoSDKCommon
 import OSLog
 import UIKit
 import UserNotifications
+import WebKit
 
 private let kakaoLogger = Logger(
     subsystem: Bundle.main.bundleIdentifier ?? "com.nurio.ios",
@@ -72,7 +73,16 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             .file(Bundle.main.url(forResource: AppEnvironment.pathConfigurationResourceName, withExtension: "json")!)
         ])
 
-        Hotwire.config.applicationUserAgentPrefix = "Nurio iOS; NurioPaymentReturn/1;"
+        Hotwire.config.applicationUserAgentPrefix = "Nurio iOS; NurioPaymentReturn/1; NurioImageCache/1;"
+        // The factory is used by both the main and modal Hotwire sessions.
+        Hotwire.config.makeCustomWebView = { configuration in
+            configuration.setURLSchemeHandler(NativeImageSchemeHandler(), forURLScheme: NativeImageURL.scheme)
+            let webView = WKWebView(frame: .zero, configuration: configuration)
+#if DEBUG
+            if #available(iOS 16.4, *) { webView.isInspectable = true }
+#endif
+            return webView
+        }
         Hotwire.config.backButtonDisplayMode = .minimal
         Hotwire.config.showDoneButtonOnModals = true
 
