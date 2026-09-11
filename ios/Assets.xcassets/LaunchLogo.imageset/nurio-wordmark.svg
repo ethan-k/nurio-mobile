@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 80" role="img" aria-labelledby="nurio-wordmark-title">
+  <title id="nurio-wordmark-title">nurio</title>
+  <g fill="none" stroke="#172033" stroke-linecap="round" stroke-linejoin="round" stroke-width="16">
+    <path d="M14 60V31C14 11 58 11 58 31V60"/>
+    <path d="M87 22V47C87 67 125 67 125 47V22"/>
+    <path d="M155 60V27C164 17 178 16 188 22"/>
+    <path d="M211 27V60"/>
+    <circle cx="261" cy="41" r="22"/>
+  </g>
+  <circle cx="211" cy="10" r="8" fill="#3182F6"/>
+</svg>
