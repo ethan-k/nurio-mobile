@@ -1,5 +1,7 @@
 import Foundation
 import XCTest
+import HotwireNative
+import WebKit
 @testable import Nurio
 
 final class SceneStartupCoordinatorTests: XCTestCase {
@@ -219,5 +221,113 @@ private final class FakeNextMainTurnScheduler {
 
     func runNext() {
         actions.removeFirst()()
+    }
+}
+
+
+final class CheckoutVisitRecoveryTests: XCTestCase {
+    @MainActor
+    func testTurboCheckoutProposalsColdBootTheirDestinationSession() async {
+        for (path, context) in [
+            ("/orders/new", "default"),
+            ("/orders/42/payment_summary", "modal"),
+            ("/pass_packages/4/purchase", "modal"),
+            ("/pass_packages/4/payment_summary", "modal"),
+            ("/payments/portone/complete?paymentId=test", "default")
+        ] {
+            let (navigator, delegate, views) = makeNavigator()
+            let destination = URL(string: path, relativeTo: AppEnvironment.baseURL)!.absoluteURL
+            let webView = views[context == "modal" ? 1 : 0]
+            webView.reportedURL = URL(string: "https://gateway.invalid/payment")!
+            let loaded = expectation(description: "Initial visit and recovered cold boot: \(path)")
+            loaded.expectedFulfillmentCount = 2
+            webView.onLoad = { url in
+                XCTAssertEqual(url, destination)
+                loaded.fulfill()
+            }
+
+            // Calling route with a proposal is the Turbo/native callback path:
+            // no WKNavigationAction policy handler participates here.
+            navigator.route(VisitProposal(url: destination, options: .init(), properties: [
+                "context": context, "animated": false
+            ]))
+            await fulfillment(of: [loaded], timeout: 5)
+            XCTAssertEqual(webView.requests, [destination, destination])
+            XCTAssertTrue(views[context == "modal" ? 0 : 1].requests.isEmpty)
+            withExtendedLifetime(delegate) {}
+        }
+    }
+
+    @MainActor
+    func testRecoveryDoesNotLoadAfterUserNavigatesAway() async {
+        let (navigator, delegate, views) = makeNavigator()
+        views[0].reportedURL = URL(string: "https://gateway.invalid/payment")!
+        navigator.route(AppEnvironment.baseURL.appendingPathComponent("orders/new"))
+        navigator.route(AppEnvironment.baseURL.appendingPathComponent("events/42"))
+        let unexpectedLoad = expectation(description: "Abandoned checkout must not reload")
+        unexpectedLoad.isInverted = true
+        views[0].onLoad = { _ in unexpectedLoad.fulfill() }
+        await fulfillment(of: [unexpectedLoad], timeout: 0.3)
+        XCTAssertEqual(views[0].requests.map(\.path), ["/orders/new", "/events/42"])
+        withExtendedLifetime(delegate) {}
+    }
+
+    @MainActor
+    func testHealthySessionKeepsNormalNavigation() async {
+        let (navigator, delegate, views) = makeNavigator()
+        views[0].reportedURL = AppEnvironment.baseURL.appendingPathComponent("events/42")
+        let destination = AppEnvironment.baseURL.appendingPathComponent("orders/new")
+        let proposal = VisitProposal(url: destination, options: .init(), properties: [:])
+        if case .accept = delegate.handle(proposal: proposal, from: navigator) {
+            XCTAssertTrue(views[0].requests.isEmpty)
+        } else {
+            XCTFail("Healthy checkout must retain the default controller")
+        }
+    }
+
+    func testRecoveryExcludesGatewayPostsAndUnrelatedDestinations() {
+        let base = URL(string: "https://nurio.kr")!
+        for value in [
+            "https://ksmobile.inicis.com/smart/payment/",
+            "https://other.example/orders/new",
+            "http://nurio.kr/orders/new",
+            "https://nurio.kr:444/orders/new",
+            "https://nurio.kr/events/42",
+            "https://nurio.kr/orders/42",
+            "nurio://payment-complete"
+        ] {
+            XCTAssertFalse(CheckoutNavigation.isRecoveryDestination(URL(string: value)!, baseURL: base), value)
+        }
+    }
+
+    @MainActor
+    private func makeNavigator() -> (Navigator, SceneController, [CheckoutRecoveryTestWebView]) {
+        let originalFactory = Hotwire.config.makeCustomWebView
+        defer { Hotwire.config.makeCustomWebView = originalFactory }
+        var views: [CheckoutRecoveryTestWebView] = []
+        Hotwire.config.makeCustomWebView = { configuration in
+            let view = CheckoutRecoveryTestWebView(frame: .zero, configuration: configuration)
+            views.append(view)
+            return view
+        }
+        let delegate = SceneController()
+        let navigator = Navigator(configuration: .init(name: "checkout-recovery-test", startLocation: AppEnvironment.baseURL), delegate: delegate)
+        return (navigator, delegate, views)
+    }
+}
+
+private final class CheckoutRecoveryTestWebView: WKWebView {
+    var reportedURL: URL?
+    var requests: [URL] = []
+    var onLoad: ((URL) -> Void)?
+
+    override var url: URL? { reportedURL }
+
+    override func load(_ request: URLRequest) -> WKNavigation? {
+        if let url = request.url {
+            requests.append(url)
+            onLoad?(url)
+        }
+        return nil
     }
 }

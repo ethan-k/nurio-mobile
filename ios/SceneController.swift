@@ -110,7 +110,10 @@ extension SceneController: UIWindowSceneDelegate {
 
 extension SceneController: NavigatorDelegate {
     func handle(proposal: VisitProposal, from navigator: Navigator) -> ProposalResult {
-        .accept
+        if let controller = CheckoutVisitRecovery.controller(for: proposal, navigator: navigator) {
+            return .acceptCustom(controller)
+        }
+        return .accept
     }
 
     func visitableDidFailRequest(_ visitable: any Visitable, error: HotwireNativeError, retryHandler: RetryBlock?) {

@@ -2,20 +2,10 @@ import Foundation
 import HotwireNative
 import WebKit
 
-/// Forces a checkout page to **cold-boot** when the destination session's web view is
-/// still parked on an external payment-gateway page from a previous attempt.
-///
-/// Why: Hotwire Native reuses one web view per session. After "pay by card" the
-/// checkout web view navigates to the gateway (Inicis). When the user backs out and
-/// re-enters checkout, the framework sees the session as still `initialized` and
-/// attempts a *JavaScript* visit — but a JS visit needs Turbo's runtime on the
-/// current page, and the current page is the foreign gateway. The visit collapses
-/// and the cached gateway page is re-shown instead of a fresh checkout.
-///
-/// This handler detects that re-entry and cold-boots the new checkout visitable
-/// in its destination session. It never touches
-/// the outbound gateway navigation (that is off-origin), so the form POST that
-/// carries `P_INIT_PAYMENT` is left completely intact.
+/// Routes non-Turbo checkout navigation through the same navigator entry point
+/// as Turbo visits. Recovery belongs there: a restored modal can still contain
+/// the gateway page, which cannot execute Turbo's JavaScript visits.
+/// Outbound gateway form POSTs continue through WebKit unchanged.
 struct CheckoutColdBootWebViewPolicyDecisionHandler: WebViewPolicyDecisionHandler {
     let name = "checkout-cold-boot-policy"
 
@@ -34,43 +24,50 @@ struct CheckoutColdBootWebViewPolicyDecisionHandler: WebViewPolicyDecisionHandle
         configuration: Navigator.Configuration,
         navigator: any Navigating
     ) -> WebViewPolicyManager.Decision {
-        // Navigating does not expose sessions; checkout recovery needs the
-        // concrete app navigator's main and modal sessions to cold-boot safely.
-        guard let navigator = navigator as? Navigator else { return .allow }
         if let url = navigationAction.request.url {
-            Task { @MainActor in
-                let usesMainSession = CheckoutNavigation.usesMainSession(url)
-                let session = usesMainSession ? navigator.session : navigator.modalSession
-                let navigationController = usesMainSession ? navigator.rootViewController : navigator.modalRootViewController
-                let stuckGatewayURL = session.webView.url.flatMap { currentURL in
-                    CheckoutNavigation.isOffOrigin(currentURL, baseURL: AppEnvironment.baseURL) ? currentURL : nil
-                }
-
-                if let stuckGatewayURL {
-                    PaymentCrashTelemetry.logRetryColdBoot()
-
-                    // Drop the abandoned gateway's cookies/session so the retry starts
-                    // clean — Korean PGs (KG Inicis) reject a reused session with
-                    // "비정상적인 접근" even when the order id is fresh.
-                    PaymentGatewayData.clear(forStuckURL: stuckGatewayURL)
-                }
-
-                navigator.route(url)
-
-                // Force the NEW checkout visitable to cold-boot. A JavaScript visit
-                // can't run on the gateway page (no Turbo runtime), and reloading the
-                // session would re-fetch the gateway URL as a GET — which Inicis
-                // rejects with payError.ini. Cold-booting the fresh visitable loads
-                // only the checkout URL.
-                if stuckGatewayURL != nil,
-                   let visitable = navigationController.topViewController as? VisitableViewController,
-                   visitable.initialVisitableURL == url {
-                    session.visit(visitable, options: VisitOptions(action: .replace), reload: true)
-                }
-            }
+            Task { @MainActor in navigator.route(url) }
         }
 
         return .cancel
+    }
+}
+
+/// Turbo link visits and native payment callbacks bypass WKNavigationAction.
+/// Recover at the navigator proposal boundary so every checkout entry is covered.
+@MainActor
+enum CheckoutVisitRecovery {
+    static func controller(for proposal: VisitProposal, navigator: Navigator) -> VisitableViewController? {
+        guard CheckoutNavigation.isRecoveryDestination(proposal.url, baseURL: AppEnvironment.baseURL) else {
+            return nil
+        }
+
+        let isModal = proposal.context == .modal
+        let session = isModal ? navigator.modalSession : navigator.session
+        guard let gatewayURL = session.webView.url,
+              CheckoutNavigation.isOffOrigin(gatewayURL, baseURL: AppEnvironment.baseURL) else {
+            return nil
+        }
+
+        let controller = Hotwire.config.defaultViewController(proposal.url)
+        // The navigator must finish attaching this exact destination before the
+        // forced visit. Never reload the abandoned gateway's POST-only URL.
+        DispatchQueue.main.async { [weak navigator, weak controller] in
+            guard let navigator, let controller else { return }
+            let navigationController = isModal ? navigator.modalRootViewController : navigator.rootViewController
+            guard navigationController.topViewController === controller,
+                  !navigationController.isBeingDismissed else { return }
+
+            PaymentGatewayData.clear(forStuckURL: gatewayURL) {
+                let currentSession = isModal ? navigator.modalSession : navigator.session
+                guard currentSession === session,
+                      navigationController.topViewController === controller,
+                      !navigationController.isBeingDismissed else { return }
+
+                PaymentCrashTelemetry.logRetryColdBoot()
+                session.visit(controller, options: VisitOptions(action: proposal.options.action), reload: true)
+            }
+        }
+        return controller
     }
 }
 
@@ -80,8 +77,11 @@ enum PaymentGatewayData {
     /// page the checkout web view is stuck on (e.g. `inicis.com` for
     /// `ksmobile.inicis.com`). Leaves nurio and all other domains untouched.
     @MainActor
-    static func clear(forStuckURL url: URL) {
-        guard let host = url.host?.lowercased() else { return }
+    static func clear(forStuckURL url: URL, completion: @escaping () -> Void) {
+        guard let host = url.host?.lowercased() else {
+            completion()
+            return
+        }
 
         let store = WKWebsiteDataStore.default()
         let types = WKWebsiteDataStore.allWebsiteDataTypes()
@@ -91,14 +91,22 @@ enum PaymentGatewayData {
                 return !name.isEmpty && (host == name || host.hasSuffix(".\(name)"))
             }
 
-            guard !targets.isEmpty else { return }
-            store.removeData(ofTypes: types, for: targets) {}
+            guard !targets.isEmpty else {
+                completion()
+                return
+            }
+            store.removeData(ofTypes: types, for: targets, completionHandler: completion)
         }
     }
 }
 
 /// Pure routing rules for checkout entry detection.
 enum CheckoutNavigation {
+    static func isRecoveryDestination(_ url: URL, baseURL: URL) -> Bool {
+        isSafeReloadURL(url, baseURL: baseURL) &&
+            (isCheckoutEntry(url, baseURL: baseURL) || url.path == "/payments/portone/complete")
+    }
+
     /// Hotwire's default retry calls Session.reload(), which must not reload a
     /// gateway URL. Check both the original visit and its current destination.
     static func safeRetryHandler(
