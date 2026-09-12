@@ -6,22 +6,28 @@ touching anything** in `ios/Payments/` or the checkout navigation.
 
 ## How a payment flows
 
-1. Ticket selection (`/orders/new`, including query parameters) is a normal
-   Turbo page in the **main session's web view**. Payment-summary and pass-purchase
-   pages keep the **modal session's web view**. Checkout retry recovery selects
-   the same destination session as the path configuration.
+1. Ticket selection, payment selection/summary, and pass-purchase pages are
+   full-screen Turbo pages in the **main session's web view**.
+   On the first HTTPS Inicis navigation, `PaymentGatewayPresentation` presents
+   the existing checkout `VisitableView` inside a native sheet. It keeps the same
+   WKWebView, document, request and cookies; it never cancels/replays the POST.
 2. Tapping **pay by card** runs the PortOne browser SDK, which submits a
    **form POST** to KG Inicis (`mobile.inicis.com` → `ksmobile.inicis.com`)
    *inside the same checkout web view*. The init parameters (`P_INIT_PAYMENT`)
    travel in the POST body.
 3. The Inicis flow may bounce out to card/bank apps via custom URL schemes and
-   back.
+   back. The bare `nurio://` return only resumes the existing gateway document.
+   It is not a page destination. Unknown URLs using Nurio's own scheme are also
+   ignored, preventing the system navigator from repeatedly reopening the app.
 4. On completion (success or failure), the gateway redirects through PortOne
    (`checkout-service.prod.iamport.co`) to **`nurio://payment-complete?paymentId=…`**.
    The server advertises this capability via the `NurioPaymentReturn/1` user-agent
    token; the app catches the scheme (`AppRouteCoordinator` →
    `NativePaymentCallback`) and routes to `/payments/portone/complete`, which
-   verifies, fulfills, and redirects.
+   verifies, fulfills, and redirects. The gateway sheet restores the checkout
+   view before routing. If the destination session is still on the gateway,
+   only the merchant completion URL is cold-booted. The callback never reloads
+   the Inicis URL. An HTTPS completion redirect uses the same return path.
 
 ## Hard constraints (learned the expensive way)
 
@@ -65,27 +71,36 @@ abandon-retry fails, app relaunch (fresh web view) recovers.
 
 ## The working design
 
-`ios/Payments/CheckoutColdBootWebViewPolicyDecisionHandler.swift`, registered
-first in `AppDelegate` (registration **replaces** the default policy chain, so
-the framework defaults are re-listed after it).
+`CheckoutVisitRecovery` runs at `SceneController`'s navigator proposal boundary,
+so Turbo link visits, non-Turbo links, and native callbacks share recovery.
+For a merchant checkout entry or `/payments/portone/complete`, it inspects the
+destination session. When that session is still on a foreign gateway page, it
+creates the destination controller, waits until that exact controller is attached,
+clears only the abandoned gateway's website data, and cold-boots the merchant URL.
+It rechecks controller/session identity after the asynchronous cleanup.
 
-On a main-frame navigation to a **checkout entry point** (`/orders/new`,
-`*/payment_summary`, `*/purchase` — deliberately *not* `/orders/:id` or the
-payment-complete return) while the destination session's web view is parked
-**off-origin**:
+`PaymentGatewayPresentation` restores and dismisses the gateway sheet before
+routing a return. It leaves checkout/completion recovery to `CheckoutVisitRecovery`
+and cold-boots other merchant return pages when closing a direct event-page
+checkout. Neither path reloads the gateway URL. The completion web-policy handler
+allows the resulting merchant request through instead of intercepting it again.
 
-1. **Clear website data for the stuck gateway's registrable domain only**
-   (cookies/storage/cache for e.g. `inicis.com`; nurio.kr untouched) →
-   neutralizes constraint 4.
-2. `navigator.route(url)` as normal.
-3. **Force a cold boot of the *newly created* checkout visitable**:
-   `session.visit(newVisitable, options: .replace, reload: true)` on the selected
-   main or modal session.
-   This loads only the checkout URL — never the gateway URL — sidestepping
-   constraints 2 and 3.
+Outbound gateway POSTs are always allowed unchanged. Cookie cleanup occurs only
+when abandoning/recovering the old gateway, never when presenting its live view.
 
-The outbound gateway POST is never matched (it is off-origin), so constraint 1
-is satisfied by construction.
+### Gateway sheet lifecycle
+
+The sheet moves the existing `VisitableView` and leaves a snapshot under it.
+While it owns the view, the source controller's lifecycle delegate is suspended
+so an adaptive full-screen presentation cannot make Hotwire detach the live
+payment web view. Dismissal restores the view and delegate before navigation.
+Pull-to-refresh and interactive swipe-to-dismiss are disabled during payment.
+The Close button returns to the original merchant page through a cold boot when
+needed; it never retries a provider POST. Selection pages remain full screen.
+
+The fixture test submits a POST into a real WKWebView, moves it into and out of
+the gateway controller, and verifies one navigation and retained JavaScript
+state. Physical KakaoPay/Naver Pay completion still requires device testing.
 
 ## Server-side counterparts (nurio Rails repo)
 

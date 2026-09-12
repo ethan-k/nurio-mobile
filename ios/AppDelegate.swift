@@ -105,6 +105,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         // external payment gateway. Ours runs first; the rest are the framework
         // defaults, preserved because registering replaces the whole chain.
         Hotwire.registerWebViewPolicyDecisionHandlers([
+            PaymentGatewayWebViewPolicyDecisionHandler(),
             CheckoutColdBootWebViewPolicyDecisionHandler(),
             ReloadWebViewPolicyDecisionHandler(),
             NewWindowWebViewPolicyDecisionHandler(),

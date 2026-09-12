@@ -59,7 +59,9 @@
     },
     {
       "patterns": [
-        "^/orders/new(?:\\?.*)?$"
+        "^/orders/new(?:\\?.*)?$",
+        "^/orders/[^/]+/payment_summary(?:\\?.*)?$",
+        "^/pass_packages/[^/]+/(?:purchase|payment_summary)(?:\\?.*)?$"
       ],
       "properties": {
         "context": "default",

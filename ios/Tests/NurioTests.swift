@@ -98,7 +98,7 @@ final class NurioTests: XCTestCase {
         }
     }
 
-    func testTicketCheckoutUsesMainStackAndPreservesOtherCheckoutModals() throws {
+    func testCheckoutSelectionUsesMainStackAndPreservesOtherModals() throws {
         let configurationURL = try XCTUnwrap(
             Bundle(for: AppDelegate.self).url(forResource: AppEnvironment.pathConfigurationResourceName, withExtension: "json")
         )
@@ -110,9 +110,9 @@ final class NurioTests: XCTestCase {
             ("/orders/new", "default"),
             ("/orders/new?event_id=34&lang=en&quantity=1&ticket_offer_id=4&step=tickets", "default"),
             ("/orders/new?event_id=34&lang=ko", "default"),
-            ("/orders/42/payment_summary?lang=en", "modal"),
-            ("/pass_packages/4/purchase?lang=en", "modal"),
-            ("/pass_packages/4/payment_summary", "modal"),
+            ("/orders/42/payment_summary?lang=en", "default"),
+            ("/pass_packages/4/purchase?lang=en", "default"),
+            ("/pass_packages/4/payment_summary", "default"),
             ("/events/34/reviews/new", "modal")
         ]
 
@@ -142,7 +142,7 @@ final class NurioTests: XCTestCase {
 
         for path in [ "/orders/42/payment_summary", "/pass_packages/4/purchase", "/pass_packages/4/payment_summary" ] {
             let url = baseURL.appendingPathComponent(path)
-            XCTAssertFalse(CheckoutNavigation.usesMainSession(url))
+            XCTAssertTrue(CheckoutNavigation.usesMainSession(url))
             XCTAssertTrue(CheckoutNavigation.isCheckoutEntry(url, baseURL: baseURL))
         }
         for destination in [
@@ -179,9 +179,23 @@ final class NurioTests: XCTestCase {
             AppRouteCoordinator.destinationURL(
                 for: URL(string: "https://nurio.kr/admin/events")!,
                 baseURL: baseURL
-            ).absoluteString,
+            )?.absoluteString,
             "https://nurio.kr/events"
         )
+    }
+
+    func testAppResumeAndUnknownOwnSchemeURLsNeverRouteBackToTheSystem() {
+        for rawURL in ["nurio://", "nurio:///", "nurio:", "nurio://unknown", "nurio://auth-callback?token=incomplete"] {
+            XCTAssertNil(AppRouteCoordinator.destinationURL(for: URL(string: rawURL)!, baseURL: AppEnvironment.baseURL))
+        }
+    }
+
+    func testPaymentResultStillRoutesToServerVerification() {
+        let url = URL(string: "nurio://payment-complete?paymentId=test-payment")!
+        let destination = AppRouteCoordinator.destinationURL(for: url, baseURL: AppEnvironment.baseURL)
+        XCTAssertEqual(destination?.path, "/payments/portone/complete")
+        XCTAssertEqual(destination?.host, AppEnvironment.baseURL.host)
+        XCTAssertEqual(URLComponents(url: destination!, resolvingAgainstBaseURL: false)?.queryItems?.first?.value, "test-payment")
     }
 
     func testInvalidNativeCallbackReturnsNil() {

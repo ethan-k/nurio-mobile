@@ -24,10 +24,11 @@ final class AppRouteCoordinator {
             }
         }
 
-        route(Self.destinationURL(for: url, baseURL: AppEnvironment.baseURL))
+        guard let destination = Self.destinationURL(for: url, baseURL: AppEnvironment.baseURL) else { return }
+        route(destination)
     }
 
-    nonisolated static func destinationURL(for url: URL, baseURL: URL) -> URL {
+    nonisolated static func destinationURL(for url: URL, baseURL: URL) -> URL? {
         if NativeAppOpenURL.isAppOpenURL(url) {
             return NativeAppOpenURL.webURL(from: url, baseURL: baseURL) ?? AppEnvironment.eventsURL(for: baseURL)
         }
@@ -48,6 +49,10 @@ final class AppRouteCoordinator {
             return AppEnvironment.eventsURL(for: baseURL)
         }
 
+        // Payment apps use the bare app scheme to resume the existing gateway.
+        // Sending it back to the system navigator opens Nurio again in a loop.
+        // Unknown/malformed URLs for our own scheme must never be re-opened either.
+        guard url.scheme?.lowercased() != AppEnvironment.callbackScheme else { return nil }
         return url
     }
 
@@ -56,7 +61,11 @@ final class AppRouteCoordinator {
             authLogger.error("AppRouteCoordinator missing navigation handler")
             return
         }
-        navigationHandler.route(url)
+        if let navigator = navigationHandler as? Navigator {
+            PaymentGatewayPresentation.shared.routeAppReturn(url, navigator: navigator)
+        } else {
+            navigationHandler.route(url)
+        }
     }
 }
 

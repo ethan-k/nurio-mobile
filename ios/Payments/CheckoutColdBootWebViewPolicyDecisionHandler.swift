@@ -130,10 +130,10 @@ enum CheckoutNavigation {
         return (url.port ?? defaultPort) == (baseURL.port ?? defaultPort)
     }
 
-    // Ticket selection lives on the main stack; payment summaries and pass
-    // purchases retain their existing modal sessions.
+    // Merchant selection/confirmation stays full screen. Only the live gateway
+    // view is presented as a modal, without changing its Hotwire session.
     static func usesMainSession(_ url: URL) -> Bool {
-        url.path == "/orders/new"
+        url.path == "/orders/new" || url.path.hasSuffix("/payment_summary") || url.path.hasSuffix("/purchase")
     }
 
     static func isCheckoutEntry(_ url: URL, baseURL: URL) -> Bool {

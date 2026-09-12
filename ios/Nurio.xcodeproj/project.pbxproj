@@ -45,6 +45,8 @@
 		D40000000000000000000001 /* KeyboardInsetsComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40000000000000000000031 /* KeyboardInsetsComponent.swift */; };
 		F50000000000000000000001 /* NativeImageCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = F50000000000000000000031 /* NativeImageCache.swift */; };
 		F40000000000000000000001 /* NativeImageCacheTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F40000000000000000000031 /* NativeImageCacheTests.swift */; };
+		F70000000000000000000001 /* PaymentGatewayPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = F70000000000000000000031 /* PaymentGatewayPresentation.swift */; };
+		F70000000000000000000002 /* PaymentGatewayPresentationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F70000000000000000000032 /* PaymentGatewayPresentationTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -97,6 +99,8 @@
 		F60000000000000000000032 /* ProductionDebug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = ProductionDebug.xcconfig; sourceTree = "<group>"; };
 		F60000000000000000000033 /* Local.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Local.xcconfig; sourceTree = "<group>"; };
 		F60000000000000000000034 /* LocalOverrides.xcconfig.example */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = LocalOverrides.xcconfig.example; sourceTree = "<group>"; };
+		F70000000000000000000031 /* PaymentGatewayPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentGatewayPresentation.swift; sourceTree = "<group>"; };
+		F70000000000000000000032 /* PaymentGatewayPresentationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentGatewayPresentationTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -206,6 +210,7 @@
 			isa = PBXGroup;
 			children = (
 				A00000000000000000000041 /* NurioTests.swift */,
+				F70000000000000000000032 /* PaymentGatewayPresentationTests.swift */,
 				F40000000000000000000031 /* NativeImageCacheTests.swift */,
 				F10000000000000000000031 /* NativeLocaleBootstrapTests.swift */,
 				F20000000000000000000031 /* SceneStartupCoordinatorTests.swift */,
@@ -217,6 +222,7 @@
 			isa = PBXGroup;
 			children = (
 				B000000000000000000000033 /* CheckoutColdBootWebViewPolicyDecisionHandler.swift */,
+				F70000000000000000000031 /* PaymentGatewayPresentation.swift */,
 				F30000000000000000000031 /* PaymentCrashContext.swift */,
 			);
 			path = Payments;
@@ -393,6 +399,7 @@
 				B000000000000000000000001 /* NativePushTokenStore.swift in Sources */,
 				B000000000000000000000002 /* RegisterDeviceTokenComponent.swift in Sources */,
 				B000000000000000000000003 /* CheckoutColdBootWebViewPolicyDecisionHandler.swift in Sources */,
+				F70000000000000000000001 /* PaymentGatewayPresentation.swift in Sources */,
 				F10000000000000000000002 /* NativeLocaleBootstrap.swift in Sources */,
 				F30000000000000000000001 /* PaymentCrashContext.swift in Sources */,
 				F30000000000000000000002 /* PaymentTelemetryComponent.swift in Sources */,
@@ -405,6 +412,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A00000000000000000000010 /* NurioTests.swift in Sources */,
+				F70000000000000000000002 /* PaymentGatewayPresentationTests.swift in Sources */,
 				F40000000000000000000001 /* NativeImageCacheTests.swift in Sources */,
 				F10000000000000000000001 /* NativeLocaleBootstrapTests.swift in Sources */,
 				F20000000000000000000001 /* SceneStartupCoordinatorTests.swift in Sources */,

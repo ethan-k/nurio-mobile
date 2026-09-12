@@ -131,7 +131,7 @@ extension SceneController: NavigatorDelegate {
                 currentURL: visitable.currentVisitableURL,
                 baseURL: AppEnvironment.baseURL
             )
-            RequestErrorPresentation.present(error, on: errorPresenter, retryHandler: safeRetryHandler)
+            RequestErrorPresentation.present(error, on: PaymentGatewayPresentation.shared.errorController(for: visitable) ?? errorPresenter, retryHandler: safeRetryHandler)
             return
         }
 
