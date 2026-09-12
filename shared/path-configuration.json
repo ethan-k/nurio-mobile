@@ -49,7 +49,6 @@
     },
     {
       "patterns": [
-        "/orders/new.*",
         "/orders/.*/payment_summary.*",
         "/pass_packages/.*/purchase.*",
         "/pass_packages/.*/payment_summary.*"
@@ -95,6 +94,16 @@
         "context": "default",
         "uri": "hotwire://fragment/web",
         "pull_to_refresh_enabled": false
+      }
+    },
+    {
+      "patterns": [
+        "^/orders/new(?:\\?.*)?$"
+      ],
+      "properties": {
+        "context": "default",
+        "pull_to_refresh_enabled": false,
+        "uri": "hotwire://fragment/web"
       }
     }
   ]

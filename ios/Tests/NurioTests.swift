@@ -60,6 +60,64 @@ final class NurioTests: XCTestCase {
         }
     }
 
+    func testTicketCheckoutUsesMainStackAndPreservesOtherCheckoutModals() throws {
+        let configurationURL = try XCTUnwrap(
+            Bundle(for: AppDelegate.self).url(forResource: AppEnvironment.pathConfigurationResourceName, withExtension: "json")
+        )
+        let configuration = try XCTUnwrap(
+            JSONSerialization.jsonObject(with: Data(contentsOf: configurationURL)) as? [String: Any]
+        )
+        let rules = try XCTUnwrap(configuration["rules"] as? [[String: Any]])
+        let destinations = [
+            ("/orders/new", "default"),
+            ("/orders/new?event_id=34&lang=en&quantity=1&ticket_offer_id=4&step=tickets", "default"),
+            ("/orders/new?event_id=34&lang=ko", "default"),
+            ("/orders/42/payment_summary?lang=en", "modal"),
+            ("/pass_packages/4/purchase?lang=en", "modal"),
+            ("/pass_packages/4/payment_summary", "modal"),
+            ("/events/34/reviews/new", "modal")
+        ]
+
+        for (path, expectedContext) in destinations {
+            var properties: [String: Any] = [:]
+            for rule in rules {
+                let patterns = try XCTUnwrap(rule["patterns"] as? [String])
+                if try patterns.contains(where: { pattern in
+                    let regex = try NSRegularExpression(pattern: pattern)
+                    return regex.firstMatch(in: path, range: NSRange(path.startIndex..., in: path)) != nil
+                }) {
+                    properties.merge(try XCTUnwrap(rule["properties"] as? [String: Any])) { _, new in new }
+                }
+            }
+            XCTAssertEqual(properties["context"] as? String, expectedContext, path)
+            if path.hasPrefix("/orders/new") {
+                XCTAssertEqual(properties["pull_to_refresh_enabled"] as? Bool, false, path)
+            }
+        }
+    }
+
+    func testCheckoutRetrySelectsTicketDestinationSessionWithoutMatchingGatewayNavigation() {
+        let baseURL = URL(string: "https://nurio.kr")!
+        let ticketURL = URL(string: "https://nurio.kr/orders/new?event_id=34&step=tickets")!
+        XCTAssertTrue(CheckoutNavigation.usesMainSession(ticketURL))
+        XCTAssertTrue(CheckoutNavigation.isCheckoutEntry(ticketURL, baseURL: baseURL))
+
+        for path in [ "/orders/42/payment_summary", "/pass_packages/4/purchase", "/pass_packages/4/payment_summary" ] {
+            let url = baseURL.appendingPathComponent(path)
+            XCTAssertFalse(CheckoutNavigation.usesMainSession(url))
+            XCTAssertTrue(CheckoutNavigation.isCheckoutEntry(url, baseURL: baseURL))
+        }
+        for destination in [
+            "https://mobile.inicis.com/orders/new",
+            "https://ksmobile.inicis.com/payment_summary",
+            "https://nurio.kr/orders/42",
+            "https://nurio.kr/orders/newer",
+            "https://nurio.kr/payments/portone/complete?paymentId=123"
+        ] {
+            XCTAssertFalse(CheckoutNavigation.isCheckoutEntry(URL(string: destination)!, baseURL: baseURL))
+        }
+    }
+
     func testSignInURLUsesExistingAuthLoginRoute() {
         XCTAssertEqual(
             AppEnvironment.signInURL.absoluteString,

@@ -6,12 +6,13 @@ touching anything** in `ios/Payments/` or the checkout navigation.
 
 ## How a payment flows
 
-1. The checkout page (`/orders/new` or `*/payment_summary`) is a normal Turbo
-   page in the **modal session's web view** (path configuration routes checkout
-   to the modal context).
+1. Ticket selection (`/orders/new`, including query parameters) is a normal
+   Turbo page in the **main session's web view**. Payment-summary and pass-purchase
+   pages keep the **modal session's web view**. Checkout retry recovery selects
+   the same destination session as the path configuration.
 2. Tapping **pay by card** runs the PortOne browser SDK, which submits a
    **form POST** to KG Inicis (`mobile.inicis.com` → `ksmobile.inicis.com`)
-   *inside the same modal web view*. The init parameters (`P_INIT_PAYMENT`)
+   *inside the same checkout web view*. The init parameters (`P_INIT_PAYMENT`)
    travel in the POST body.
 3. The Inicis flow may bounce out to card/bank apps via custom URL schemes and
    back.
@@ -37,9 +38,9 @@ GET**, which Inicis rejects:
 A "host the PG in its own native modal" architecture is therefore **impossible
 for this gateway**. It was built and reverted (`01fda92` … reverted in `f9d657d`).
 
-### 2. Never `reload()` / `markContentAsStale()` while the modal visitable is on the gateway
+### 2. Never `reload()` / `markContentAsStale()` while the checkout visitable is on the gateway
 
-After step 2 above, the modal screen's *visitable URL becomes the Inicis URL*.
+After step 2 above, the checkout screen's *visitable URL becomes the Inicis URL*.
 `Session.reload()` (which `markContentAsStale()` triggers on next appear)
 re-visits the **topmost visitable** — i.e. cold-boots the Inicis URL as a GET →
 constraint 1 fires → PortOne relays `FAILURE_TYPE_PG` → the server marks the
@@ -70,7 +71,7 @@ the framework defaults are re-listed after it).
 
 On a main-frame navigation to a **checkout entry point** (`/orders/new`,
 `*/payment_summary`, `*/purchase` — deliberately *not* `/orders/:id` or the
-payment-complete return) while the modal session's web view is parked
+payment-complete return) while the destination session's web view is parked
 **off-origin**:
 
 1. **Clear website data for the stuck gateway's registrable domain only**
@@ -78,7 +79,8 @@ payment-complete return) while the modal session's web view is parked
    neutralizes constraint 4.
 2. `navigator.route(url)` as normal.
 3. **Force a cold boot of the *newly created* checkout visitable**:
-   `modalSession.visit(newVisitable, options: .replace, reload: true)`.
+   `session.visit(newVisitable, options: .replace, reload: true)` on the selected
+   main or modal session.
    This loads only the checkout URL — never the gateway URL — sidestepping
    constraints 2 and 3.
 

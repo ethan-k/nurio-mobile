@@ -48,7 +48,6 @@
     },
     {
       "patterns": [
-        "/orders/new.*",
         "/orders/.*/payment_summary.*",
         "/pass_packages/.*/purchase.*",
         "/pass_packages/.*/payment_summary.*"
@@ -102,6 +101,16 @@
       ],
       "properties": {
         "presentation": "replace"
+      }
+    },
+    {
+      "patterns": [
+        "^/orders/new(?:\\?.*)?$"
+      ],
+      "properties": {
+        "context": "default",
+        "pull_to_refresh_enabled": false,
+        "uri": "hotwire://fragment/web"
       }
     }
   ]
