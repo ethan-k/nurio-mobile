@@ -36,7 +36,7 @@ Study Leader app entry point:
 
 The top-level `ios/` project is a standalone Hotwire Native shell.
 
-- Start URL: `https://nurio.kr/events`
+- Start URL: the configured server root (production: `https://nurio.kr/`)
 - OAuth callback: `nurio://auth-callback`
 - Path configuration source: `shared/configurations/ios_v1.json`
 - Customer scope is explicit: admin and tutor URLs are not handled in-app
@@ -50,11 +50,11 @@ xcodebuild -project ios/Nurio.xcodeproj -scheme Nurio -destination 'platform=iOS
 xcodebuild -project ios/Nurio.xcodeproj -scheme Nurio -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.2' test
 ```
 
-Optional base URL override at runtime:
-
-```bash
-NURIO_BASE_URL=https://nurio.kr xcodebuild -project ios/Nurio.xcodeproj -scheme Nurio -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.2' build
-```
+For server selection, choose `Nurio Local`, `Nurio Production Debug`, or `Nurio Release`
+in Xcode. URLs live in `ios/Config/*.xcconfig` and are embedded into the app's
+Info.plist. The original `Nurio` scheme still uses production Debug for Run/Test.
+See [iOS server configuration](ios/README.md#server-configurations-and-xcode-schemes)
+for local iPhone setup and temporary launch overrides.
 
 Archive for release after signing is configured:
 

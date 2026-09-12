@@ -1,22 +1,39 @@
 import Foundation
 
 enum AppEnvironment {
-    private static let defaultBaseURL = URL(string: "https://nurio.kr")!
-
     static let callbackScheme = "nurio"
     static let pathConfigurationResourceName = "ios_v1"
 
     static var baseURL: URL {
-        guard
-            let override = ProcessInfo.processInfo.environment["NURIO_BASE_URL"],
-            let overrideURL = URL(string: override),
-            overrideURL.scheme != nil,
-            overrideURL.host != nil
-        else {
-            return defaultBaseURL
+        guard let url = resolveBaseURL(
+            configuredValue: Bundle.main.object(forInfoDictionaryKey: "NurioBaseURL") as? String,
+            overrideValue: ProcessInfo.processInfo.environment["NURIO_BASE_URL"]
+        ) else {
+            preconditionFailure("NurioBaseURL must contain a valid HTTP(S) server URL. Check the selected build configuration.")
         }
+        return url
+    }
 
-        return overrideURL
+    static func resolveBaseURL(configuredValue: String?, overrideValue: String?) -> URL? {
+#if DEBUG
+        if let overrideURL = validatedBaseURL(overrideValue) {
+            return overrideURL
+        }
+#endif
+        return validatedBaseURL(configuredValue)
+    }
+
+    private static func validatedBaseURL(_ value: String?) -> URL? {
+        guard let value,
+              let url = URL(string: value),
+              let scheme = url.scheme?.lowercased(),
+              ["http", "https"].contains(scheme),
+              let host = url.host, !host.isEmpty,
+              url.user == nil, url.password == nil,
+              url.query == nil, url.fragment == nil else {
+            return nil
+        }
+        return url
     }
 
     static var coldStartURL: URL {

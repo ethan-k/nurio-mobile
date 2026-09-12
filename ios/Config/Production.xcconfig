@@ -1,0 +1,4 @@
+// $() prevents the URL's double slash from being parsed as a comment.
+NURIO_BASE_URL = https:/$()/nurio.kr
+INFOPLIST_PREPROCESS = YES
+INFOPLIST_PREPROCESSOR_DEFINITIONS = NURIO_LOCAL_BUILD=0

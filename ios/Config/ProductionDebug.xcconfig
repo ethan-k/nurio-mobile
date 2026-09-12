@@ -1,0 +1,2 @@
+// Production server with the project's Debug compiler and signing settings.
+#include "Production.xcconfig"

@@ -53,3 +53,6 @@ Thumbs.db
 # Keep repository-level guidance documents tracked.
 !AGENTS.md
 !CLAUDE.md
+
+# Personal customer iOS local server override
+/ios/Config/LocalOverrides.xcconfig

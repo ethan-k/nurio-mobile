@@ -1,0 +1,6 @@
+// localhost reaches the Mac from Simulator, but the iPhone itself on a device.
+// For a physical device, copy LocalOverrides.xcconfig.example and set your Mac's LAN host.
+NURIO_BASE_URL = http:/$()/localhost:3000
+INFOPLIST_PREPROCESS = YES
+INFOPLIST_PREPROCESSOR_DEFINITIONS = NURIO_LOCAL_BUILD=1
+#include? "LocalOverrides.xcconfig"

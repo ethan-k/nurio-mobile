@@ -5,6 +5,41 @@ import SwiftUI
 @testable import Nurio
 
 final class NurioTests: XCTestCase {
+    func testAppBundleEmbedsConfiguredServerURL() throws {
+        let value = try XCTUnwrap(Bundle(for: AppDelegate.self).object(forInfoDictionaryKey: "NurioBaseURL") as? String)
+        XCTAssertNotNil(AppEnvironment.resolveBaseURL(configuredValue: value, overrideValue: nil))
+        XCTAssertFalse(value.contains("$("))
+    }
+
+    func testConfiguredServerIsUsedWithoutLaunchOverride() {
+        XCTAssertEqual(
+            AppEnvironment.resolveBaseURL(configuredValue: "http://localhost:3000", overrideValue: nil)?.absoluteString,
+            "http://localhost:3000"
+        )
+    }
+
+    func testInvalidServerConfigurationIsRejected() {
+        for value in [nil, "", "$(NURIO_BASE_URL)", "/events", "ftp://nurio.kr", "https://user:pass@nurio.kr", "https://nurio.kr?token=value"] {
+            XCTAssertNil(AppEnvironment.resolveBaseURL(configuredValue: value, overrideValue: nil))
+        }
+    }
+
+    func testInvalidLaunchOverrideFallsBackToConfiguredServer() {
+        XCTAssertEqual(
+            AppEnvironment.resolveBaseURL(configuredValue: "https://nurio.kr", overrideValue: "file:///tmp/local")?.absoluteString,
+            "https://nurio.kr"
+        )
+    }
+
+    func testLaunchOverrideOnlyAppliesInDebugBuilds() {
+        let url = AppEnvironment.resolveBaseURL(configuredValue: "https://nurio.kr", overrideValue: "http://localhost:3000")
+#if DEBUG
+        XCTAssertEqual(url?.absoluteString, "http://localhost:3000")
+#else
+        XCTAssertEqual(url?.absoluteString, "https://nurio.kr")
+#endif
+    }
+
     func testAppBundleDeclaresMediaPrivacyUsageDescriptions() {
         let appBundle = Bundle(for: AppDelegate.self)
 
@@ -124,7 +159,7 @@ final class NurioTests: XCTestCase {
     func testSignInURLUsesExistingAuthLoginRoute() {
         XCTAssertEqual(
             AppEnvironment.signInURL.absoluteString,
-            "https://nurio.kr/auth/login"
+            AppEnvironment.baseURL.appendingPathComponent("auth/login").absoluteString
         )
     }
 
@@ -429,7 +464,7 @@ final class NurioTests: XCTestCase {
             offeredRetry = handler
             return TestRequestErrorView(error: error, handler: handler)
         }
-        let visitable = VisitableViewController(url: testCheckoutURL)
+        let visitable = VisitableViewController(url: AppEnvironment.baseURL.appendingPathComponent("orders/42/payment_summary"))
         let delegate: any NavigatorDelegate = SceneController()
         var retries = 0
 
@@ -447,19 +482,20 @@ final class NurioTests: XCTestCase {
 
     @MainActor
     func testRouteHandlersUseTheNewProposalAPIAndPreserveScope() {
-        let configuration = Navigator.Configuration(name: "test", startLocation: testBaseURL)
+        let baseURL = AppEnvironment.baseURL
+        let configuration = Navigator.Configuration(name: "test", startLocation: baseURL)
         let customerHandler: any RouteDecisionHandler = CustomerScopeRouteDecisionHandler()
         let oauthHandler: any RouteDecisionHandler = OAuthRouteDecisionHandler()
-        for (rawURL, blocked, oauth) in [
-            ("https://nurio.kr/admin/events", true, false),
-            ("https://nurio.kr/tutoring/sessions", true, false),
-            ("https://nurio.kr/events/42", false, false),
-            ("https://nurio.kr/auth/apple", false, true),
-            ("https://nurio.kr/auth/kakao", false, true),
-            ("https://nurio.kr/auth/google_oauth2", false, true),
-            ("https://example.com/auth/apple", false, false),
+        for (url, blocked, oauth) in [
+            (baseURL.appendingPathComponent("admin/events"), true, false),
+            (baseURL.appendingPathComponent("tutoring/sessions"), true, false),
+            (baseURL.appendingPathComponent("events/42"), false, false),
+            (baseURL.appendingPathComponent("auth/apple"), false, true),
+            (baseURL.appendingPathComponent("auth/kakao"), false, true),
+            (baseURL.appendingPathComponent("auth/google_oauth2"), false, true),
+            (URL(string: "https://example.com/auth/apple")!, false, false),
         ] {
-            let proposal = VisitProposal(url: URL(string: rawURL)!, options: VisitOptions())
+            let proposal = VisitProposal(url: url, options: VisitOptions())
             XCTAssertEqual(customerHandler.matches(proposal: proposal, configuration: configuration), blocked)
             XCTAssertEqual(oauthHandler.matches(proposal: proposal, configuration: configuration), oauth)
         }
@@ -478,10 +514,11 @@ final class NurioTests: XCTestCase {
     }
 
     func testScopePolicyBlocksAdminAndTutorPaths() {
-        XCTAssertTrue(CustomerScopePolicy.isBlocked(URL(string: "https://nurio.kr/admin/events")!))
-        XCTAssertTrue(CustomerScopePolicy.isBlocked(URL(string: "https://nurio.kr/tutoring/sessions")!))
+        let baseURL = AppEnvironment.baseURL
+        XCTAssertTrue(CustomerScopePolicy.isBlocked(baseURL.appendingPathComponent("admin/events")))
+        XCTAssertTrue(CustomerScopePolicy.isBlocked(baseURL.appendingPathComponent("tutoring/sessions")))
         XCTAssertTrue(CustomerScopePolicy.isBlocked(URL(string: "https://tutors.nurio.kr/events")!))
-        XCTAssertFalse(CustomerScopePolicy.isBlocked(URL(string: "https://nurio.kr/events/42")!))
+        XCTAssertFalse(CustomerScopePolicy.isBlocked(baseURL.appendingPathComponent("events/42")))
     }
 
     func testNativeAppOpenURLRoutesToRequestedCustomerPage() {
