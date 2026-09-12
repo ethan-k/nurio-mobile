@@ -1,6 +1,43 @@
 import CryptoKit
 import FirebaseCrashlytics
 import Foundation
+import HotwireNative
+import WebKit
+
+/// Deliberately excludes raw NSError domains, messages, userInfo, and URLs.
+struct PaymentNativeRequestFailure {
+    let kind: String
+    let code: Int
+    let shouldReport: Bool
+
+    init(error: Error) {
+        if let error = error as? TurboError {
+            switch error {
+            case .networkFailure:
+                (kind, code, shouldReport) = ("network", 0, true)
+            case .timeoutFailure:
+                (kind, code, shouldReport) = ("timeout", -1, true)
+            case .contentTypeMismatch:
+                (kind, code, shouldReport) = ("content_type", -2, true)
+            case .pageLoadFailure:
+                (kind, code, shouldReport) = ("turbo_missing", 0, true)
+            case .http(let statusCode):
+                (kind, code, shouldReport) = ("http", statusCode, !(400..<500).contains(statusCode))
+            }
+            return
+        }
+
+        let error = error as NSError
+        switch error.domain {
+        case NSURLErrorDomain:
+            (kind, code, shouldReport) = ("url_loading", error.code, error.code != NSURLErrorCancelled)
+        case WKError.errorDomain:
+            (kind, code, shouldReport) = ("webkit", error.code, true)
+        default:
+            (kind, code, shouldReport) = ("unknown", 0, true)
+        }
+    }
+}
 
 protocol PaymentCrashReporting {
     func setCustomValue(_ value: Any, forKey key: String) throws
@@ -160,9 +197,22 @@ final class PaymentCrashContext {
         safeRecord(failure)
     }
 
-    func reportNativeRequestFailure() {
+    func reportNativeRequestFailure(_ error: Error, currentURL: URL, baseURL: URL) {
         guard isActive else { return }
-        reportTechnicalFailure(.nativeRequest)
+        let requestFailure = PaymentNativeRequestFailure(error: error)
+        guard requestFailure.shouldReport else {
+            safeLog("payment_request_ignored:\(requestFailure.kind):\(requestFailure.code)")
+            return
+        }
+
+        failureKind = .nativeRequest
+        applyKeys()
+        safeLog("payment_failure:native_request")
+        safeRecord(.nativeRequest, details: [
+            "native_request_kind": requestFailure.kind,
+            "native_request_code": requestFailure.code,
+            "native_request_page": CheckoutNavigation.isSafeReloadURL(currentURL, baseURL: baseURL) ? "app" : "external",
+        ])
     }
 
     func hashReference(_ value: String) -> String {
@@ -190,11 +240,13 @@ final class PaymentCrashContext {
         bestEffort { try reporter.log(message) }
     }
 
-    private func safeRecord(_ failure: PaymentFailureKind) {
+    private func safeRecord(_ failure: PaymentFailureKind, details: [String: Any] = [:]) {
+        var userInfo = details
+        userInfo[NSLocalizedDescriptionKey] = "payment_failure:\(failure.rawValue)"
         let error = NSError(
             domain: "com.nurio.payment",
             code: failure.code,
-            userInfo: [NSLocalizedDescriptionKey: "payment_failure:\(failure.rawValue)"]
+            userInfo: userInfo
         )
         bestEffort { try reporter.record(error: error) }
     }
@@ -283,7 +335,7 @@ enum PaymentCrashTelemetry {
         context?.reportTechnicalFailure(failure)
     }
 
-    static func reportNativeRequestFailure() {
-        context?.reportNativeRequestFailure()
+    static func reportNativeRequestFailure(_ error: Error, currentURL: URL) {
+        context?.reportNativeRequestFailure(error, currentURL: currentURL, baseURL: AppEnvironment.baseURL)
     }
 }

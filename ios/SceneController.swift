@@ -118,12 +118,16 @@ extension SceneController: NavigatorDelegate {
             return
         }
 
-        PaymentCrashTelemetry.reportNativeRequestFailure()
+        PaymentCrashTelemetry.reportNativeRequestFailure(error, currentURL: visitable.currentVisitableURL)
 
         if let errorPresenter = visitable as? ErrorPresenter {
-            errorPresenter.presentError(error) {
-                retryHandler?()
-            }
+            let safeRetryHandler = CheckoutNavigation.safeRetryHandler(
+                retryHandler,
+                initialURL: visitable.initialVisitableURL,
+                currentURL: visitable.currentVisitableURL,
+                baseURL: AppEnvironment.baseURL
+            )
+            errorPresenter.presentError(error, retryHandler: safeRetryHandler)
             return
         }
 

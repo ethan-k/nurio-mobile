@@ -50,6 +50,41 @@ errors are not non-fatals. Technical categories use stable safe names such as
 `sdk_load`, `sdk_request`, `attempt_refresh`, `native_request`,
 `malformed_callback`, and `renderer_terminated`.
 
+Customer iOS request non-fatals include per-event `native_request_kind`,
+`native_request_code`, and `native_request_page` (`app` or `external`) in the
+sanitized NSError. These details distinguish missing Turbo (`turbo_missing`),
+network/timeout, content-type, HTTP, URL-loading, and WebKit failures without
+copying the original error, domain, message, or URL. Unknown errors use code 0.
+Request cancellation (`NSURLErrorCancelled`) and HTTP 4xx responses remain
+user-visible through the existing error UI but do not create payment technical
+non-fatals. Missing Turbo remains reportable on both app and external pages;
+the stack alone does not prove a gateway handoff succeeded.
+
+Customer iOS only offers Hotwire's reload-based Retry when both the original
+visit and current page are on the app origin (including its www alias). Gateway
+errors retain the error screen without a Retry button, avoiding a bodyless GET
+to an Inicis POST-only URL. A missing framework retry handler also stays nil.
+No automatic reload, payment replay, or provider-state change is introduced.
+
+### Android comparison
+
+Customer Android pins Hotwire Native 1.2.6. Its equivalent missing-runtime
+failures are `LoadError.NotPresent` and `LoadError.NotReady`. Both customer web
+fragments inherit the framework's error handling: `onVisitErrorReceived` shows
+the default error view, while failures with a cached snapshot retain that
+snapshot. Neither callback currently forwards request failures to payment
+Crashlytics; the `native_request` category exists but is not wired to these
+callbacks. An absence of Android payment non-fatals does not prove these page
+loads succeeded.
+
+The Android framework error view has no Retry button; it supports pull to
+refresh instead. That refresh cold-boots the fragment destination, and
+`CheckoutColdBootRouteDecisionHandler`
+resets the session when re-entering checkout from a foreign gateway page.
+Those protections cover checkout re-entry, not missing or broken Turbo assets
+on a Nurio page. Android provider-return recovery is a separate flow and does
+not establish that every page-load failure recovers successfully.
+
 ## Delivery proof
 
 A local build or test does not prove Firebase delivery. Before calling a release

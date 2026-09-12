@@ -96,6 +96,29 @@ enum PaymentGatewayData {
 
 /// Pure routing rules for checkout entry detection.
 enum CheckoutNavigation {
+    /// Hotwire's default retry calls Session.reload(), which must not reload a
+    /// gateway URL. Check both the original visit and its current destination.
+    static func safeRetryHandler(
+        _ retryHandler: (() -> Void)?,
+        initialURL: URL,
+        currentURL: URL,
+        baseURL: URL
+    ) -> (() -> Void)? {
+        guard isSafeReloadURL(initialURL, baseURL: baseURL),
+              isSafeReloadURL(currentURL, baseURL: baseURL) else { return nil }
+        return retryHandler
+    }
+
+    static func isSafeReloadURL(_ url: URL, baseURL: URL) -> Bool {
+        guard let scheme = url.scheme?.lowercased(),
+              scheme == "http" || scheme == "https",
+              scheme == baseURL.scheme?.lowercased(),
+              isOnOrigin(url, baseURL: baseURL) else { return false }
+
+        let defaultPort = scheme == "https" ? 443 : 80
+        return (url.port ?? defaultPort) == (baseURL.port ?? defaultPort)
+    }
+
     // Ticket selection lives on the main stack; payment summaries and pass
     // purchases retain their existing modal sessions.
     static func usesMainSession(_ url: URL) -> Bool {

@@ -1,4 +1,6 @@
 import XCTest
+import HotwireNative
+import WebKit
 @testable import Nurio
 
 final class NurioTests: XCTestCase {
@@ -243,6 +245,162 @@ final class NurioTests: XCTestCase {
         )
 
         XCTAssertTrue(context.isActive)
+    }
+
+    func testMissingTurboRequestIncludesSafeDiagnosticDetails() throws {
+        for (url, page) in [
+            ("https://nurio.kr/orders/42/payment_summary?paymentId=private-id", "app"),
+            ("https://ksmobile.inicis.com/payment?token=private-token", "external"),
+        ] {
+            let reporter = RecordingPaymentCrashReporter()
+            let context = activePaymentContext(reporter: reporter)
+
+            context.reportNativeRequestFailure(
+                TurboError.pageLoadFailure,
+                currentURL: URL(string: url)!,
+                baseURL: URL(string: "https://nurio.kr")!
+            )
+
+            let error = try XCTUnwrap(reporter.errors.first) as NSError
+            XCTAssertEqual(reporter.errors.count, 1)
+            XCTAssertEqual(error.domain, "com.nurio.payment")
+            XCTAssertEqual(error.code, PaymentFailureKind.nativeRequest.code)
+            XCTAssertEqual(error.userInfo["native_request_kind"] as? String, "turbo_missing")
+            XCTAssertEqual(error.userInfo["native_request_page"] as? String, page)
+            XCTAssertEqual(Set(error.userInfo.keys), [
+                NSLocalizedDescriptionKey, "native_request_kind", "native_request_code", "native_request_page",
+            ])
+            XCTAssertFalse(String(describing: error.userInfo).contains("private"))
+        }
+    }
+
+    func testRequestCancellationAndClientErrorsDoNotCreatePaymentNonfatals() {
+        let reporter = RecordingPaymentCrashReporter()
+        let context = activePaymentContext(reporter: reporter)
+        let errors: [Error] = [
+            URLError(.cancelled),
+            TurboError.http(statusCode: 401),
+            TurboError.http(statusCode: 403),
+            TurboError.http(statusCode: 404),
+            TurboError.http(statusCode: 409),
+            TurboError.http(statusCode: 422),
+            TurboError.http(statusCode: 429),
+        ]
+
+        for error in errors {
+            context.reportNativeRequestFailure(error, currentURL: testCheckoutURL, baseURL: testBaseURL)
+        }
+
+        XCTAssertTrue(reporter.errors.isEmpty)
+        XCTAssertEqual(reporter.values["payment_failure_kind"] as? String, "none")
+        XCTAssertTrue(context.isActive)
+    }
+
+    func testTechnicalRequestFailuresRemainReportableWithStableKindsAndCodes() throws {
+        let cases: [(Error, String, Int)] = [
+            (TurboError.networkFailure, "network", 0),
+            (TurboError.timeoutFailure, "timeout", -1),
+            (TurboError.contentTypeMismatch, "content_type", -2),
+            (TurboError.http(statusCode: 0), "http", 0),
+            (TurboError.http(statusCode: 500), "http", 500),
+            (TurboError.http(statusCode: 503), "http", 503),
+            (URLError(.notConnectedToInternet), "url_loading", NSURLErrorNotConnectedToInternet),
+            (URLError(.timedOut), "url_loading", NSURLErrorTimedOut),
+            (NSError(domain: WKError.errorDomain, code: WKError.Code.webContentProcessTerminated.rawValue), "webkit", 2),
+            (NSError(domain: "private-domain", code: -999, userInfo: [
+                NSLocalizedDescriptionKey: "private-token",
+                NSURLErrorFailingURLErrorKey: URL(string: "https://example.com/private-url")!,
+            ]), "unknown", 0),
+        ]
+
+        for (input, kind, code) in cases {
+            let reporter = RecordingPaymentCrashReporter()
+            let context = activePaymentContext(reporter: reporter)
+            context.reportNativeRequestFailure(input, currentURL: testCheckoutURL, baseURL: testBaseURL)
+
+            let error = try XCTUnwrap(reporter.errors.first) as NSError
+            XCTAssertEqual(reporter.errors.count, 1)
+            XCTAssertEqual(error.userInfo["native_request_kind"] as? String, kind)
+            XCTAssertEqual(error.userInfo["native_request_code"] as? Int, code)
+            XCTAssertFalse(String(describing: error.userInfo).contains("private"))
+        }
+    }
+
+    func testRequestDiagnosticsDoNotLeakIntoLaterPaymentFailures() throws {
+        let reporter = RecordingPaymentCrashReporter()
+        let context = activePaymentContext(reporter: reporter)
+        context.reportNativeRequestFailure(TurboError.pageLoadFailure, currentURL: testCheckoutURL, baseURL: testBaseURL)
+        context.reportTechnicalFailure(.sdkRequest)
+
+        let error = try XCTUnwrap(reporter.errors.last) as NSError
+        XCTAssertEqual(Set(error.userInfo.keys), [NSLocalizedDescriptionKey])
+        XCTAssertNil(reporter.values["native_request_kind"])
+
+        context.reset()
+        context.reportNativeRequestFailure(TurboError.pageLoadFailure, currentURL: testCheckoutURL, baseURL: testBaseURL)
+        XCTAssertEqual(reporter.errors.count, 2)
+    }
+
+    func testNativeRequestReporterFailureCannotEscape() {
+        let context = activePaymentContext(reporter: ThrowingPaymentCrashReporter())
+        context.reportNativeRequestFailure(TurboError.pageLoadFailure, currentURL: testCheckoutURL, baseURL: testBaseURL)
+        XCTAssertTrue(context.isActive)
+    }
+
+    func testAppRequestRetryRemainsUserTriggeredForTicketAndPassCheckout() {
+        var retries = 0
+        for path in ["/orders/new", "/orders/42/payment_summary", "/pass_packages/4/payment_summary", "/pass_packages/4/purchase", "/payments/portone/complete"] {
+            let url = testBaseURL.appendingPathComponent(path)
+            let previousRetries = retries
+            let retry = CheckoutNavigation.safeRetryHandler(
+                { retries += 1 }, initialURL: url, currentURL: url, baseURL: testBaseURL
+            )
+            XCTAssertNotNil(retry)
+            XCTAssertEqual(retries, previousRetries)
+            retry?()
+            XCTAssertEqual(retries, previousRetries + 1)
+        }
+    }
+
+    func testGatewayAndNonAppURLsNeverReceiveReloadRetry() {
+        var retries = 0
+        for rawURL in [
+            "https://mobile.inicis.com/smart/payment/", "https://ksmobile.inicis.com/payment",
+            "https://checkout-service.prod.iamport.co/", "https://example.com/",
+            "https://nurio.kr.example.com/", "https://nurio.kr:444/", "http://nurio.kr/",
+            "nurio://payment-complete", "about:blank",
+        ] {
+            let foreignURL = URL(string: rawURL)!
+            for (initialURL, currentURL) in [(testCheckoutURL, foreignURL), (foreignURL, testCheckoutURL)] {
+                let retry = CheckoutNavigation.safeRetryHandler(
+                    { retries += 1 }, initialURL: initialURL, currentURL: currentURL, baseURL: testBaseURL
+                )
+                XCTAssertNil(retry, rawURL)
+                retry?()
+            }
+        }
+        XCTAssertEqual(retries, 0)
+    }
+
+    func testAbsentRetryHandlerStaysAbsentAndAppOriginAliasesAreAccepted() {
+        XCTAssertNil(CheckoutNavigation.safeRetryHandler(
+            nil, initialURL: testCheckoutURL, currentURL: testCheckoutURL, baseURL: testBaseURL
+        ))
+        XCTAssertNotNil(CheckoutNavigation.safeRetryHandler(
+            {}, initialURL: testCheckoutURL, currentURL: URL(string: "https://www.nurio.kr:443/orders/new")!, baseURL: testBaseURL
+        ))
+    }
+
+    private var testBaseURL: URL { URL(string: "https://nurio.kr")! }
+    private var testCheckoutURL: URL { testBaseURL.appendingPathComponent("orders/42/payment_summary") }
+
+    private func activePaymentContext(reporter: PaymentCrashReporting) -> PaymentCrashContext {
+        let context = PaymentCrashContext(reporter: reporter, appSurface: "nurio")
+        context.track(
+            stage: "payment_requested", orderKind: "ticket", paymentReference: "payment-123",
+            handoff: "webview", failureKind: "none", reportNonfatal: false
+        )
+        return context
     }
 
     func testScopePolicyBlocksAdminAndTutorPaths() {
