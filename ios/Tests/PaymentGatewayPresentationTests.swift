@@ -34,7 +34,7 @@ final class PaymentGatewayPresentationTests: XCTestCase {
         }
         let delegate = SceneController()
         let navigator = Navigator(configuration: .init(name: "gateway-return-test", startLocation: AppEnvironment.baseURL), delegate: delegate)
-        views[0].reportedURL = URL(string: "https://ksmobile.inicis.com/payment")!
+        views[0].reportedURL = URL(string: "https://gateway.invalid/payment")!
         let destination = URL(string: "/payments/portone/complete?paymentId=fixture", relativeTo: AppEnvironment.baseURL)!.absoluteURL
         let loaded = expectation(description: "Merchant verification and its existing recovery")
         loaded.expectedFulfillmentCount = 2
@@ -52,6 +52,74 @@ final class PaymentGatewayPresentationTests: XCTestCase {
     }
 
     @MainActor
+    func testHotwireResultDismissesGatewayBeforeReplacingItsWebView() async throws {
+        try await assertResultDismissesGateway(nativeCallback: false)
+    }
+
+    @MainActor
+    func testPortOneWebViewCallbackDismissesGatewayAndLoadsServerVerification() async throws {
+        try await assertResultDismissesGateway(nativeCallback: true)
+    }
+
+    @MainActor
+    private func assertResultDismissesGateway(nativeCallback: Bool) async throws {
+        let originalFactory = Hotwire.config.makeCustomWebView
+        defer { Hotwire.config.makeCustomWebView = originalFactory }
+        var views: [GatewayRouteWebView] = []
+        Hotwire.config.makeCustomWebView = { configuration in
+            let view = GatewayRouteWebView(frame: .zero, configuration: configuration)
+            views.append(view)
+            return view
+        }
+        let delegate = SceneController()
+        let navigator = Navigator(configuration: .init(name: "sheet-result-test", startLocation: AppEnvironment.baseURL), delegate: delegate)
+        let window = UIWindow(frame: CGRect(x: 0, y: 0, width: 390, height: 844))
+        window.rootViewController = navigator.rootViewController
+        window.makeKeyAndVisible()
+        defer { window.isHidden = true }
+        let checkout = AppEnvironment.baseURL.appendingPathComponent("orders/123/payment_summary")
+        navigator.route(checkout)
+        let source = try XCTUnwrap(navigator.session.activeVisitable as? VisitableViewController)
+        views[0].reportedURL = URL(string: "https://gateway.invalid/payment")!
+        let presentation = PaymentGatewayPresentation.shared
+        presentation.presentGateway(navigator: navigator)
+        try await Task.sleep(nanoseconds: 600_000_000)
+        let sheet = try XCTUnwrap(presentation.gatewayController)
+        XCTAssertTrue(source.visitableView.superview === sheet.view)
+
+        // appScheme only resumes the pending gateway, it is not a payment result.
+        AppRouteCoordinator.shared.handleIncoming(URL(string: "nurio://")!)
+        XCTAssertTrue(presentation.gatewayController === sheet)
+        let loaded = expectation(description: "Server result loads after sheet dismissal")
+        let callback = URL(string: "nurio://payment-complete?paymentId=fixture")!
+        let result = nativeCallback ? NativePaymentCallback.completeURL(from: callback, baseURL: AppEnvironment.baseURL)! : AppEnvironment.baseURL.appendingPathComponent("tickets/123/confirmation")
+        loaded.expectedFulfillmentCount = 2
+        views[0].onLoad = { url in
+            guard url == result else { return }
+            XCTAssertNil(presentation.gatewayController)
+            XCTAssertNil(navigator.rootViewController.presentedViewController)
+            loaded.fulfill()
+        }
+        // A Turbo/redirect proposal bypasses AppRouteCoordinator. Previously this
+        // detached the source web view while leaving its now-empty sheet visible.
+        let originalHandler = AppRouteCoordinator.shared.navigationHandler
+        defer { AppRouteCoordinator.shared.navigationHandler = originalHandler }
+        if nativeCallback {
+            AppRouteCoordinator.shared.navigationHandler = navigator
+            let action = GatewayCallbackNavigationAction(url: callback)
+            let handler = PaymentGatewayWebViewPolicyDecisionHandler()
+            XCTAssertTrue(handler.matches(navigationAction: action, configuration: .init(name: "sheet-result-test", startLocation: AppEnvironment.baseURL)))
+            XCTAssertEqual(handler.handle(navigationAction: action, configuration: .init(name: "sheet-result-test", startLocation: AppEnvironment.baseURL), navigator: navigator), .cancel)
+        } else {
+            navigator.route(result)
+        }
+        await fulfillment(of: [loaded], timeout: 5)
+        XCTAssertNil(presentation.gatewayController)
+        XCTAssertEqual((navigator.rootViewController.topViewController as? VisitableViewController)?.initialVisitableURL, result)
+        withExtendedLifetime(delegate) {}
+    }
+
+    @MainActor
     func testGatewayModalPreservesSubmittedDocumentAndRestoresCheckoutWithoutReload() async throws {
         let fixture = GatewayFixtureHandler()
         let configuration = WKWebViewConfiguration()
@@ -60,7 +128,7 @@ final class PaymentGatewayPresentationTests: XCTestCase {
         let loaded = expectation(description: "Gateway POST document loaded")
         let navigation = GatewayNavigationProbe { loaded.fulfill() }
         webView.navigationDelegate = navigation
-        let source = VisitableViewController(url: AppEnvironment.baseURL.appendingPathComponent("orders/new"))
+        let source = HotwireWebViewController(url: AppEnvironment.baseURL.appendingPathComponent("orders/new"))
         source.loadViewIfNeeded()
         source.visitableView.activateWebView(webView, forVisitable: source)
         let delegate = GatewayVisitableDelegateProbe()
@@ -78,10 +146,6 @@ final class PaymentGatewayPresentationTests: XCTestCase {
         request.httpMethod = "POST"
         request.httpBody = Data("P_INIT_PAYMENT=fixture-state".utf8)
         webView.load(request)
-        await fulfillment(of: [loaded], timeout: 10)
-        XCTAssertEqual(fixture.requests.count, 1)
-        XCTAssertEqual(fixture.requests.first?.httpMethod, "POST")
-        try await webView.evaluateJavaScript("window.paymentState = 'still-the-same-transaction'")
 
         let modal = PaymentGatewayViewController(source: source)
         let sheet = UINavigationController(rootViewController: modal)
@@ -92,6 +156,15 @@ final class PaymentGatewayPresentationTests: XCTestCase {
         await withCheckedContinuation { continuation in
             root.present(sheet, animated: false) { continuation.resume() }
         }
+        await fulfillment(of: [loaded], timeout: 10)
+        XCTAssertEqual(fixture.requests.count, 1)
+        XCTAssertEqual(fixture.requests.first?.httpMethod, "POST")
+        try await webView.evaluateJavaScript("window.paymentState = 'still-the-same-transaction'")
+        window.layoutIfNeeded()
+        XCTAssertFalse(webView.isHidden)
+        XCTAssertGreaterThan(webView.bounds.height, 100)
+        XCTAssertGreaterThan(webView.bounds.width, 100)
+        XCTAssertTrue(webView.window === window)
         XCTAssertTrue(root.presentedViewController === sheet)
         XCTAssertTrue(source.visitableView.superview === modal.view)
         XCTAssertTrue(source.visitableView.webView === webView)
@@ -100,8 +173,8 @@ final class PaymentGatewayPresentationTests: XCTestCase {
         webView.uiDelegate?.webViewDidClose?(webView)
         XCTAssertEqual(originalWebUIDelegate.closeCount, 1)
         XCTAssertFalse(source.visitableView.allowsPullToRefresh)
-        source.viewWillDisappear(false)
-        source.viewDidDisappear(false)
+        source.beginAppearanceTransition(false, animated: false)
+        source.endAppearanceTransition()
         XCTAssertEqual(delegate.disappearances, 0)
         let presentedState = try await webView.evaluateJavaScript("window.paymentState") as? String
         XCTAssertEqual(presentedState, "still-the-same-transaction")
@@ -169,4 +242,10 @@ private final class GatewayRouteWebView: WKWebView {
         if let url = request.url { requests.append(url); onLoad?(url) }
         return nil
     }
+}
+
+private final class GatewayCallbackNavigationAction: WKNavigationAction {
+    private let callbackRequest: URLRequest
+    init(url: URL) { callbackRequest = URLRequest(url: url); super.init() }
+    override var request: URLRequest { callbackRequest }
 }

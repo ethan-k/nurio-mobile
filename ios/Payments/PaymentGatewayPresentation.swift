@@ -9,8 +9,11 @@ struct PaymentGatewayWebViewPolicyDecisionHandler: @preconcurrency WebViewPolicy
     let name = "payment-gateway-presentation"
 
     func matches(navigationAction: WKNavigationAction, configuration: Navigator.Configuration) -> Bool {
-        guard navigationAction.targetFrame?.isMainFrame == true,
-              let url = navigationAction.request.url else { return false }
+        guard let url = navigationAction.request.url else { return false }
+        // Result redirects can originate in gateway frames or popup windows.
+        // Consume our scheme here instead of reopening Nurio through iOS.
+        if url.scheme?.lowercased() == AppEnvironment.callbackScheme { return true }
+        guard navigationAction.targetFrame?.isMainFrame == true else { return false }
         return PaymentGatewayPresentation.isGatewayURL(url) ||
             PaymentGatewayPresentation.isCompletionURL(url, baseURL: configuration.startLocation)
     }
@@ -18,6 +21,11 @@ struct PaymentGatewayWebViewPolicyDecisionHandler: @preconcurrency WebViewPolicy
     func handle(navigationAction: WKNavigationAction, configuration: Navigator.Configuration, navigator: any Navigating) -> WebViewPolicyManager.Decision {
         guard let navigator = navigator as? Navigator,
               let url = navigationAction.request.url else { return .allow }
+
+        if url.scheme?.lowercased() == AppEnvironment.callbackScheme {
+            Task { @MainActor in AppRouteCoordinator.shared.handleIncoming(url) }
+            return .cancel
+        }
 
         if PaymentGatewayPresentation.isCompletionURL(url, baseURL: configuration.startLocation) {
             if PaymentGatewayPresentation.shared.completionURLBeingRouted == url { return .allow }
@@ -90,6 +98,16 @@ final class PaymentGatewayPresentation {
         }
         controller.takeCheckoutView()
         navigator.activeNavigationController.present(modal, animated: true)
+    }
+
+    /// Turbo proposals and server redirects can reach Navigator without going
+    /// through AppRouteCoordinator or the WKNavigationAction completion handler.
+    /// Dismiss before Navigator deactivates the source's borrowed web view.
+    func interceptMerchantVisit(_ url: URL, navigator: Navigator) -> Bool {
+        guard gatewayController != nil,
+              CheckoutNavigation.isSafeReloadURL(url, baseURL: AppEnvironment.baseURL) else { return false }
+        Task { @MainActor in self.routeAppReturn(url, navigator: navigator) }
+        return true
     }
 
     func routeAppReturn(_ url: URL, navigator: Navigator) {

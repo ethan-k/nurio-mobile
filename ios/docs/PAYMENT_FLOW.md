@@ -88,6 +88,28 @@ allows the resulting merchant request through instead of intercepting it again.
 Outbound gateway POSTs are always allowed unchanged. Cookie cleanup occurs only
 when abandoning/recovering the old gateway, never when presenting its live view.
 
+### Payment return and result navigation
+
+PortOne separates `appScheme` (return from KakaoPay/card-app authentication) from
+`redirectUrl` (the final payment result). See the [mobile integration guide](https://developers.portone.io/opi/ko/extra/mobile-payment/readme-v2?v=v2)
+and [official iOS implementation](https://github.com/portone-io/ios-sdk/blob/a88175c/Sources/PortOneSdk/PaymentWebView.swift).
+A bare `nurio://` must leave the current gateway alive. The web-view policy consumes
+Nurio scheme URLs directly through `AppRouteCoordinator`, including callbacks from
+frames/popups; it must not send payment results through another OS app-open cycle.
+
+The custom sheet is outside Hotwire's modal navigation stack. Therefore merchant
+result proposals also pass through `interceptMerchantVisit` in `SceneController`
+**before** Hotwire activates a new visitable. Without this boundary, the result
+can load underneath while Hotwire removes the borrowed web view from the sheet,
+leaving an empty Payment modal even after successful server processing. The
+intercept rejects the initial proposal, dismisses/restores the sheet, then routes
+the merchant destination. It does not infer payment success from the app return.
+
+Regression tests cover the actual Navigator with a presented sheet: bare app
+resume retains it, both web-view callbacks and direct Hotwire result proposals
+dismiss it before the merchant request, and gateway POST/document state survives
+presentation. The direct-result test fails with the dismissal intercept removed.
+
 ### Gateway sheet lifecycle
 
 The sheet moves the existing `VisitableView` and leaves a snapshot under it.

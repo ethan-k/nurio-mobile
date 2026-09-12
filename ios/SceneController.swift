@@ -110,6 +110,9 @@ extension SceneController: UIWindowSceneDelegate {
 
 extension SceneController: NavigatorDelegate {
     func handle(proposal: VisitProposal, from navigator: Navigator) -> ProposalResult {
+        if PaymentGatewayPresentation.shared.interceptMerchantVisit(proposal.url, navigator: navigator) {
+            return .reject
+        }
         if let controller = CheckoutVisitRecovery.controller(for: proposal, navigator: navigator) {
             return .acceptCustom(controller)
         }
