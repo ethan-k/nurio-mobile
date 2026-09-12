@@ -5,12 +5,12 @@ import UIKit
 final class CustomerScopeRouteDecisionHandler: RouteDecisionHandler {
     let name = "customer-scope"
 
-    func matches(location: URL, configuration: Navigator.Configuration) -> Bool {
-        CustomerScopePolicy.isBlocked(location)
+    func matches(proposal: VisitProposal, configuration: Navigator.Configuration) -> Bool {
+        CustomerScopePolicy.isBlocked(proposal.url)
     }
 
-    func handle(location: URL, configuration: Navigator.Configuration, navigator: Navigator) -> Router.Decision {
-        UIApplication.shared.open(location)
+    func handle(proposal: VisitProposal, configuration: Navigator.Configuration, navigator: any Navigating) -> Router.Decision {
+        UIApplication.shared.open(proposal.url)
         return .cancel
     }
 }

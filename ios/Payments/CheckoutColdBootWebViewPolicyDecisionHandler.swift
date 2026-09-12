@@ -32,8 +32,11 @@ struct CheckoutColdBootWebViewPolicyDecisionHandler: WebViewPolicyDecisionHandle
     func handle(
         navigationAction: WKNavigationAction,
         configuration: Navigator.Configuration,
-        navigator: Navigator
+        navigator: any Navigating
     ) -> WebViewPolicyManager.Decision {
+        // Navigating does not expose sessions; checkout recovery needs the
+        // concrete app navigator's main and modal sessions to cold-boot safely.
+        guard let navigator = navigator as? Navigator else { return .allow }
         if let url = navigationAction.request.url {
             Task { @MainActor in
                 let usesMainSession = CheckoutNavigation.usesMainSession(url)

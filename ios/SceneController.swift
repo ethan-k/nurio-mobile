@@ -1,5 +1,6 @@
 import HotwireNative
 import KakaoSDKAuth
+import SwiftUI
 import UIKit
 
 final class SceneController: UIResponder {
@@ -112,8 +113,8 @@ extension SceneController: NavigatorDelegate {
         .accept
     }
 
-    func visitableDidFailRequest(_ visitable: any Visitable, error: any Error, retryHandler: RetryBlock?) {
-        if let turboError = error as? TurboError, case let .http(statusCode) = turboError, statusCode == 401 {
+    func visitableDidFailRequest(_ visitable: any Visitable, error: HotwireNativeError, retryHandler: RetryBlock?) {
+        if error.statusCode == 401 {
             navigator.route(AppEnvironment.signInURL)
             return
         }
@@ -127,13 +128,50 @@ extension SceneController: NavigatorDelegate {
                 currentURL: visitable.currentVisitableURL,
                 baseURL: AppEnvironment.baseURL
             )
-            errorPresenter.presentError(error, retryHandler: safeRetryHandler)
+            RequestErrorPresentation.present(error, on: errorPresenter, retryHandler: safeRetryHandler)
             return
         }
 
         presentError(error.localizedDescription)
     }
 }
+
+/// Hotwire 1.3.1's ErrorPresenter wraps even a nil handler in a closure. Keep
+/// nil intact so its error-view factory cannot offer an unsafe gateway retry.
+@MainActor
+enum RequestErrorPresentation {
+    static func present(_ error: HotwireNativeError, on controller: UIViewController, retryHandler: (() -> Void)?) {
+        remove(from: controller)
+        let handler = retryHandler.map { retry in
+            { [weak controller] in
+                retry()
+                if let controller { remove(from: controller) }
+            }
+        }
+        let errorView = Hotwire.config.makeCustomErrorView(error, handler)
+        let host = RequestErrorHostingController(rootView: AnyView(errorView))
+        controller.addChild(host)
+        host.view.translatesAutoresizingMaskIntoConstraints = false
+        controller.view.addSubview(host.view)
+        NSLayoutConstraint.activate([
+            host.view.leadingAnchor.constraint(equalTo: controller.view.leadingAnchor),
+            host.view.trailingAnchor.constraint(equalTo: controller.view.trailingAnchor),
+            host.view.topAnchor.constraint(equalTo: controller.view.topAnchor),
+            host.view.bottomAnchor.constraint(equalTo: controller.view.bottomAnchor),
+        ])
+        host.didMove(toParent: controller)
+    }
+
+    private static func remove(from controller: UIViewController) {
+        for child in controller.children where child is RequestErrorHostingController {
+            child.willMove(toParent: nil)
+            child.view.removeFromSuperview()
+            child.removeFromParent()
+        }
+    }
+}
+
+private final class RequestErrorHostingController: UIHostingController<AnyView> {}
 
 extension SceneController: UINavigationControllerDelegate {
     func navigationController(

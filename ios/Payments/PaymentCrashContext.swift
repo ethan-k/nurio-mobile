@@ -11,17 +11,25 @@ struct PaymentNativeRequestFailure {
     let shouldReport: Bool
 
     init(error: Error) {
-        if let error = error as? TurboError {
+        if let error = error as? HotwireNativeError {
             switch error {
-            case .networkFailure:
-                (kind, code, shouldReport) = ("network", 0, true)
-            case .timeoutFailure:
-                (kind, code, shouldReport) = ("timeout", -1, true)
-            case .contentTypeMismatch:
+            case .web(let error):
+                if let urlError = error.urlError {
+                    (kind, code, shouldReport) = ("url_loading", urlError.code.rawValue, urlError.code != .cancelled)
+                    return
+                }
+                let isTimeout = error.isTimeout || error.errorCode == -1
+                (kind, code, shouldReport) = (isTimeout ? "timeout" : "network", error.errorCode, true)
+            case .load(.contentTypeMismatch):
                 (kind, code, shouldReport) = ("content_type", -2, true)
-            case .pageLoadFailure:
+            case .load(.notPresent):
                 (kind, code, shouldReport) = ("turbo_missing", 0, true)
-            case .http(let statusCode):
+            case .load(.notReady):
+                (kind, code, shouldReport) = ("turbo_not_ready", 0, true)
+            case .load(.invalidResponse):
+                (kind, code, shouldReport) = ("invalid_response", 0, true)
+            case .http(let error):
+                let statusCode = error.statusCode
                 (kind, code, shouldReport) = ("http", statusCode, !(400..<500).contains(statusCode))
             }
             return

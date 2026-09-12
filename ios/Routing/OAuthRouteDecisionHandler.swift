@@ -11,7 +11,8 @@ private let authLogger = Logger(
 final class OAuthRouteDecisionHandler: RouteDecisionHandler {
     let name = "oauth"
 
-    func matches(location: URL, configuration: Navigator.Configuration) -> Bool {
+    func matches(proposal: VisitProposal, configuration: Navigator.Configuration) -> Bool {
+        let location = proposal.url
         guard
             let scheme = location.scheme?.lowercased(),
             scheme == "http" || scheme == "https"
@@ -23,7 +24,8 @@ final class OAuthRouteDecisionHandler: RouteDecisionHandler {
         return location.host?.lowercased() == appHost && AppEnvironment.oauthPaths.contains(location.path)
     }
 
-    func handle(location: URL, configuration: Navigator.Configuration, navigator: Navigator) -> Router.Decision {
+    func handle(proposal: VisitProposal, configuration: Navigator.Configuration, navigator: any Navigating) -> Router.Decision {
+        let location = proposal.url
         if location.path == "/auth/apple" {
             NativeAppleSignInCoordinator.shared.presentationAnchorProvider = { [weak navigator] in
                 navigator?.activeNavigationController.view.window

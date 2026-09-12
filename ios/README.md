@@ -2,6 +2,25 @@
 
 Standalone Hotwire Native iOS shell for the Nurio customer web experience.
 
+## Hotwire Native dependency
+
+The customer target pins Hotwire Native **1.3.1**. Its custom route handlers use
+`VisitProposal` and `Navigating`; request failures use `HotwireNativeError`.
+The upgrade preserves 401 sign-in routing, checkout session selection, and the
+restriction against retrying an external gateway URL.
+
+`RequestErrorPresentation` passes an optional retry handler directly to
+Hotwire's error-view factory. This avoids the 1.3.1 default presenter's wrapping
+of a nil handler, which would otherwise expose an ineffective Retry button.
+Payment telemetry distinguishes missing Turbo, Turbo not ready, invalid
+responses, HTTP errors, and wrapped URL-loading failures without retaining raw
+error messages or URLs.
+
+See the [1.3.1 release notes](https://github.com/hotwired/hotwire-native-ios/releases/tag/1.3.1)
+and [1.3.0 API migration notes](https://github.com/hotwired/hotwire-native-ios/releases/tag/1.3.0).
+An installed release still needs payment-app handoff/return and modal checkout
+verification on a physical iPhone.
+
 ## Runtime
 
 - Start URL: `https://nurio.kr/`; the server sends signed-out users to `/login` and signed-in users to `/events`

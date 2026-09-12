@@ -1,6 +1,7 @@
 import XCTest
 import HotwireNative
 import WebKit
+import SwiftUI
 @testable import Nurio
 
 final class NurioTests: XCTestCase {
@@ -256,7 +257,7 @@ final class NurioTests: XCTestCase {
             let context = activePaymentContext(reporter: reporter)
 
             context.reportNativeRequestFailure(
-                TurboError.pageLoadFailure,
+                HotwireNativeError.load(.notPresent),
                 currentURL: URL(string: url)!,
                 baseURL: URL(string: "https://nurio.kr")!
             )
@@ -279,12 +280,13 @@ final class NurioTests: XCTestCase {
         let context = activePaymentContext(reporter: reporter)
         let errors: [Error] = [
             URLError(.cancelled),
-            TurboError.http(statusCode: 401),
-            TurboError.http(statusCode: 403),
-            TurboError.http(statusCode: 404),
-            TurboError.http(statusCode: 409),
-            TurboError.http(statusCode: 422),
-            TurboError.http(statusCode: 429),
+            HotwireNativeError.web(WebError(urlError: URLError(.cancelled))),
+            HotwireNativeError.http(HTTPError(statusCode: 401)!),
+            HotwireNativeError.http(HTTPError(statusCode: 403)!),
+            HotwireNativeError.http(HTTPError(statusCode: 404)!),
+            HotwireNativeError.http(HTTPError(statusCode: 409)!),
+            HotwireNativeError.http(HTTPError(statusCode: 422)!),
+            HotwireNativeError.http(HTTPError(statusCode: 429)!),
         ]
 
         for error in errors {
@@ -298,12 +300,16 @@ final class NurioTests: XCTestCase {
 
     func testTechnicalRequestFailuresRemainReportableWithStableKindsAndCodes() throws {
         let cases: [(Error, String, Int)] = [
-            (TurboError.networkFailure, "network", 0),
-            (TurboError.timeoutFailure, "timeout", -1),
-            (TurboError.contentTypeMismatch, "content_type", -2),
-            (TurboError.http(statusCode: 0), "http", 0),
-            (TurboError.http(statusCode: 500), "http", 500),
-            (TurboError.http(statusCode: 503), "http", 503),
+            (HotwireNativeError.web(WebError(errorCode: 0, message: "private-message")), "network", 0),
+            (HotwireNativeError.web(WebError(errorCode: -1, message: "private-message")), "timeout", -1),
+            (HotwireNativeError.load(.contentTypeMismatch), "content_type", -2),
+            (HotwireNativeError.load(.notReady), "turbo_not_ready", 0),
+            (HotwireNativeError.load(.invalidResponse), "invalid_response", 0),
+            (HotwireNativeError.web(WebError(urlError: URLError(.notConnectedToInternet))), "url_loading", NSURLErrorNotConnectedToInternet),
+            (HotwireNativeError.web(WebError(urlError: URLError(.timedOut))), "url_loading", NSURLErrorTimedOut),
+            (HotwireNativeError.web(WebError(errorCode: -999, message: "private-message")), "network", -999),
+            (HotwireNativeError.http(HTTPError(statusCode: 500)!), "http", 500),
+            (HotwireNativeError.http(HTTPError(statusCode: 503)!), "http", 503),
             (URLError(.notConnectedToInternet), "url_loading", NSURLErrorNotConnectedToInternet),
             (URLError(.timedOut), "url_loading", NSURLErrorTimedOut),
             (NSError(domain: WKError.errorDomain, code: WKError.Code.webContentProcessTerminated.rawValue), "webkit", 2),
@@ -329,7 +335,7 @@ final class NurioTests: XCTestCase {
     func testRequestDiagnosticsDoNotLeakIntoLaterPaymentFailures() throws {
         let reporter = RecordingPaymentCrashReporter()
         let context = activePaymentContext(reporter: reporter)
-        context.reportNativeRequestFailure(TurboError.pageLoadFailure, currentURL: testCheckoutURL, baseURL: testBaseURL)
+        context.reportNativeRequestFailure(HotwireNativeError.load(.notPresent), currentURL: testCheckoutURL, baseURL: testBaseURL)
         context.reportTechnicalFailure(.sdkRequest)
 
         let error = try XCTUnwrap(reporter.errors.last) as NSError
@@ -337,13 +343,13 @@ final class NurioTests: XCTestCase {
         XCTAssertNil(reporter.values["native_request_kind"])
 
         context.reset()
-        context.reportNativeRequestFailure(TurboError.pageLoadFailure, currentURL: testCheckoutURL, baseURL: testBaseURL)
+        context.reportNativeRequestFailure(HotwireNativeError.load(.notPresent), currentURL: testCheckoutURL, baseURL: testBaseURL)
         XCTAssertEqual(reporter.errors.count, 2)
     }
 
     func testNativeRequestReporterFailureCannotEscape() {
         let context = activePaymentContext(reporter: ThrowingPaymentCrashReporter())
-        context.reportNativeRequestFailure(TurboError.pageLoadFailure, currentURL: testCheckoutURL, baseURL: testBaseURL)
+        context.reportNativeRequestFailure(HotwireNativeError.load(.notPresent), currentURL: testCheckoutURL, baseURL: testBaseURL)
         XCTAssertTrue(context.isActive)
     }
 
@@ -389,6 +395,74 @@ final class NurioTests: XCTestCase {
         XCTAssertNotNil(CheckoutNavigation.safeRetryHandler(
             {}, initialURL: testCheckoutURL, currentURL: URL(string: "https://www.nurio.kr:443/orders/new")!, baseURL: testBaseURL
         ))
+    }
+
+    @MainActor
+    func testStructuredSceneFailureDoesNotOfferGatewayRetry() {
+        let originalFactory = Hotwire.config.makeCustomErrorView
+        defer { Hotwire.config.makeCustomErrorView = originalFactory }
+        var receivedError: HotwireNativeError?
+        var offeredRetry: (() -> Void)?
+        Hotwire.config.makeCustomErrorView = { error, handler in
+            receivedError = error
+            offeredRetry = handler
+            return TestRequestErrorView(error: error, handler: handler)
+        }
+        let visitable = VisitableViewController(url: URL(string: "https://ksmobile.inicis.com/payment")!)
+        let delegate: any NavigatorDelegate = SceneController()
+        var retries = 0
+
+        delegate.visitableDidFailRequest(visitable, error: .load(.notReady), retryHandler: { retries += 1 })
+
+        XCTAssertEqual(receivedError, .load(.notReady))
+        XCTAssertNil(offeredRetry)
+        XCTAssertEqual(retries, 0)
+        XCTAssertEqual(visitable.children.count, 1)
+    }
+
+    @MainActor
+    func testStructuredSceneRetryRunsOnceAndRemovesTheErrorView() {
+        let originalFactory = Hotwire.config.makeCustomErrorView
+        defer { Hotwire.config.makeCustomErrorView = originalFactory }
+        var offeredRetry: (() -> Void)?
+        Hotwire.config.makeCustomErrorView = { error, handler in
+            offeredRetry = handler
+            return TestRequestErrorView(error: error, handler: handler)
+        }
+        let visitable = VisitableViewController(url: testCheckoutURL)
+        let delegate: any NavigatorDelegate = SceneController()
+        var retries = 0
+
+        for _ in 0..<2 {
+            delegate.visitableDidFailRequest(visitable, error: .load(.notPresent), retryHandler: { retries += 1 })
+        }
+
+        XCTAssertEqual(visitable.children.count, 1)
+        XCTAssertEqual(retries, 0)
+        XCTAssertNotNil(offeredRetry)
+        offeredRetry?()
+        XCTAssertEqual(retries, 1)
+        XCTAssertTrue(visitable.children.isEmpty)
+    }
+
+    @MainActor
+    func testRouteHandlersUseTheNewProposalAPIAndPreserveScope() {
+        let configuration = Navigator.Configuration(name: "test", startLocation: testBaseURL)
+        let customerHandler: any RouteDecisionHandler = CustomerScopeRouteDecisionHandler()
+        let oauthHandler: any RouteDecisionHandler = OAuthRouteDecisionHandler()
+        for (rawURL, blocked, oauth) in [
+            ("https://nurio.kr/admin/events", true, false),
+            ("https://nurio.kr/tutoring/sessions", true, false),
+            ("https://nurio.kr/events/42", false, false),
+            ("https://nurio.kr/auth/apple", false, true),
+            ("https://nurio.kr/auth/kakao", false, true),
+            ("https://nurio.kr/auth/google_oauth2", false, true),
+            ("https://example.com/auth/apple", false, false),
+        ] {
+            let proposal = VisitProposal(url: URL(string: rawURL)!, options: VisitOptions())
+            XCTAssertEqual(customerHandler.matches(proposal: proposal, configuration: configuration), blocked)
+            XCTAssertEqual(oauthHandler.matches(proposal: proposal, configuration: configuration), oauth)
+        }
     }
 
     private var testBaseURL: URL { URL(string: "https://nurio.kr")! }
@@ -528,6 +602,12 @@ final class NurioTests: XCTestCase {
             "https://nurio.kr/events/42/feedback/new?t=a%2Bb%2Fc%3D&_native_refresh=notification-789"
         )
     }
+}
+
+private struct TestRequestErrorView: ErrorPresentableView {
+    let error: HotwireNativeError
+    let handler: ErrorPresenter.Handler?
+    var body: some View { EmptyView() }
 }
 
 private final class RecordingPaymentCrashReporter: PaymentCrashReporting {

@@ -53,6 +53,7 @@ errors are not non-fatals. Technical categories use stable safe names such as
 Customer iOS request non-fatals include per-event `native_request_kind`,
 `native_request_code`, and `native_request_page` (`app` or `external`) in the
 sanitized NSError. These details distinguish missing Turbo (`turbo_missing`),
+Turbo not ready (`turbo_not_ready`), invalid responses (`invalid_response`),
 network/timeout, content-type, HTTP, URL-loading, and WebKit failures without
 copying the original error, domain, message, or URL. Unknown errors use code 0.
 Request cancellation (`NSURLErrorCancelled`) and HTTP 4xx responses remain
@@ -64,7 +65,11 @@ Customer iOS only offers Hotwire's reload-based Retry when both the original
 visit and current page are on the app origin (including its www alias). Gateway
 errors retain the error screen without a Retry button, avoiding a bodyless GET
 to an Inicis POST-only URL. A missing framework retry handler also stays nil.
-No automatic reload, payment replay, or provider-state change is introduced.
+With Hotwire Native 1.3.1, `RequestErrorPresentation` preserves a nil retry
+handler when calling the error-view factory; the upstream default presenter
+wraps nil in a closure. Structured `HotwireNativeError.web` failures retain
+URL-loading cancellation filtering. No automatic reload, payment replay, or
+provider-state change is introduced by this error presentation or telemetry.
 
 ### Android comparison
 
