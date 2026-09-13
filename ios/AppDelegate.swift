@@ -68,12 +68,21 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         application.registerForRemoteNotifications()
     }
 
+    /// "NurioApp/1.0.15 (5)" — lets the server show the running version on the
+    /// my page and nudge members whose build is behind the App Store release.
+    static var appBuildUserAgentToken: String {
+        let info = Bundle.main.infoDictionary ?? [:]
+        let version = info["CFBundleShortVersionString"] as? String ?? "0"
+        let build = info["CFBundleVersion"] as? String ?? "0"
+        return "NurioApp/\(version) (\(build))"
+    }
+
     private func configureHotwire() {
         Hotwire.loadPathConfiguration(from: [
             .file(Bundle.main.url(forResource: AppEnvironment.pathConfigurationResourceName, withExtension: "json")!)
         ])
 
-        Hotwire.config.applicationUserAgentPrefix = "Nurio iOS; NurioPaymentReturn/1; NurioImageCache/1;"
+        Hotwire.config.applicationUserAgentPrefix = "Nurio iOS; NurioPaymentReturn/1; NurioImageCache/1; \(Self.appBuildUserAgentToken);"
         // The factory is used by both the main and modal Hotwire sessions.
         Hotwire.config.makeCustomWebView = { configuration in
             configuration.setURLSchemeHandler(NativeImageSchemeHandler(), forURLScheme: NativeImageURL.scheme)

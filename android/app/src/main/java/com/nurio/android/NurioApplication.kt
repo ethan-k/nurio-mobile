@@ -40,7 +40,10 @@ class NurioApplication : Application() {
         Hotwire.config.webViewDebuggingEnabled = BuildConfig.DEBUG
         Hotwire.config.makeCustomWebView = { context -> NurioHotwireWebView(context) }
 
-        Hotwire.config.applicationUserAgentPrefix = "Nurio Android; NurioPaymentReturn/1; NurioImageCache/1"
+        // "NurioApp/1.0.17 (22)" lets the server show the running version on the
+        // my page and nudge members whose build is behind the Play Store release.
+        Hotwire.config.applicationUserAgentPrefix =
+            "Nurio Android; NurioPaymentReturn/1; NurioImageCache/1; NurioApp/${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})"
 
         // Bridge components (sign-in-with-oauth, register-device-token) decode/encode
         // message JSON through Hotwire.config.jsonConverter. It is null by default, so
