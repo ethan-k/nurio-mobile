@@ -1,5 +1,6 @@
 import java.util.Properties
 import java.io.FileInputStream
+import java.net.URI
 
 plugins {
     alias(libs.plugins.android.application)
@@ -16,6 +17,19 @@ val keystorePropertiesFile = rootProject.file("keystore.properties")
 val keystoreProperties = Properties()
 if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+}
+
+val debugBaseUri = URI(
+    providers.gradleProperty("nurioBaseUrl")
+        .orElse(providers.environmentVariable("NURIO_BASE_URL"))
+        .orElse("https://nurio.kr")
+        .get()
+        .trimEnd('/')
+)
+require(debugBaseUri.scheme in setOf("http", "https") && !debugBaseUri.host.isNullOrBlank() &&
+    debugBaseUri.rawUserInfo == null && debugBaseUri.rawPath.isNullOrEmpty() &&
+    debugBaseUri.rawQuery == null && debugBaseUri.rawFragment == null) {
+    "nurioBaseUrl must be an HTTP(S) origin without credentials, a path, query, or fragment"
 }
 
 android {
@@ -47,7 +61,7 @@ android {
     buildTypes {
         debug {
             manifestPlaceholders["crashlyticsCollectionEnabled"] = false
-            buildConfigField("String", "BASE_URL", "\"https://nurio.kr\"")
+            buildConfigField("String", "BASE_URL", "\"${debugBaseUri.toASCIIString()}\"")
             buildConfigField("Boolean", "DEBUG_LOGGING", "true")
         }
         create("productionDebug") {
