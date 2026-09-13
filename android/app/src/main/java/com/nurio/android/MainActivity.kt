@@ -43,10 +43,9 @@ class MainActivity : HotwireActivity(), PaymentRecoveryHost {
         }
     }
     private val paymentRecoveryHandler = Handler(Looper.getMainLooper())
+    private var paymentReturnPrompt: Snackbar? = null
     private val paymentRecoveryRunnable = Runnable {
-        val recovery = PaymentRecovery.takeExternalAppReturnRecovery() ?: return@Runnable
-        showPaymentMessage(R.string.payment_status_checking, Snackbar.LENGTH_LONG)
-        routePaymentResult(buildPaymentRecoveryUrl(recovery))
+        if (PaymentRecovery.hasPendingExternalAppHandoff()) showPaymentReturnPrompt()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -100,6 +99,7 @@ class MainActivity : HotwireActivity(), PaymentRecoveryHost {
 
     override fun onPause() {
         paymentRecoveryHandler.removeCallbacks(paymentRecoveryRunnable)
+        dismissPaymentReturnPrompt()
         startupCoordinator.onHostPaused()
         super.onPause()
     }
@@ -186,8 +186,31 @@ class MainActivity : HotwireActivity(), PaymentRecoveryHost {
     }
 
     private fun routePaymentResult(url: String) {
+        dismissPaymentReturnPrompt()
         PaymentPopupWindow.closeAll(this)
         routeWhenReady(url)
+    }
+
+    private fun showPaymentReturnPrompt() {
+        // Returning from authentication is not payment completion. The original
+        // gateway must remain alive to approve the payment and deliver its result.
+        // Replacing it after a timer can strand an authorized payment in READY.
+        val container = PaymentPopupWindow.contentView(this)
+            ?: findViewById<View>(R.id.main_container)
+            ?: return
+        dismissPaymentReturnPrompt()
+        paymentReturnPrompt = Snackbar.make(container, R.string.payment_result_pending, Snackbar.LENGTH_INDEFINITE)
+            .setAction(R.string.payment_check_status) {
+                val recovery = PaymentRecovery.takeExternalAppReturnRecovery() ?: return@setAction
+                routePaymentResult(buildPaymentRecoveryUrl(recovery))
+                showPaymentMessage(R.string.payment_status_checking, Snackbar.LENGTH_LONG)
+            }
+            .also { it.show() }
+    }
+
+    private fun dismissPaymentReturnPrompt() {
+        paymentReturnPrompt?.dismiss()
+        paymentReturnPrompt = null
     }
 
     private fun handleAppOpenIntent(intent: Intent?): Boolean {

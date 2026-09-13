@@ -45,6 +45,11 @@ object PaymentNavigation {
     }
 
     fun shouldStayInWebView(uri: Uri, currentLocation: String?): Boolean {
+        // A gateway can redirect to a wallet/bank domain before launching its
+        // app. Keep that entire web flow in the original browser context so its
+        // authorization return can finish the payment. Merchant pages still
+        // go through Hotwire, and completion callbacks are intercepted first.
+        if (PaymentRecovery.hasActiveAttempt() && isWebUrl(uri) && !isAppWebUrl(uri)) return true
         if (!isPaymentGatewayUrl(uri)) return false
         return currentLocation == null || isPaymentContext(currentLocation)
     }

@@ -106,6 +106,10 @@ internal class PaymentPopupWindow(
     companion object {
         private val openWindows = mutableSetOf<PaymentPopupWindow>()
 
+        fun contentView(host: PaymentRecoveryHost): View? = openWindows
+            .lastOrNull { it.presented && it.parent.context.findPaymentRecoveryHost() === host }
+            ?.popup
+
         fun closeAll(host: PaymentRecoveryHost) {
             // Closing a parent detaches its children and mutates the registry.
             // Programmatic closure must not trigger user-dismiss recovery.

@@ -182,8 +182,9 @@ Android keeps a two-hour, app-private recovery record containing only the active
 merchant reference and, when available, an exact `/events/:id` path. It is not
 sent to Crashlytics or logs. A separate `payment-recovery` bridge owns that
 state; the `payment-telemetry` bridge remains diagnostics-only. When an external
-app cannot launch, or the app resumes without a callback, `MainActivity` makes a
-single marked visit to `/payments/portone/complete`. The route handler cold-boots
+app cannot launch, or the user closes the payment window or chooses **Check
+status**, `MainActivity` makes a single marked visit to
+`/payments/portone/complete`. The route handler cold-boots
 that visit only when the current WebView is foreign, and Rails queries PortOne
 before deciding success/failure. A paymentId-less callback uses the active
 recovery record; `/settings/tickets` remains only the last-resort fallback when
@@ -194,19 +195,28 @@ Normal completion callbacks use the same cold-boot rule as recovery. Both
 inside the WebView and routed through `MainActivity`, without reopening the app
 through Android. A bare `nurio://` only resumes the current gateway document.
 Before routing a result or recovery, the activity closes its payment popup tree
-programmatically, without starting a second user-dismiss recovery. Pausing the
-activity cancels its pending return check until the next resume.
+programmatically, without starting a second user-dismiss recovery. Returning
+from an external app without a result preserves the original gateway document:
+wallet authentication can finish before the gateway approves the payment.
+After two seconds the app offers **Check status**, without navigating or
+claiming recovery automatically. Pausing or receiving a result dismisses that
+prompt. An automatic recovery redirect at this point can strand a payment in
+PortOne's `READY` state by destroying the gateway before it finishes.
 
-During an active payment, provider HTTP/HTTPS popup steps stay in the payment
-WebView; merchant completion returns to the main navigator. Only external app
+During an active payment, provider HTTP/HTTPS steps stay in their original main
+or popup WebView, including wallet domains outside Inicis/PortOne such as
+KakaoPay and Naver Pay. Merchant completion returns to the main navigator. Only external app
 schemes such as `intent://` are handed to Android. Never reload, intercept, or
 replay the outbound Inicis POST. Constraints 1–4 above apply to Android all the same.
 
 Android emulator regression tests cover ticket/pass popup completion, native
 dismissal and provider window-opener behavior. A separate test parks the actual
 navigator WebView on a non-Turbo gateway document after a form POST and verifies
-that both callback types load the merchant completion with GET without replaying
-the gateway request. These fixtures do not prove provider or physical-device
+that both callback types load the merchant completion with GET and remove the
+native progress overlay without replaying the gateway request. It also covers
+delayed completion after a stop/resume, an external callback intent, an explicit
+status check, and a wallet bridge redirect that must remain in the same WebView.
+These fixtures do not prove provider or physical-device
 payment completion.
 
 ### Testing Android against localhost

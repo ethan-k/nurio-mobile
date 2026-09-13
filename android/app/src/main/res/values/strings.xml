@@ -9,6 +9,8 @@
     <string name="push_notification_channel_description">Event reminders and account notifications</string>
     <string name="payment_app_launch_failed">결제 앱을 열 수 없습니다. 앱 설치 여부를 확인해 주세요. 결제 상태를 확인합니다.</string>
     <string name="payment_status_checking">결제 결과를 확인하고 있어요.</string>
+    <string name="payment_result_pending">결제 결과를 기다리고 있어요.</string>
+    <string name="payment_check_status">결제 상태 확인</string>
     <string name="payment_window_title">결제</string>
     <string name="dismiss">닫기</string>
 </resources>

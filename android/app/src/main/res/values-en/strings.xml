@@ -9,6 +9,8 @@
     <string name="push_notification_channel_description">Event reminders and account notifications</string>
     <string name="payment_app_launch_failed">The payment app could not be opened. Check that it is installed. We’ll verify the payment status.</string>
     <string name="payment_status_checking">Checking your payment result.</string>
+    <string name="payment_result_pending">Waiting for the payment result.</string>
+    <string name="payment_check_status">Check status</string>
     <string name="payment_window_title">Payment</string>
     <string name="dismiss">Dismiss</string>
 </resources>
