@@ -58,7 +58,9 @@ private class PaymentPopupWebViewClient(
     private val window: PaymentPopupWindow,
 ) : WebViewClient() {
     override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
-        if (!request.isForMainFrame) return false
+        if (!request.isForMainFrame) {
+            return PaymentNavigation.consumePaymentReturn(parentWebView.context, request.url, false)
+        }
         return routePopupLocation(view, request.url.toString())
     }
 
@@ -77,6 +79,7 @@ private class PaymentPopupWebViewClient(
 
     private fun routePopupLocation(popupWebView: WebView, location: String): Boolean {
         val uri = location.toUri()
+        if (PaymentNavigation.consumePaymentReturn(parentWebView.context, uri)) return true
         if (PaymentNavigation.isIgnoredUrl(uri)) return false
 
         if (PaymentNavigation.shouldStayInWebView(uri, parentWebView.url) ||

@@ -2,8 +2,10 @@ package com.nurio.android.payments
 
 import android.content.Context
 import android.content.ContextWrapper
+import android.net.Uri
 
 interface PaymentRecoveryHost {
+    fun onPaymentReturn(uri: Uri)
     fun onExternalPaymentLaunchFailed()
     fun onPaymentPopupDismissed()
 }

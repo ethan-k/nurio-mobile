@@ -15,6 +15,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.graphics.drawable.toDrawable
 import com.nurio.android.R
+import com.nurio.android.payments.PaymentRecoveryHost
 import com.nurio.android.payments.findPaymentRecoveryHost
 
 /** Owns the actual browser-created window for the lifetime of a payment popup. */
@@ -38,6 +39,7 @@ internal class PaymentPopupWindow(
     }
 
     init {
+        openWindows.add(this)
         parent.addOnAttachStateChangeListener(this)
     }
 
@@ -84,6 +86,7 @@ internal class PaymentPopupWindow(
     fun close() {
         if (closed) return
         closed = true
+        openWindows.remove(this)
         parent.removeOnAttachStateChangeListener(this)
         (popup.parent as? ViewGroup)?.removeView(popup)
         dialog.dismiss()
@@ -99,4 +102,15 @@ internal class PaymentPopupWindow(
 
     override fun onViewDetachedFromWindow(view: View) = close()
     override fun onViewAttachedToWindow(view: View) = Unit
+
+    companion object {
+        private val openWindows = mutableSetOf<PaymentPopupWindow>()
+
+        fun closeAll(host: PaymentRecoveryHost) {
+            // Closing a parent detaches its children and mutates the registry.
+            // Programmatic closure must not trigger user-dismiss recovery.
+            openWindows.filter { it.parent.context.findPaymentRecoveryHost() === host }
+                .forEach { it.close() }
+        }
+    }
 }

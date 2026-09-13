@@ -22,9 +22,9 @@ import dev.hotwire.navigation.routing.Router
  *
  * Mirror of iOS `CheckoutColdBootWebViewPolicyDecisionHandler`; the full
  * constraints are documented in `ios/docs/PAYMENT_FLOW.md`. This handler only
- * matches on-origin checkout *entry* URLs, so the outbound gateway POST (which
- * must never be intercepted or re-issued) is untouched, as are the order
- * confirmation page and the payment-complete return.
+ * matches on-origin checkout entry and payment completion URLs. Both normal
+ * callbacks and recovery must cold-boot the merchant page when Turbo is absent.
+ * The outbound gateway POST must never be intercepted or re-issued.
  */
 class CheckoutColdBootRouteDecisionHandler : Router.RouteDecisionHandler {
     override val name = "checkout-cold-boot"
@@ -42,10 +42,7 @@ class CheckoutColdBootRouteDecisionHandler : Router.RouteDecisionHandler {
         if (host != baseHost && host != "www.$baseHost") return false
 
         val path = locationUri.path.orEmpty()
-        return isCheckoutEntryPath(path) || PaymentRoutePolicy.isNativeRecoveryEntry(
-            path = path,
-            recoveryMarker = locationUri.getQueryParameter("native_recovery"),
-        )
+        return isCheckoutEntryPath(path) || PaymentRoutePolicy.isPaymentCompletionPath(path)
     }
 
     override fun handle(

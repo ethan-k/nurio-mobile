@@ -183,7 +183,22 @@ before deciding success/failure. A paymentId-less callback uses the active
 recovery record; `/settings/tickets` remains only the last-resort fallback when
 there is no recoverable attempt.
 
-During an active payment, every HTTP/HTTPS popup step stays in the payment
-WebView. Only `intent://` and other non-web schemes are handed to Android. Never
-reload, intercept, or replay the outbound Inicis POST. Constraints 1–4 above
-apply to Android all the same.
+Normal completion callbacks use the same cold-boot rule as recovery. Both
+`nurio://payment-complete` and the merchant HTTPS completion URL are consumed
+inside the WebView and routed through `MainActivity`, without reopening the app
+through Android. A bare `nurio://` only resumes the current gateway document.
+Before routing a result or recovery, the activity closes its payment popup tree
+programmatically, without starting a second user-dismiss recovery. Pausing the
+activity cancels its pending return check until the next resume.
+
+During an active payment, provider HTTP/HTTPS popup steps stay in the payment
+WebView; merchant completion returns to the main navigator. Only external app
+schemes such as `intent://` are handed to Android. Never reload, intercept, or
+replay the outbound Inicis POST. Constraints 1–4 above apply to Android all the same.
+
+Android emulator regression tests cover ticket/pass popup completion, native
+dismissal and provider window-opener behavior. A separate test parks the actual
+navigator WebView on a non-Turbo gateway document after a form POST and verifies
+that both callback types load the merchant completion with GET without replaying
+the gateway request. These fixtures do not prove provider or physical-device
+payment completion.

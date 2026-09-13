@@ -30,25 +30,11 @@ class PaymentRoutePolicyTest {
     }
 
     @Test
-    fun `only explicitly marked completion is a native recovery entry`() {
-        assertTrue(
-            PaymentRoutePolicy.isNativeRecoveryEntry(
-                path = "/payments/portone/complete",
-                recoveryMarker = "1",
-            )
-        )
-        assertFalse(
-            PaymentRoutePolicy.isNativeRecoveryEntry(
-                path = "/payments/portone/complete",
-                recoveryMarker = null,
-            )
-        )
-        assertFalse(
-            PaymentRoutePolicy.isNativeRecoveryEntry(
-                path = "/events/42",
-                recoveryMarker = "1",
-            )
-        )
+    fun `normal completion and recovery share the exact merchant completion path`() {
+        assertTrue(PaymentRoutePolicy.isPaymentCompletionPath("/payments/portone/complete"))
+        assertFalse(PaymentRoutePolicy.isPaymentCompletionPath("/events/42"))
+        assertFalse(PaymentRoutePolicy.isPaymentCompletionPath("/orders/1"))
+        assertFalse(PaymentRoutePolicy.isPaymentCompletionPath("/payments/portone/complete/other"))
     }
 
     @Test

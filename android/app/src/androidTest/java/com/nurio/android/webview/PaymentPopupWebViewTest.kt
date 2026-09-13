@@ -1,6 +1,8 @@
 package com.nurio.android.webview
 
+import android.content.Intent
 import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Build
 import android.os.Message
 import android.os.SystemClock
@@ -63,7 +65,26 @@ class PaymentPopupWebViewTest {
     @Test
     fun passPopupPreservesPostAndCheckoutWindow() = exercisePopup("/pass_packages/3/payment_summary")
 
-    private fun exercisePopup(path: String) {
+    @Test
+    fun ticketCompletionClosesPaymentWindow() = exercisePopup(
+        "/orders/42/payment_summary",
+        "nurio://payment-complete?paymentId=popup-test&redirect_uri=%2Fevents%2F77",
+    )
+
+    @Test
+    fun passCompletionClosesPaymentWindow() = exercisePopup(
+        "/pass_packages/3/payment_summary",
+        "${BuildConfig.BASE_URL}/payments/portone/complete?paymentId=popup-test&redirect_uri=%2Fevents%2F77",
+    )
+
+    @Test
+    fun appLinkCompletionClosesPaymentWindow() = exercisePopup(
+        "/orders/42/payment_summary",
+        "${BuildConfig.BASE_URL}/payments/portone/complete?paymentId=popup-test&redirect_uri=%2Fevents%2F77",
+        returnViaIntent = true,
+    )
+
+    private fun exercisePopup(path: String, completionUrl: String? = null, returnViaIntent: Boolean = false) {
         ActivityScenario.launch(MainActivity::class.java).use { scenario ->
             try {
                 scenario.onActivity { activity ->
@@ -114,7 +135,7 @@ class PaymentPopupWebViewTest {
                     )
                 }
                 await("Checkout did not load") { parent.title == "checkout-ready" }
-                repeat(2) {
+                repeat(if (completionUrl == null) 2 else 0) {
                     requests.clear()
                     instrumentation.runOnMainSync { parent.evaluateJavascript("pay()", null) }
                     await("Gateway did not receive the form") { requests.isNotEmpty() }
@@ -154,7 +175,22 @@ class PaymentPopupWebViewTest {
                 requests.clear()
                 instrumentation.runOnMainSync { parent.evaluateJavascript("pay()", null) }
                 await("Third payment did not open") { popup?.title == "gateway-ready" && popup?.isShown == true }
-                if (path.startsWith("/orders")) {
+                if (completionUrl != null) {
+                    if (returnViaIntent) {
+                        scenario.onActivity { activity ->
+                            val launchIntent = activity.intent
+                            instrumentation.callActivityOnNewIntent(
+                                activity, Intent(Intent.ACTION_VIEW, Uri.parse(completionUrl))
+                            )
+                            // ActivityScenario identifies its activity by the original intent.
+                            activity.intent = launchIntent
+                        }
+                    } else {
+                        instrumentation.runOnMainSync {
+                            popup!!.evaluateJavascript("window.location.href='$completionUrl'", null)
+                        }
+                    }
+                } else if (path.startsWith("/orders")) {
                     instrumentation.runOnMainSync {
                         val container = popup!!.parent as ViewGroup
                         val toolbar = container.getChildAt(0) as ViewGroup
@@ -163,17 +199,26 @@ class PaymentPopupWebViewTest {
                 } else {
                     instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_BACK)
                 }
-                await("Native dismissal left the provider visible") { popup?.parent == null }
+                await("Payment return left the provider visible") { popup?.parent == null }
                 var recoveryLocation: String? = null
                 val deadline = SystemClock.uptimeMillis() + 10_000
                 while (SystemClock.uptimeMillis() < deadline) {
                     scenario.onActivity { recoveryLocation = it.delegate.currentNavigator?.location }
-                    if (recoveryLocation?.contains("native_recovery=1") == true) break
+                    if (recoveryLocation?.contains("/payments/portone/complete?") == true) break
                     SystemClock.sleep(50)
                 }
-                assertTrue("Native dismissal must check the pending payment: $recoveryLocation",
-                    recoveryLocation?.contains("/payments/portone/complete?paymentId=popup-test") == true &&
+                assertTrue("Payment return must check the pending payment: $recoveryLocation",
+                    recoveryLocation?.contains("/payments/portone/complete?paymentId=popup-test") == true)
+                if (completionUrl != null) {
+                    assertTrue("Pass/event return context was lost: $recoveryLocation",
+                        recoveryLocation?.contains("redirect_uri=%2Fevents%2F77") == true)
+                    assertTrue("Completion must not trigger a second recovery: $recoveryLocation",
+                        recoveryLocation?.contains("native_recovery") == false)
+                    assertEquals("The gateway POST must not be replayed", listOf("popup:POST"), requests.toList())
+                } else {
+                    assertTrue("Native dismissal must recover: $recoveryLocation",
                         recoveryLocation?.contains("native_recovery=1") == true)
+                }
             } finally {
                 instrumentation.runOnMainSync {
                     (parent.parent as? ViewGroup)?.removeView(parent)

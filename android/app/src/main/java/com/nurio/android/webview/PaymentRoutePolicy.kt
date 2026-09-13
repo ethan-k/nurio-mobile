@@ -9,9 +9,7 @@ internal object PaymentRoutePolicy {
             PASS_PACKAGE_PATH.matches(path)
     }
 
-    fun isNativeRecoveryEntry(path: String, recoveryMarker: String?): Boolean {
-        return path == "/payments/portone/complete" && recoveryMarker == "1"
-    }
+    fun isPaymentCompletionPath(path: String): Boolean = path == "/payments/portone/complete"
 
     fun shouldKeepPaymentPopupWebUrl(scheme: String?, paymentActive: Boolean): Boolean {
         return paymentActive && scheme?.lowercase() in WEB_SCHEMES

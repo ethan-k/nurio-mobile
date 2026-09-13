@@ -41,6 +41,7 @@ private class PaymentAwareWebViewClient(
     private val delegate: WebViewClient
 ) : WebViewClientCompat() {
     override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
+        if (PaymentNavigation.consumePaymentReturn(view.context, request.url, request.isForMainFrame)) return true
         if (PaymentNavigation.shouldStayInWebView(request.url, view.url)) return false
         val outcome = PaymentNavigation.openExternalPaymentApp(view.context, request.url)
         if (outcome.consumed) {
@@ -58,6 +59,7 @@ private class PaymentAwareWebViewClient(
     @Deprecated("Deprecated in Java")
     override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
         val uri = android.net.Uri.parse(url)
+        if (PaymentNavigation.consumePaymentReturn(view.context, uri)) return true
         if (PaymentNavigation.shouldStayInWebView(uri, view.url)) return false
         val outcome = PaymentNavigation.openExternalPaymentApp(view.context, uri)
         if (outcome.consumed) {

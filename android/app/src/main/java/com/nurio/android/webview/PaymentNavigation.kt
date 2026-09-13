@@ -10,6 +10,7 @@ import com.nurio.android.BuildConfig
 import com.nurio.android.payments.PaymentCrashTelemetry
 import com.nurio.android.payments.PaymentFailureKind
 import com.nurio.android.payments.PaymentRecovery
+import com.nurio.android.payments.findPaymentRecoveryHost
 
 internal data class ExternalPaymentNavigationOutcome(
     val consumed: Boolean,
@@ -26,6 +27,22 @@ object PaymentNavigation {
         "iamport.co",
         "portone.io"
     )
+
+    internal fun consumePaymentReturn(context: Context, uri: Uri, isMainFrame: Boolean = true): Boolean {
+        // appScheme only resumes the gateway; redirectUrl supplies the result.
+        if (uri.scheme.equals("nurio", ignoreCase = true) && uri.host.isNullOrEmpty()) return true
+        if (!isPaymentCompleteUrl(uri) || (!isMainFrame && isWebUrl(uri))) return false
+
+        val host = context.findPaymentRecoveryHost() ?: return false
+        host.onPaymentReturn(uri)
+        return true
+    }
+
+    internal fun isPaymentCompleteUrl(uri: Uri): Boolean {
+        return (uri.scheme.equals("nurio", ignoreCase = true) &&
+            uri.host.equals("payment-complete", ignoreCase = true)) ||
+            (isAppWebUrl(uri) && PaymentRoutePolicy.isPaymentCompletionPath(uri.path.orEmpty()))
+    }
 
     fun shouldStayInWebView(uri: Uri, currentLocation: String?): Boolean {
         if (!isPaymentGatewayUrl(uri)) return false
@@ -82,14 +99,17 @@ object PaymentNavigation {
     }
 
     private fun isCheckoutEntryUrl(uri: Uri): Boolean {
+        if (!isAppWebUrl(uri)) return false
+
+        return PaymentRoutePolicy.isCheckoutEntryPath(uri.path.orEmpty())
+    }
+
+    private fun isAppWebUrl(uri: Uri): Boolean {
         if (!isWebUrl(uri)) return false
 
         val baseHost = BuildConfig.BASE_URL.toUri().host?.lowercase() ?: return false
         val host = uri.host?.lowercase() ?: return false
-        if (host != baseHost && host != "www.$baseHost") return false
-
-        val path = uri.path.orEmpty()
-        return PaymentRoutePolicy.isCheckoutEntryPath(path)
+        return host == baseHost || host == "www.$baseHost"
     }
 
     private fun openIntentUri(context: Context, location: String): ExternalPaymentNavigationOutcome {

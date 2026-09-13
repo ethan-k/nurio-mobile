@@ -27,6 +27,8 @@ import com.nurio.android.payments.PaymentRecovery
 import com.nurio.android.payments.PaymentRecoveryHost
 import com.nurio.android.payments.PendingPaymentRecovery
 import com.nurio.android.startup.MainActivityStartupCoordinator
+import com.nurio.android.webview.PaymentPopupWindow
+import com.nurio.android.webview.PaymentNavigation
 import com.google.android.material.snackbar.Snackbar
 import dev.hotwire.navigation.activities.HotwireActivity
 import dev.hotwire.navigation.navigator.Navigator
@@ -44,7 +46,7 @@ class MainActivity : HotwireActivity(), PaymentRecoveryHost {
     private val paymentRecoveryRunnable = Runnable {
         val recovery = PaymentRecovery.takeExternalAppReturnRecovery() ?: return@Runnable
         showPaymentMessage(R.string.payment_status_checking, Snackbar.LENGTH_LONG)
-        routeWhenReady(buildPaymentRecoveryUrl(recovery))
+        routePaymentResult(buildPaymentRecoveryUrl(recovery))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -97,6 +99,7 @@ class MainActivity : HotwireActivity(), PaymentRecoveryHost {
     }
 
     override fun onPause() {
+        paymentRecoveryHandler.removeCallbacks(paymentRecoveryRunnable)
         startupCoordinator.onHostPaused()
         super.onPause()
     }
@@ -114,7 +117,7 @@ class MainActivity : HotwireActivity(), PaymentRecoveryHost {
         val recovery = PaymentRecovery.takeLaunchFailureRecovery()
         showPaymentMessage(R.string.payment_app_launch_failed, Snackbar.LENGTH_INDEFINITE)
         if (recovery != null) {
-            routeWhenReady(buildPaymentRecoveryUrl(recovery))
+            routePaymentResult(buildPaymentRecoveryUrl(recovery))
         }
     }
 
@@ -122,7 +125,7 @@ class MainActivity : HotwireActivity(), PaymentRecoveryHost {
         paymentRecoveryHandler.removeCallbacks(paymentRecoveryRunnable)
         val recovery = PaymentRecovery.takeLaunchFailureRecovery() ?: return
         showPaymentMessage(R.string.payment_status_checking, Snackbar.LENGTH_LONG)
-        routeWhenReady(buildPaymentRecoveryUrl(recovery))
+        routePaymentResult(buildPaymentRecoveryUrl(recovery))
     }
 
     override fun onNavigatorReady(navigator: Navigator) {
@@ -158,9 +161,15 @@ class MainActivity : HotwireActivity(), PaymentRecoveryHost {
 
     private fun handlePaymentCallbackIntent(intent: Intent?): Boolean {
         val callbackUri = intent?.data
-            ?.takeIf { it.scheme == "nurio" && it.host == "payment-complete" }
+            ?.takeIf(PaymentNavigation::isPaymentCompleteUrl)
             ?: return false
 
+        onPaymentReturn(callbackUri)
+        return true
+    }
+
+    override fun onPaymentReturn(uri: Uri) {
+        val callbackUri = uri
         val paymentId = callbackUri.getQueryParameter("paymentId")
             ?: callbackUri.getQueryParameter("payment_id")
         paymentRecoveryHandler.removeCallbacks(paymentRecoveryRunnable)
@@ -173,8 +182,12 @@ class MainActivity : HotwireActivity(), PaymentRecoveryHost {
 
         val completeUrl = buildPaymentCompleteUrl(callbackUri, recovery)
 
-        routeWhenReady(completeUrl)
-        return true
+        routePaymentResult(completeUrl)
+    }
+
+    private fun routePaymentResult(url: String) {
+        PaymentPopupWindow.closeAll(this)
+        routeWhenReady(url)
     }
 
     private fun handleAppOpenIntent(intent: Intent?): Boolean {
