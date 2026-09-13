@@ -162,6 +162,12 @@ Run a Debug build from Xcode (`debugLoggingEnabled` is on) and watch for:
 
 ## Android
 
+Ticket checkout, payment summaries, and pass purchases use the full-screen web
+fragment with pull-to-refresh disabled. The bottom-sheet fragment measures its
+WebView inside a native ScrollView, which pushes fixed checkout buttons below
+the visible area and clips KakaoPay's viewport-sized app-launch page. Keep the
+existing full-screen WebView throughout the provider POST and authentication.
+
 `android/.../routing/CheckoutColdBootRouteDecisionHandler.kt` is the parity
 implementation, registered before `AppNavigationRouteDecisionHandler` in
 `NurioApplication`. Android is simpler than iOS: all visit proposals flow
@@ -202,3 +208,28 @@ navigator WebView on a non-Turbo gateway document after a form POST and verifies
 that both callback types load the merchant completion with GET without replaying
 the gateway request. These fixtures do not prove provider or physical-device
 payment completion.
+
+### Testing Android against localhost
+
+The customer debug build accepts a `nurioBaseUrl` Gradle property or
+`NURIO_BASE_URL` environment variable. It must be an HTTP(S) origin without a
+path, credentials, query, or fragment. Release and `productionDebug` builds
+always use `https://nurio.kr`.
+
+With Rails running on port 3000, connect the selected emulator and install:
+
+```sh
+adb -s emulator-5554 reverse tcp:3000 tcp:3000
+cd android
+./gradlew :app:installDebug -PnurioBaseUrl=http://localhost:3000
+```
+
+Replace the serial with the device shown by `adb devices`. Debug-only network
+security settings allow cleartext for `localhost`, `127.0.0.1`, and `10.0.2.2`;
+other hosts still require HTTPS. The default debug origin remains `nurio.kr`.
+
+Confirm the rendered checkout does not say **Mock mode enabled** before claiming
+provider coverage. A previously started Rails process may retain mock-mode
+environment overrides even when a new Rails runner reports real configuration.
+Provider authentication and a verified paid order are separate from a successful
+SDK launch, cancellation, or an automated callback fixture.

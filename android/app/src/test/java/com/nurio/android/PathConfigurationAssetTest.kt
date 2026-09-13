@@ -55,7 +55,7 @@ class PathConfigurationAssetTest {
     }
 
     @Test
-    fun `ticket checkout uses main stack while payment summaries and pass purchases stay modal`() {
+    fun `checkout stays full screen so provider viewport controls remain usable`() {
         val asset = listOf(
             File("src/main/assets/json/path-configuration.json"),
             File("app/src/main/assets/json/path-configuration.json")
@@ -68,9 +68,10 @@ class PathConfigurationAssetTest {
             "/orders/new" to "default",
             "/orders/new?event_id=34&lang=en&quantity=1&ticket_offer_id=4&step=tickets" to "default",
             "/orders/new?event_id=34&lang=ko" to "default",
-            "/orders/42/payment_summary?lang=en" to "modal",
-            "/pass_packages/4/purchase?lang=en" to "modal",
-            "/pass_packages/4/payment_summary" to "modal",
+            "/orders/42/payment_summary?lang=en" to "default",
+            "/orders/42/payment_summary?lang=ko" to "default",
+            "/pass_packages/4/purchase?lang=en" to "default",
+            "/pass_packages/4/payment_summary" to "default",
             "/events/34/reviews/new" to "modal"
         )
 
@@ -91,7 +92,7 @@ class PathConfigurationAssetTest {
                     if (expectedContext == "modal") "hotwire://fragment/web/modal" else "hotwire://fragment/web",
                     properties["uri"]
                 )
-                if (path.startsWith("/orders/new")) {
+                if (expectedContext == "default") {
                     assertEquals("$configuration: $path refresh", "false", properties["pull_to_refresh_enabled"])
                 }
             }
