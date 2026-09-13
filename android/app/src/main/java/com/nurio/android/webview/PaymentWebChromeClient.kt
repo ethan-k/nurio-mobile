@@ -28,7 +28,23 @@ class PaymentWebChromeClient(session: Session) : HotwireWebChromeClient(session)
             settings.domStorageEnabled = true
             settings.userAgentString = webView.settings.userAgentString
             PaymentWebViewCompatibility.configure(this)
-            webViewClient = PaymentPopupWebViewClient(webView)
+        }
+        val window = PaymentPopupWindow(webView, popup)
+        popup.webViewClient = PaymentPopupWebViewClient(webView, window)
+        popup.webChromeClient = object : HotwireWebChromeClient(session) {
+            override fun onCloseWindow(windowToClose: WebView) {
+                window.close()
+            }
+
+            override fun onCreateWindow(webView: WebView, isDialog: Boolean, isUserGesture: Boolean, resultMsg: Message?): Boolean {
+                return this@PaymentWebChromeClient.onCreateWindow(webView, isDialog, isUserGesture, resultMsg)
+            }
+        }
+
+        // Some providers write their payment UI into about:blank instead of
+        // navigating the child. Those windows must also be visible.
+        if (PaymentNavigation.isPaymentContext(webView.url) || PaymentRecovery.hasActiveAttempt()) {
+            window.show(webView.url?.toUri()?.host.orEmpty())
         }
 
         transport.webView = popup
@@ -38,62 +54,54 @@ class PaymentWebChromeClient(session: Session) : HotwireWebChromeClient(session)
 }
 
 private class PaymentPopupWebViewClient(
-    private val parentWebView: WebView
+    private val parentWebView: WebView,
+    private val window: PaymentPopupWindow,
 ) : WebViewClient() {
-    private var routed = false
-
     override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
-        routePopupLocation(view, request.url.toString())
-        return true
+        if (!request.isForMainFrame) return false
+        return routePopupLocation(view, request.url.toString())
     }
 
     @Deprecated("Deprecated in Java")
     override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
-        routePopupLocation(view, url)
-        return true
+        return routePopupLocation(view, url)
     }
 
     override fun onPageStarted(view: WebView, url: String, favicon: Bitmap?) {
         PaymentWebViewCompatibility.injectRuntimeFallback(view, url)
+        // POST navigations skip shouldOverrideUrlLoading. Display the original
+        // child WebView here; loading this URL in the parent would lose the body
+        // and sever window.opener / postMessage / window.close.
         routePopupLocation(view, url)
     }
 
-    private fun routePopupLocation(popupWebView: WebView, location: String) {
-        if (routed) return
-
+    private fun routePopupLocation(popupWebView: WebView, location: String): Boolean {
         val uri = location.toUri()
+        if (PaymentNavigation.isIgnoredUrl(uri)) return false
 
-        if (PaymentNavigation.isIgnoredUrl(uri)) return
-
-        if (PaymentNavigation.shouldStayInWebView(uri, parentWebView.url)) {
-            routed = true
-            parentWebView.loadUrl(location)
-            popupWebView.destroy()
-            return
-        }
-
-        if (PaymentRoutePolicy.shouldKeepPaymentPopupWebUrl(uri.scheme, PaymentRecovery.hasActiveAttempt())) {
-            routed = true
-            parentWebView.loadUrl(location)
-            popupWebView.destroy()
-            return
+        if (PaymentNavigation.shouldStayInWebView(uri, parentWebView.url) ||
+            PaymentRoutePolicy.shouldKeepPaymentPopupWebUrl(uri.scheme, PaymentRecovery.hasActiveAttempt())) {
+            window.show(uri.host.orEmpty())
+            return false
         }
 
         val externalOutcome = PaymentNavigation.openExternalPaymentApp(parentWebView.context, uri)
         if (externalOutcome.consumed) {
-            routed = true
             if (externalOutcome.webFallbackUrl != null) {
-                parentWebView.loadUrl(externalOutcome.webFallbackUrl)
+                popupWebView.loadUrl(externalOutcome.webFallbackUrl)
             } else if (!externalOutcome.launched) {
+                window.close()
                 parentWebView.context.findPaymentRecoveryHost()?.onExternalPaymentLaunchFailed()
             }
-            popupWebView.destroy()
-            return
+            // Keep the child alive while the bank app is open so it can resume
+            // its own session and communicate with the checkout opener.
+            return true
         }
 
         if (PaymentNavigation.openExternalWebUrl(parentWebView.context, uri)) {
-            routed = true
-            popupWebView.destroy()
+            window.close()
+            return true
         }
+        return false
     }
 }

@@ -118,6 +118,13 @@ class MainActivity : HotwireActivity(), PaymentRecoveryHost {
         }
     }
 
+    override fun onPaymentPopupDismissed() {
+        paymentRecoveryHandler.removeCallbacks(paymentRecoveryRunnable)
+        val recovery = PaymentRecovery.takeLaunchFailureRecovery() ?: return
+        showPaymentMessage(R.string.payment_status_checking, Snackbar.LENGTH_LONG)
+        routeWhenReady(buildPaymentRecoveryUrl(recovery))
+    }
+
     override fun onNavigatorReady(navigator: Navigator) {
         super.onNavigatorReady(navigator)
         startupCoordinator.onNavigatorReady()

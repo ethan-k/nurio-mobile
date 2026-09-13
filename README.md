@@ -23,6 +23,8 @@ Customer app domains:
 - Pass packages, tickets, payments, wallet credits
 - Profile/settings, referrals, event history
 
+Customer Android payment behavior and regression checks: [Android payments](android/PAYMENTS.md).
+
 Tutor app entry point:
 - `tutors-nurio-mobile/android/` for the tutor-facing Hotwire Android shell
 

@@ -5,6 +5,7 @@ import android.content.ContextWrapper
 
 interface PaymentRecoveryHost {
     fun onExternalPaymentLaunchFailed()
+    fun onPaymentPopupDismissed()
 }
 
 internal fun Context.findPaymentRecoveryHost(): PaymentRecoveryHost? {
