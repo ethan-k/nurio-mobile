@@ -39,15 +39,16 @@ class AndroidBetaHarness
   end
 
   attr_accessor :on_build, :on_upload, :fail_commit
-  attr_reader :uploaded
+  attr_reader :uploaded, :upload_options
 
   def build
     on_build&.call
   end
 
-  def upload_to_play_store(**)
+  def upload_to_play_store(**options)
     on_upload&.call
     @uploaded = true
+    @upload_options = options
   end
 
   def google_play_track_version_codes(**) = [19]
@@ -63,6 +64,10 @@ class AndroidBetaHarness
 
   def run_beta
     instance_exec(&self.class.lanes.fetch([:android, :beta]))
+  end
+
+  def run_listing(options = {})
+    instance_exec(options, &self.class.lanes.fetch([:android, :listing]))
   end
 end
 
@@ -184,6 +189,63 @@ class AndroidBetaTest < ReleaseLaneTest
     File.write(@gradle, ORIGINAL + "// existing work\n")
     assert_raises(RuntimeError) { @lane.run_beta }
     assert_equal ORIGINAL + "// existing work\n", File.read(@gradle)
+    refute @lane.uploaded
+  end
+end
+
+class AndroidListingTest < ReleaseLaneTest
+  def create_listing(include_metadata: true)
+    root = File.join(@root, "play-listing")
+    %w[en-US ko-KR].each do |locale|
+      screenshots = File.join(root, locale, "images", "phoneScreenshots")
+      FileUtils.mkdir_p(screenshots)
+      File.write(File.join(screenshots, "01.png"), "one")
+      File.write(File.join(screenshots, "02.png"), "two")
+      File.write(File.join(root, locale, "images", "featureGraphic.png"), "feature")
+      next unless include_metadata
+
+      File.write(File.join(root, locale, "title.txt"), "Nurio")
+      File.write(File.join(root, locale, "short_description.txt"), "Meet people")
+      File.write(File.join(root, locale, "full_description.txt"), "Meet people and stay connected")
+    end
+    root
+  end
+
+  def test_listing_validates_without_publishing_by_default
+    path = create_listing
+
+    @lane.run_listing(metadata_path: path)
+
+    assert @lane.uploaded
+    assert_equal true, @lane.upload_options[:validate_only]
+    assert_equal false, @lane.upload_options[:skip_upload_metadata]
+    assert_equal true, @lane.upload_options[:sync_image_upload]
+    assert_equal path, @lane.upload_options[:metadata_path]
+  end
+
+  def test_listing_publishes_only_when_explicitly_requested
+    path = create_listing
+
+    @lane.run_listing(metadata_path: path, publish: "true")
+
+    assert_equal false, @lane.upload_options[:validate_only]
+  end
+
+  def test_listing_can_update_only_images
+    path = create_listing(include_metadata: false)
+
+    @lane.run_listing(metadata_path: path, include_metadata: "false")
+
+    assert_equal true, @lane.upload_options[:skip_upload_metadata]
+  end
+
+  def test_listing_rejects_an_incomplete_locale
+    path = create_listing
+    FileUtils.rm(File.join(path, "ko-KR", "images", "phoneScreenshots", "02.png"))
+
+    error = assert_raises(RuntimeError) { @lane.run_listing(metadata_path: path) }
+
+    assert_match(/ko-KR requires 2-8 phone screenshots/, error.message)
     refute @lane.uploaded
   end
 end

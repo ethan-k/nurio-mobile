@@ -68,6 +68,14 @@ Build and upload to App Store Connect for release review (metadata untouched)
 
 Check the Play publisher credentials without building or uploading
 
+### android listing
+
+```sh
+[bundle exec] fastlane android listing
+```
+
+Validate or publish EN/KO Play listing text, screenshots, and graphics
+
 ### android build
 
 ```sh

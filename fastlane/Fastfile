@@ -25,6 +25,7 @@ require_relative "ios_release_version"
 
 IOS_REQUIRED_VARIABLES = %w[APP_STORE_CONNECT_KEY_IDENTIFIER APP_STORE_CONNECT_ISSUER_ID APP_STORE_CONNECT_PRIVATE_KEY].freeze
 ANDROID_REQUIRED_VARIABLES = %w[PLAY_SERVICE_ACCOUNT_JSON_BASE64].freeze
+NURIO_PLAY_LISTING_LOCALES = %w[en-US ko-KR].freeze
 
 # Credential decoding lives in a module so the memoized temp-key path survives
 # across lane, after_all, and error blocks, which do not share `self`.
@@ -101,6 +102,39 @@ module NurioCredentials
       decoded
     end
   end
+end
+
+def nurio_play_listing_path!(value, include_metadata:)
+  UI.user_error!("metadata_path is required") unless NurioCredentials.present?(value)
+
+  path = File.expand_path(value)
+  UI.user_error!("Play listing directory does not exist: #{path}") unless File.directory?(path)
+
+  NURIO_PLAY_LISTING_LOCALES.each do |locale|
+    locale_path = File.join(path, locale)
+    UI.user_error!("Missing Play locale directory: #{locale_path}") unless File.directory?(locale_path)
+
+    screenshots = Dir.glob(File.join(locale_path, "images", "phoneScreenshots", "*.{png,jpg,jpeg}"), File::FNM_CASEFOLD).sort
+    unless (2..8).cover?(screenshots.length)
+      UI.user_error!("#{locale} requires 2-8 phone screenshots; found #{screenshots.length}")
+    end
+
+    feature_graphics = Dir.glob(File.join(locale_path, "images", "featureGraphic.{png,jpg,jpeg}"), File::FNM_CASEFOLD)
+    UI.user_error!("#{locale} requires exactly one feature graphic") unless feature_graphics.one?
+
+    next unless include_metadata
+
+    %w[title short_description full_description].each do |name|
+      file = File.join(locale_path, "#{name}.txt")
+      UI.user_error!("Missing localized Play listing file: #{file}") unless File.file?(file) && !File.read(file).strip.empty?
+    end
+  end
+
+  path
+end
+
+def nurio_true?(value)
+  value == true || value.to_s.casecmp("true").zero?
 end
 
 before_all do
@@ -439,6 +473,30 @@ platform :android do
   lane :validate do
     validate_play_store_json_key(json_key_data: NurioCredentials.play_json_key_data)
     UI.success("Play publisher service account authenticated")
+  end
+
+  desc "Validate or publish EN/KO Play listing text, screenshots, and graphics"
+  lane :listing do |options|
+    NurioCredentials.require!(ANDROID_REQUIRED_VARIABLES)
+    publish = nurio_true?(options[:publish])
+    include_metadata = options[:include_metadata].nil? || nurio_true?(options[:include_metadata])
+    metadata_path = nurio_play_listing_path!(options[:metadata_path], include_metadata: include_metadata)
+
+    UI.important(publish ? "Publishing Google Play listing" : "Validating Google Play listing without publishing")
+    upload_to_play_store(
+      package_name: NURIO_ANDROID_PACKAGE,
+      json_key_data: NurioCredentials.play_json_key_data,
+      metadata_path: metadata_path,
+      skip_upload_apk: true,
+      skip_upload_aab: true,
+      skip_upload_changelogs: true,
+      skip_upload_metadata: !include_metadata,
+      skip_upload_images: false,
+      skip_upload_screenshots: false,
+      sync_image_upload: true,
+      validate_only: !publish
+    )
+    UI.success(publish ? "Google Play listing published" : "Google Play listing validated; no changes were published")
   end
 
   desc "Build the signed release AAB (no upload)"
