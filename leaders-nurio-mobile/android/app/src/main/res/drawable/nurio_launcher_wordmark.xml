@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Official Nurio wordmark, centered within Android's 66dp adaptive icon safe area. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="300"
+    android:viewportHeight="300">
+    <group
+        android:scaleX="0.6"
+        android:scaleY="0.6"
+        android:translateX="60"
+        android:translateY="126">
+        <path
+            android:fillColor="@android:color/transparent"
+            android:strokeColor="#FFFFFF"
+            android:strokeWidth="16"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"
+            android:pathData="M14,60V31C14,11 58,11 58,31V60 M87,22V47C87,67 125,67 125,47V22 M155,60V27C164,17 178,16 188,22 M211,27V60 M283,41A22,22 0,1 1,239,41A22,22 0,1 1,283,41Z" />
+        <path
+            android:fillColor="#CDE5FF"
+            android:pathData="M219,10A8,8 0,1 1,203,10A8,8 0,1 1,219,10Z" />
+    </group>
+</vector>

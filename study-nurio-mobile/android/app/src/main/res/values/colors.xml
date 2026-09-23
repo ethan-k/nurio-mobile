@@ -10,7 +10,7 @@
     <color name="on_background">#1A1A1A</color>
     <color name="on_surface">#1A1A1A</color>
 
-    <color name="splash_background">#FFFFFF</color>
+    <color name="splash_background">#172033</color>
 
     <color name="bottom_nav_background">#FFFFFF</color>
     <color name="bottom_nav_selected">#F64060</color>
