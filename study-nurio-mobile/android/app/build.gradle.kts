@@ -110,6 +110,10 @@ fun String.asBuildConfigString(): String =
             .replace("\t", "\\t") +
         "\""
 
+val studyDebugBaseUrl = providers.gradleProperty("nurioStudyBaseUrl")
+    .orElse("https://study.nurio.kr")
+    .get()
+
 android {
     namespace = "com.nurio.study.android"
     compileSdk = 36
@@ -147,7 +151,7 @@ android {
     buildTypes {
         debug {
             manifestPlaceholders["crashlyticsCollectionEnabled"] = false
-            buildConfigField("String", "BASE_URL", "\"https://study.nurio.kr\"")
+            buildConfigField("String", "BASE_URL", studyDebugBaseUrl.asBuildConfigString())
             buildConfigField("Boolean", "DEBUG_LOGGING", "false")
         }
         create("productionDebug") {
