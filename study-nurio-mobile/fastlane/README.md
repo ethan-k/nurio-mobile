@@ -39,6 +39,14 @@ Archive and export a signed App Store IPA (no upload)
 
 Build and upload to TestFlight
 
+### ios refresh_dsyms
+
+```sh
+[bundle exec] fastlane ios refresh_dsyms
+```
+
+Upload App Store Connect dSYMs to Crashlytics (run after TestFlight finishes processing)
+
 ### ios release
 
 ```sh

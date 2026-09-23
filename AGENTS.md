@@ -33,6 +33,12 @@
 - The external bundle includes exported store icons, editable logo artwork, screenshots, feature graphics, preview media, localized metadata exports, and upload-ready packages.
 - Keep only runtime icon resources and source files required to build the installed apps in `leaders-nurio-mobile/`; do not commit generated store screenshots or promotional binaries.
 
+## Commits
+- After completing any file-changing task, commit it before reporting the work done — one meaningful change per commit — unless the user explicitly says not to commit (workspace rule: `../../AGENTS.md`).
+- Conventional Commits-style subjects (`fix(payments): …`, `feat(leaders): …`), imperative.
+- Stage only the files you changed for the task, by name; never `git add -A`.
+- All mobile commits happen in this standalone checkout, never inside the embedded `nurio/nurio-mobile/` gitlink.
+
 ## Architecture Rules
 - Keep customer scope boundaries explicit in native navigation and API integration.
 - Keep Study Leader scope boundaries explicit and preserve `nurioleaders://auth-callback` on both platforms.
