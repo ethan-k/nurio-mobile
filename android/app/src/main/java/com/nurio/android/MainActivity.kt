@@ -27,6 +27,7 @@ import com.nurio.android.payments.PaymentRecovery
 import com.nurio.android.payments.PaymentRecoveryHost
 import com.nurio.android.payments.PendingPaymentRecovery
 import com.nurio.android.startup.MainActivityStartupCoordinator
+import com.nurio.android.webview.LegacyWebViewInsets
 import com.nurio.android.webview.PaymentPopupWindow
 import com.nurio.android.webview.PaymentNavigation
 import com.google.android.material.snackbar.Snackbar
@@ -52,6 +53,7 @@ class MainActivity : HotwireActivity(), PaymentRecoveryHost {
         installSplashScreen()
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+        LegacyWebViewInsets.applyIfNeeded(this)
 
         startupCoordinator = MainActivityStartupCoordinator(
             bootstrapLocale = {
