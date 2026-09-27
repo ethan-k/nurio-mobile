@@ -7,12 +7,21 @@ import WebKit
 @MainActor
 struct PaymentGatewayWebViewPolicyDecisionHandler: @preconcurrency WebViewPolicyDecisionHandler {
     let name = "payment-gateway-presentation"
+    private let presentation: PaymentGatewayPresentation
+
+    init(presentation: PaymentGatewayPresentation = .shared) {
+        self.presentation = presentation
+    }
 
     func matches(navigationAction: WKNavigationAction, configuration: Navigator.Configuration) -> Bool {
         guard let url = navigationAction.request.url else { return false }
         // Result redirects can originate in gateway frames or popup windows.
         // Consume our scheme here instead of reopening Nurio through iOS.
         if url.scheme?.lowercased() == AppEnvironment.callbackScheme { return true }
+        if presentation.ownsGatewayWebView(navigationAction.navigatingWebView),
+           PaymentGatewayPresentation.providerNavigation(for: url, baseURL: configuration.startLocation) != nil {
+            return true
+        }
         guard navigationAction.targetFrame?.isMainFrame == true else { return false }
         return PaymentGatewayPresentation.isGatewayURL(url) ||
             PaymentGatewayPresentation.isCompletionURL(url, baseURL: configuration.startLocation)
@@ -27,19 +36,39 @@ struct PaymentGatewayWebViewPolicyDecisionHandler: @preconcurrency WebViewPolicy
             return .cancel
         }
 
+        // PortOne's WebView contract: provider pages (Naver Pay, Kakao Pay, card
+        // issuers) load in the gateway web view, and card/wallet app schemes go
+        // to iOS from any frame. Hotwire's defaults would cancel these and try
+        // a Safari sheet the Payment sheet already covers, leaving it blank.
+        if presentation.ownsGatewayWebView(navigationAction.navigatingWebView),
+           let providerNavigation = PaymentGatewayPresentation.providerNavigation(for: url, baseURL: configuration.startLocation) {
+            switch providerNavigation {
+            case .stayInWebView:
+                return .allow
+            case .openApp:
+                presentation.openExternalURL(url)
+                return .cancel
+            }
+        }
+
         if PaymentGatewayPresentation.isCompletionURL(url, baseURL: configuration.startLocation) {
-            if PaymentGatewayPresentation.shared.completionURLBeingRouted == url { return .allow }
+            if presentation.completionURLBeingRouted == url { return .allow }
             Task { @MainActor in
-                PaymentGatewayPresentation.shared.routeAppReturn(url, navigator: navigator)
+                presentation.routeAppReturn(url, navigator: navigator)
             }
             return .cancel
         }
 
         Task { @MainActor in
-            PaymentGatewayPresentation.shared.presentGateway(navigator: navigator)
+            presentation.presentGateway(navigator: navigator)
         }
         return .allow
     }
+}
+
+enum PaymentProviderNavigation: Equatable {
+    case stayInWebView
+    case openApp
 }
 
 @MainActor
@@ -50,6 +79,25 @@ final class PaymentGatewayPresentation {
     private(set) var completionURLBeingRouted: URL?
     private var closing = false
     private var pendingPaymentReturn: (() -> Void)?
+    var openExternalURL: (URL) -> Void = { UIApplication.shared.open($0) }
+
+    /// Only the web view reparented into the Payment sheet follows the provider
+    /// rules; the covered Hotwire web views keep their default routing.
+    func ownsGatewayWebView(_ webView: WKWebView?) -> Bool {
+        guard let webView, let gatewayController, !closing else { return false }
+        return gatewayController.source.visitableView.webView === webView
+    }
+
+    /// Merchant URLs and our callback scheme keep their own routing; document
+    /// internals (about:, data:, blob:, javascript:) are never app launches.
+    nonisolated static func providerNavigation(for url: URL, baseURL: URL) -> PaymentProviderNavigation? {
+        guard let scheme = url.scheme?.lowercased() else { return nil }
+        if scheme == "http" || scheme == "https" {
+            return CheckoutNavigation.isOffOrigin(url, baseURL: baseURL) ? .stayInWebView : nil
+        }
+        let documentSchemes: Set<String> = [ "about", "data", "blob", "javascript", AppEnvironment.callbackScheme ]
+        return documentSchemes.contains(scheme) ? nil : .openApp
+    }
 
     nonisolated static func isGatewayURL(_ url: URL) -> Bool {
         guard url.scheme?.lowercased() == "https", let host = url.host?.lowercased() else { return false }
@@ -283,5 +331,12 @@ final class PaymentGatewayViewController: UIViewController, WKUIDelegate {
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel) { _ in completionHandler(nil) })
         alert.addAction(UIAlertAction(title: "OK", style: .default) { [weak alert] _ in completionHandler(alert?.textFields?.first?.text) })
         present(alert, animated: true)
+    }
+}
+
+private extension WKNavigationAction {
+    /// WebKit can report a nil source frame despite the non-optional signature.
+    var navigatingWebView: WKWebView? {
+        targetFrame?.webView ?? (sourceFrame as WKFrameInfo?)?.webView
     }
 }

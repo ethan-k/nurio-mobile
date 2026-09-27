@@ -22,6 +22,82 @@ final class PaymentGatewayPresentationTests: XCTestCase {
         }
     }
 
+    func testProviderNavigationKeepsProviderPagesInWebViewAndOpensPaymentApps() {
+        let base = URL(string: "https://nurio.kr")!
+        for value in ["https://m.pay.naver.com/o/payment", "https://nid.naver.com/nidlogin.login", "https://mobile.shinhancard.com/pay", "http://pg.example.com/step"] {
+            XCTAssertEqual(PaymentGatewayPresentation.providerNavigation(for: URL(string: value)!, baseURL: base), .stayInWebView, value)
+        }
+        for value in ["shinhan-sr-ansimclick://pay?x=1", "supersol://pay", "naversearchthirdlogin://pay", "kakaotalk://kakaopay/pg", "ispmobile://TID=1"] {
+            XCTAssertEqual(PaymentGatewayPresentation.providerNavigation(for: URL(string: value)!, baseURL: base), .openApp, value)
+        }
+        for value in ["https://nurio.kr/orders/1", "https://www.nurio.kr/orders/1", "nurio://payment-complete?paymentId=1", "nurio://", "about:blank", "about:srcdoc", "data:text/html,x", "blob:https://ksmobile.inicis.com/abc", "javascript:void(0)"] {
+            XCTAssertNil(PaymentGatewayPresentation.providerNavigation(for: URL(string: value)!, baseURL: base), value)
+        }
+    }
+
+    @MainActor
+    func testPresentedGatewayKeepsProviderPagesAndOpensCardAppsFromAnyFrame() async throws {
+        let originalFactory = Hotwire.config.makeCustomWebView
+        defer { Hotwire.config.makeCustomWebView = originalFactory }
+        var views: [GatewayRouteWebView] = []
+        Hotwire.config.makeCustomWebView = { configuration in
+            let view = GatewayRouteWebView(frame: .zero, configuration: configuration)
+            views.append(view)
+            return view
+        }
+        let delegate = SceneController()
+        let configuration = Navigator.Configuration(name: "provider-hop-test", startLocation: AppEnvironment.baseURL)
+        let navigator = Navigator(configuration: configuration, delegate: delegate)
+        let window = UIWindow(frame: CGRect(x: 0, y: 0, width: 390, height: 844))
+        window.rootViewController = navigator.rootViewController
+        window.makeKeyAndVisible()
+        defer { window.isHidden = true }
+        navigator.route(AppEnvironment.baseURL.appendingPathComponent("orders/123/payment_summary"))
+        views[0].reportedURL = URL(string: "https://ksmobile.inicis.com/smart/payment")!
+        let presentation = PaymentGatewayPresentation()
+        var opened: [URL] = []
+        presentation.openExternalURL = { opened.append($0) }
+        let handler = PaymentGatewayWebViewPolicyDecisionHandler(presentation: presentation)
+        let gatewayMain = GatewayFrameInfo(isMainFrame: true, webView: views[0])
+        let gatewaySubframe = GatewayFrameInfo(isMainFrame: false, webView: views[0])
+        let coveredMain = GatewayFrameInfo(isMainFrame: true, webView: views[1])
+        let naverPayURL = URL(string: "https://m.pay.naver.com/o/payment")!
+        let naverPay = GatewayProviderNavigationAction(url: naverPayURL, frame: gatewayMain, navigationType: .other)
+        XCTAssertFalse(handler.matches(navigationAction: naverPay, configuration: configuration), "Outside a gateway, external pages keep Hotwire's default routing")
+
+        presentation.presentGateway(navigator: navigator)
+        try await Task.sleep(nanoseconds: 600_000_000)
+        XCTAssertNotNil(presentation.gatewayController)
+
+        XCTAssertTrue(handler.matches(navigationAction: naverPay, configuration: configuration))
+        XCTAssertEqual(handler.handle(navigationAction: naverPay, configuration: configuration, navigator: navigator), .allow)
+        let naverLogin = GatewayProviderNavigationAction(url: URL(string: "https://nid.naver.com/nidlogin.login")!, frame: gatewayMain, navigationType: .linkActivated)
+        XCTAssertTrue(handler.matches(navigationAction: naverLogin, configuration: configuration))
+        XCTAssertEqual(handler.handle(navigationAction: naverLogin, configuration: configuration, navigator: navigator), .allow)
+
+        let superSol = URL(string: "shinhan-sr-ansimclick://pay?srCode=fixture")!
+        let cardApp = GatewayProviderNavigationAction(url: superSol, frame: gatewaySubframe, navigationType: .other)
+        XCTAssertTrue(handler.matches(navigationAction: cardApp, configuration: configuration))
+        XCTAssertEqual(handler.handle(navigationAction: cardApp, configuration: configuration, navigator: navigator), .cancel)
+        XCTAssertEqual(opened, [superSol])
+
+        let coveredHop = GatewayProviderNavigationAction(url: naverPayURL, frame: coveredMain, navigationType: .other)
+        XCTAssertFalse(handler.matches(navigationAction: coveredHop, configuration: configuration), "Web views behind the sheet keep Hotwire's default routing")
+        let merchantPage = GatewayProviderNavigationAction(url: AppEnvironment.baseURL.appendingPathComponent("orders/123"), frame: gatewayMain, navigationType: .other)
+        XCTAssertFalse(handler.matches(navigationAction: merchantPage, configuration: configuration), "Merchant pages keep the existing gateway return routing")
+
+        let completion = URL(string: "/payments/portone/complete?paymentId=fixture", relativeTo: AppEnvironment.baseURL)!.absoluteURL
+        let completionHop = GatewayProviderNavigationAction(url: completion, frame: gatewayMain, navigationType: .other)
+        XCTAssertTrue(handler.matches(navigationAction: completionHop, configuration: configuration))
+        XCTAssertEqual(handler.handle(navigationAction: completionHop, configuration: configuration, navigator: navigator), .cancel)
+        for _ in 0..<40 where presentation.gatewayController != nil {
+            try await Task.sleep(nanoseconds: 50_000_000)
+        }
+        XCTAssertNil(presentation.gatewayController, "The payment result still dismisses the sheet")
+        XCTAssertEqual(opened, [superSol])
+        withExtendedLifetime(delegate) {}
+    }
+
     @MainActor
     func testNativePaymentReturnUsesExistingCheckoutRecoveryOnlyOnce() async {
         let originalFactory = Hotwire.config.makeCustomWebView
@@ -248,4 +324,34 @@ private final class GatewayCallbackNavigationAction: WKNavigationAction {
     private let callbackRequest: URLRequest
     init(url: URL) { callbackRequest = URLRequest(url: url); super.init() }
     override var request: URLRequest { callbackRequest }
+}
+
+private final class GatewayProviderNavigationAction: WKNavigationAction {
+    private let providerRequest: URLRequest
+    private let frame: GatewayFrameInfo
+    private let type: WKNavigationType
+    init(url: URL, frame: GatewayFrameInfo, navigationType: WKNavigationType) {
+        providerRequest = URLRequest(url: url)
+        self.frame = frame
+        type = navigationType
+        super.init()
+    }
+    override var request: URLRequest { providerRequest }
+    override var targetFrame: WKFrameInfo? { frame }
+    override var sourceFrame: WKFrameInfo { frame }
+    override var navigationType: WKNavigationType { type }
+}
+
+private final class GatewayFrameInfo: WKFrameInfo {
+    private let isMainFrameValue: Bool
+    private weak var owningWebView: WKWebView?
+    init(isMainFrame: Bool, webView: WKWebView) {
+        isMainFrameValue = isMainFrame
+        owningWebView = webView
+        super.init()
+        // WebKit crashes deallocating a WKFrameInfo it did not create.
+        _ = Unmanaged.passRetained(self)
+    }
+    override var isMainFrame: Bool { isMainFrameValue }
+    override var webView: WKWebView? { owningWebView }
 }
