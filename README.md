@@ -36,10 +36,16 @@ Study Leader app entry point:
 
 For either product, preview a joint iOS/Android patch bump with
 `task study:version:preview` or `task leaders:version:preview`, then run the
-corresponding `:bump` task. `BUMP=build` increments only the iOS build and
-Android code; `BUMP=minor` and `BUMP=major` are also available. These local
-commands require clean version files and do not query the stores, so check the
-Android code against Play before uploading. `task study:ios:beta` separately
+corresponding `:bump` task. To update one platform, use
+`task study:ios:version:bump`, `task study:android:version:bump`,
+`task leaders:ios:version:bump`, or `task leaders:android:version:bump`;
+each has a matching `:preview` task. A single-platform patch uses that
+platform's current version, while a joint patch starts above the higher
+version. `BUMP=build` increments the iOS build number or Android code without
+changing the marketing version; `BUMP=minor` and `BUMP=major` are also
+available. These local commands require clean selected version files and do not
+query the stores, so check the Android code against Play before uploading.
+`task study:ios:beta` separately
 checks App Store Connect before archiving: if the local iOS version has already
 been released, it moves to the next open patch and selects an unused TestFlight
 build number. The Study iOS version file is committed after a successful upload.

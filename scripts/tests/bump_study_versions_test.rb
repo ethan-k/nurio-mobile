@@ -49,4 +49,28 @@ class StudyVersionBumpTest < Minitest::Test
     assert_equal 2, plan[:ios][:build]
     assert_equal 2, plan[:android][:code]
   end
+
+  def test_study_ios_bumps_independently_without_android_file
+    android = File.join(@root, "study-nurio-mobile/android/app/build.gradle.kts")
+    File.delete(android)
+    bump = StudyVersionBump.new(@root, "study", platform: "ios")
+    assert_equal [bump.ios_path], bump.paths
+    plan = bump.plan("patch")
+    assert_equal [:ios], plan.keys
+    assert_equal "1.0.2", plan[:ios][:name]
+    bump.apply(plan)
+    assert_equal "1.0.2", IosReleaseVersion.new(bump.ios_path, target_name: "NurioStudy").version
+  end
+
+  def test_study_android_bumps_independently_without_ios_file
+    ios = File.join(@root, "study-nurio-mobile/ios/NurioStudy.xcodeproj/project.pbxproj")
+    File.delete(ios)
+    bump = StudyVersionBump.new(@root, "study", platform: "android")
+    assert_equal [bump.android_path], bump.paths
+    plan = bump.plan("patch")
+    assert_equal [:android], plan.keys
+    assert_equal "1.0.3", plan[:android][:name]
+    bump.apply(plan)
+    assert_match(/versionName = "1.0.3"/, File.read(bump.android_path))
+  end
 end
