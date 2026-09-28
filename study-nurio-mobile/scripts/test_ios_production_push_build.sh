@@ -3,8 +3,7 @@ set -euo pipefail
 
 script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 study_root=$(cd "${script_dir}/.." && pwd)
-repo_root=$(cd "${study_root}/.." && pwd)
-workspace_root=$(cd "${repo_root}/.." && pwd)
+workspace_root=$(cd "${study_root}/../../.." && pwd)
 source_config="${workspace_root}/nurio_study/mobile_certs/nurio-study-GoogleService-Info.plist"
 production_auth_config="${study_root}/ios/Config/NativeAuth.xcconfig"
 debug_auth_config="${study_root}/ios/Config/NativeAuth.debug.xcconfig"

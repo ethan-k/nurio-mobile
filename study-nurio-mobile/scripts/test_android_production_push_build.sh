@@ -3,7 +3,7 @@ set -euo pipefail
 
 script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 study_root=$(cd "${script_dir}/.." && pwd)
-workspace_root=$(cd "${study_root}/../.." && pwd)
+workspace_root=$(cd "${study_root}/../../.." && pwd)
 source_config="${workspace_root}/nurio_study/mobile_certs/nurio-study-google-services.json"
 staged_config="${study_root}/android/app/google-services.json"
 

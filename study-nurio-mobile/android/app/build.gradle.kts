@@ -9,7 +9,7 @@ plugins {
 }
 
 val firebaseSourceFile = rootProject.file(
-    "../../../nurio_study/mobile_certs/nurio-study-google-services.json"
+    "../../../../nurio_study/mobile_certs/nurio-study-google-services.json"
 )
 val firebaseStagedFile = file("google-services.json")
 val firebaseConfigured = firebaseSourceFile.isFile

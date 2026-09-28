@@ -307,7 +307,7 @@ platform :ios do
 
     upload_symbols_to_crashlytics(
       gsp_path: File.expand_path(
-        "../../../nurio_study/mobile_certs/nurio-study-GoogleService-Info.plist",
+        "../../../../nurio_study/mobile_certs/nurio-study-GoogleService-Info.plist",
         Dir.pwd
       ),
       binary_path: upload_symbols

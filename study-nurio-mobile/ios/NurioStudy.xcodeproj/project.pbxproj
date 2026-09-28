@@ -373,7 +373,7 @@
 			files = (
 			);
 			inputPaths = (
-				"$(SRCROOT)/../../../nurio_study/mobile_certs/nurio-study-GoogleService-Info.plist",
+				"$(SRCROOT)/../../../../nurio_study/mobile_certs/nurio-study-GoogleService-Info.plist",
 			);
 			name = "Copy Study Firebase configuration";
 			outputPaths = (
