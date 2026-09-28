@@ -23,10 +23,11 @@ class StudyVersionBumpTest < Minitest::Test
 
   def test_study_patch_uses_higher_platform_version
     bump = StudyVersionBump.new(@root, "study")
+    current_code = File.read(bump.android_path).match(/versionCode = (\d+)/)[1].to_i
     plan = bump.plan("patch")
     assert_equal "1.0.3", plan[:ios][:name]
     assert_equal "1.0.3", plan[:android][:name]
-    assert_equal 10, plan[:android][:code]
+    assert_equal current_code + 1, plan[:android][:code]
     bump.apply(plan)
     assert_equal "1.0.3", IosReleaseVersion.new(bump.ios_path, target_name: "NurioStudy").version
     assert_match(/versionName = "1.0.3"/, File.read(bump.android_path))

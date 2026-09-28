@@ -27,6 +27,11 @@ tasks:
     cmds:
       - task --list
 
+  list:
+    desc: List available tasks
+    cmds:
+      - task --list
+
   ios:open:
     desc: Open the standalone Hotwire Native iOS project in Xcode
     cmds:
@@ -112,32 +117,32 @@ tasks:
   study:version:preview:
     desc: Preview the next Study iOS and Android versions
     cmds:
-      - mise exec ruby -- ruby -S bundle exec ruby scripts/bump-study-versions.rb study {{.BUMP | default "patch"}} --dry-run
+      - mise exec ruby -- ruby scripts/bump-study-versions.rb study {{.BUMP | default "patch"}} --dry-run
 
   study:version:bump:
     desc: Bump Study iOS and Android versions (BUMP=build|major|minor|patch)
     cmds:
-      - mise exec ruby -- ruby -S bundle exec ruby scripts/bump-study-versions.rb study {{.BUMP | default "patch"}}
+      - mise exec ruby -- ruby scripts/bump-study-versions.rb study {{.BUMP | default "patch"}}
 
   study:ios:version:preview:
     desc: Preview a Study iOS-only version bump
     cmds:
-      - mise exec ruby -- ruby -S bundle exec ruby scripts/bump-study-versions.rb study {{.BUMP | default "patch"}} --platform ios --dry-run
+      - mise exec ruby -- ruby scripts/bump-study-versions.rb study {{.BUMP | default "patch"}} --platform ios --dry-run
 
   study:ios:version:bump:
     desc: Bump the Study iOS version only
     cmds:
-      - mise exec ruby -- ruby -S bundle exec ruby scripts/bump-study-versions.rb study {{.BUMP | default "patch"}} --platform ios
+      - mise exec ruby -- ruby scripts/bump-study-versions.rb study {{.BUMP | default "patch"}} --platform ios
 
   study:android:version:preview:
     desc: Preview a Study Android-only version bump
     cmds:
-      - mise exec ruby -- ruby -S bundle exec ruby scripts/bump-study-versions.rb study {{.BUMP | default "patch"}} --platform android --dry-run
+      - mise exec ruby -- ruby scripts/bump-study-versions.rb study {{.BUMP | default "patch"}} --platform android --dry-run
 
   study:android:version:bump:
     desc: Bump the Study Android version only
     cmds:
-      - mise exec ruby -- ruby -S bundle exec ruby scripts/bump-study-versions.rb study {{.BUMP | default "patch"}} --platform android
+      - mise exec ruby -- ruby scripts/bump-study-versions.rb study {{.BUMP | default "patch"}} --platform android
 
   study:ios:beta:
     desc: Build and upload the Study app to TestFlight
@@ -348,32 +353,32 @@ tasks:
   leaders:version:preview:
     desc: Preview the next Study Leader iOS and Android versions
     cmds:
-      - mise exec ruby -- ruby -S bundle exec ruby scripts/bump-study-versions.rb leaders {{.BUMP | default "patch"}} --dry-run
+      - mise exec ruby -- ruby scripts/bump-study-versions.rb leaders {{.BUMP | default "patch"}} --dry-run
 
   leaders:version:bump:
     desc: Bump Study Leader iOS and Android versions (BUMP=build|major|minor|patch)
     cmds:
-      - mise exec ruby -- ruby -S bundle exec ruby scripts/bump-study-versions.rb leaders {{.BUMP | default "patch"}}
+      - mise exec ruby -- ruby scripts/bump-study-versions.rb leaders {{.BUMP | default "patch"}}
 
   leaders:ios:version:preview:
     desc: Preview a Study Leader iOS-only version bump
     cmds:
-      - mise exec ruby -- ruby -S bundle exec ruby scripts/bump-study-versions.rb leaders {{.BUMP | default "patch"}} --platform ios --dry-run
+      - mise exec ruby -- ruby scripts/bump-study-versions.rb leaders {{.BUMP | default "patch"}} --platform ios --dry-run
 
   leaders:ios:version:bump:
     desc: Bump the Study Leader iOS version only
     cmds:
-      - mise exec ruby -- ruby -S bundle exec ruby scripts/bump-study-versions.rb leaders {{.BUMP | default "patch"}} --platform ios
+      - mise exec ruby -- ruby scripts/bump-study-versions.rb leaders {{.BUMP | default "patch"}} --platform ios
 
   leaders:android:version:preview:
     desc: Preview a Study Leader Android-only version bump
     cmds:
-      - mise exec ruby -- ruby -S bundle exec ruby scripts/bump-study-versions.rb leaders {{.BUMP | default "patch"}} --platform android --dry-run
+      - mise exec ruby -- ruby scripts/bump-study-versions.rb leaders {{.BUMP | default "patch"}} --platform android --dry-run
 
   leaders:android:version:bump:
     desc: Bump the Study Leader Android version only
     cmds:
-      - mise exec ruby -- ruby -S bundle exec ruby scripts/bump-study-versions.rb leaders {{.BUMP | default "patch"}} --platform android
+      - mise exec ruby -- ruby scripts/bump-study-versions.rb leaders {{.BUMP | default "patch"}} --platform android
 
   leaders:ios:beta:
     desc: Build and upload the Study Leader app to TestFlight
