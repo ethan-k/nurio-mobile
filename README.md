@@ -34,6 +34,16 @@ Study app entry point:
 Study Leader app entry point:
 - `leaders-nurio-mobile/` for the leader operations workspace
 
+For either product, preview a joint iOS/Android patch bump with
+`task study:version:preview` or `task leaders:version:preview`, then run the
+corresponding `:bump` task. `BUMP=build` increments only the iOS build and
+Android code; `BUMP=minor` and `BUMP=major` are also available. These local
+commands require clean version files and do not query the stores, so check the
+Android code against Play before uploading. `task study:ios:beta` separately
+checks App Store Connect before archiving: if the local iOS version has already
+been released, it moves to the next open patch and selects an unused TestFlight
+build number. The Study iOS version file is committed after a successful upload.
+
 ## iOS Hotwire Shell
 
 The top-level `ios/` project is a standalone Hotwire Native shell.

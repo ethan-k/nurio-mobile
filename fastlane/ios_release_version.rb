@@ -12,12 +12,12 @@ class IosReleaseVersion
 
   attr_reader :path, :original, :bumped
 
-  def initialize(path)
+  def initialize(path, target_name: "Nurio")
     @path = path
     @original = File.read(path)
     project = Xcodeproj::Project.open(File.dirname(path))
-    target = project.targets.find { |item| item.name == "Nurio" }
-    raise "Nurio app target is missing" unless target
+    target = project.targets.find { |item| item.name == target_name }
+    raise "#{target_name} app target is missing" unless target
 
     @settings = target.build_configurations.to_h do |config|
       [config.uuid, config.build_settings.slice("MARKETING_VERSION", "CURRENT_PROJECT_VERSION")]
@@ -26,7 +26,7 @@ class IosReleaseVersion
       raise "Invalid iOS marketing version" unless settings["MARKETING_VERSION"].to_s.match?(/\A\d+\.\d+(?:\.\d+)?\z/)
       raise "Invalid iOS build number" unless settings["CURRENT_PROJECT_VERSION"].to_s.match?(/\A\d+\z/)
     end
-    raise "Nurio build configurations have different versions" unless @settings.values.uniq.one?
+    raise "#{target_name} build configurations have different versions" unless @settings.values.uniq.one?
   end
 
   def version = @settings.values.first.fetch("MARKETING_VERSION")

@@ -1,9 +1,7 @@
 # Nurio Study mobile deployment lanes.
 #
-# Version bumping stays with the existing release scripts; these lanes only
-# build and upload at whatever versions are currently written to the iOS
-# project (MARKETING_VERSION / CURRENT_PROJECT_VERSION) and Android gradle
-# file (versionName / versionCode).
+# The iOS beta lane checks App Store Connect before building and advances a
+# closed local version. Android beta advances versionCode against Play.
 #
 # Credentials come from the shared workspace shell environment. These names
 # are deliberately unprefixed: one Apple Developer account and one Play
@@ -22,6 +20,7 @@ require "fileutils"
 require "json"
 require "shellwords"
 require "tmpdir"
+require_relative "../../fastlane/ios_release_version"
 
 IOS_REQUIRED_VARIABLES = %w[APP_STORE_CONNECT_KEY_IDENTIFIER APP_STORE_CONNECT_ISSUER_ID APP_STORE_CONNECT_PRIVATE_KEY].freeze
 ANDROID_REQUIRED_VARIABLES = %w[PLAY_SERVICE_ACCOUNT_JSON_BASE64].freeze
@@ -158,6 +157,38 @@ def nurio_ios_crashlytics_upload_symbols
   )
 end
 
+def study_ios_project_file
+  File.expand_path("../ios/NurioStudy.xcodeproj/project.pbxproj", Dir.pwd)
+end
+
+def study_ios_store_versions(api_key:)
+  Spaceship::ConnectAPI.token = Spaceship::ConnectAPI::Token.from(hash: api_key)
+  app = Spaceship::ConnectAPI::App.find("com.nurio.study.ios")
+  UI.user_error!("Cannot find com.nurio.study.ios in App Store Connect") unless app
+  app.get_app_store_versions(filter: { platform: "IOS" }, includes: "")
+end
+
+def study_require_clean_ios_version_file!(file)
+  root = `git rev-parse --show-toplevel`.strip
+  relative = file.delete_prefix("#{root}/")
+  return if system("git", "-C", root, "diff", "--quiet", "--", relative) &&
+            system("git", "-C", root, "diff", "--cached", "--quiet", "--", relative)
+
+  UI.user_error!("#{relative} has pending changes. Commit or set them aside before beta.")
+end
+
+def study_commit_ios_version_file!(file, version:, build:)
+  root = sh("git rev-parse --show-toplevel").strip
+  relative = file.delete_prefix("#{root}/")
+  unless system("git", "-C", root, "diff", "--cached", "--quiet", "--", relative)
+    UI.user_error!("Upload succeeded, but #{relative} was staged during release. Commit the uploaded version manually.")
+  end
+  sh("git -C #{Shellwords.escape(root)} add -- #{Shellwords.escape(relative)}")
+  message = "chore(release): bump Study iOS to #{version} (#{build})"
+  sh("git -C #{Shellwords.escape(root)} commit -m #{Shellwords.escape(message)} -- #{Shellwords.escape(relative)}")
+  UI.success("Committed version bump: #{message}")
+end
+
 platform :ios do
   desc "Check App Store Connect credentials without building or uploading"
   lane :validate do
@@ -204,12 +235,45 @@ platform :ios do
   desc "Build and upload to TestFlight"
   lane :beta do
     api_key = nurio_asc_api_key
-    build
-    upload_to_testflight(
-      api_key: api_key,
-      skip_waiting_for_build_processing: true,
-      distribute_external: false
-    )
+    project_file = study_ios_project_file
+    study_require_clean_ios_version_file!(project_file)
+    version_file = IosReleaseVersion.new(project_file, target_name: "NurioStudy")
+    version = IosReleaseVersion.open_version(version_file.version, study_ios_store_versions(api_key: api_key))
+    uploaded = false
+    retried_closed_train = false
+    begin
+      begin
+        latest_build = latest_testflight_build_number(
+          api_key: api_key, app_identifier: "com.nurio.study.ios", version: version,
+          initial_build_number: 0
+        ).to_i
+        build_number = [version == version_file.version ? version_file.build : 1, latest_build + 1].max
+        version_file.update(version: version, build: build_number)
+        UI.message("Deploying Nurio Study iOS: #{version} (#{build_number}) -> TestFlight")
+        build
+        upload_to_testflight(
+          api_key: api_key,
+          skip_waiting_for_build_processing: true,
+          distribute_external: false
+        )
+        uploaded = true
+      rescue StandardError => error
+        if !retried_closed_train && error.message.match?(/90186|Invalid Pre-Release Train/i)
+          retried_closed_train = true
+          version = IosReleaseVersion.open_version(
+            IosReleaseVersion.next_patch(version), study_ios_store_versions(api_key: api_key)
+          )
+          retry
+        end
+        raise
+      end
+    ensure
+      version_file.restore unless uploaded
+    end
+    unless File.read(project_file) == version_file.bumped
+      UI.user_error!("TestFlight upload succeeded, but the Xcode project changed during release. Commit the uploaded version manually.")
+    end
+    study_commit_ios_version_file!(project_file, version: version, build: build_number)
   end
 
   desc "Upload App Store Connect dSYMs to Crashlytics (run after TestFlight finishes processing)"
