@@ -29,6 +29,7 @@ import com.nurio.study.android.notifications.NotificationDestination
 import com.nurio.study.android.notifications.NotificationPayload
 import com.nurio.study.android.notifications.NotificationPermissionHost
 import com.nurio.study.android.notifications.PendingNotificationRoute
+import com.nurio.study.android.webview.LegacyWebViewInsets
 import dev.hotwire.navigation.activities.HotwireActivity
 import dev.hotwire.navigation.navigator.Navigator
 import dev.hotwire.navigation.navigator.NavigatorConfiguration
@@ -91,6 +92,7 @@ class MainActivity : HotwireActivity(), MicPermissionHost, NotificationPermissio
         super.onCreate(savedInstanceState)
         deleteSharedPreferences(LEGACY_MICROPHONE_PERMISSION_PREFERENCES)
         setContentView(R.layout.activity_main)
+        LegacyWebViewInsets.applyIfNeeded(this)
         pendingAuthUrl = savedInstanceState?.getString(PENDING_AUTH_URL_KEY)
         delegate.setCurrentNavigator(navigatorConfigurations().first())
         handleAuthCallbackIntent(intent)
