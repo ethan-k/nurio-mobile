@@ -1,5 +1,6 @@
 package com.nurio.study.android.auth
 
+import android.util.Log
 import com.kakao.sdk.auth.model.OAuthToken
 import com.kakao.sdk.common.model.ClientError
 import com.kakao.sdk.common.model.ClientErrorCause
@@ -283,7 +284,12 @@ private class NativeKakaoHandoffExchanger(
         accessToken: String,
         callback: (Result<String>) -> Unit
     ) {
-        handoffClient.exchangeKakao(accessToken, callback)
+        handoffClient.exchangeKakao(accessToken) { result ->
+            result.exceptionOrNull()?.let { error ->
+                Log.w(TAG, "Kakao handoff failed: ${error.javaClass.simpleName}: ${error.message}")
+            }
+            callback(result)
+        }
     }
 }
 
@@ -331,6 +337,10 @@ private fun kakaoLoginResult(
         return KakaoLoginResult.Cancelled
     }
 
+    if (error != null) {
+        Log.w(TAG, "Kakao SDK login failed: ${error.javaClass.simpleName}: ${error.message}")
+    }
+
     val accessToken = token?.accessToken
     return if (error != null || accessToken.isNullOrBlank()) {
         KakaoLoginResult.Failed
@@ -338,3 +348,5 @@ private fun kakaoLoginResult(
         KakaoLoginResult.Success(accessToken)
     }
 }
+
+private const val TAG = "NativeKakaoSignIn"
