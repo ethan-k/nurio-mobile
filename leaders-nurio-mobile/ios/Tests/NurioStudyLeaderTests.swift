@@ -1,9 +1,30 @@
 import HotwireNative
 import UIKit
+import UserNotifications
 import XCTest
 @testable import NurioStudyLeader
 
 final class NurioStudyLeaderTests: XCTestCase {
+    func testNotificationPermissionStatusMapsAuthorizationStatuses() {
+        let cases: [(UNAuthorizationStatus, NotificationPermissionStatus)] = [
+            (.authorized, .granted),
+            (.provisional, .granted),
+            (.ephemeral, .granted),
+            (.denied, .denied),
+            (.notDetermined, .notDetermined),
+        ]
+
+        for (authorization, expected) in cases {
+            XCTAssertEqual(NotificationPermissionStatus(authorization), expected)
+        }
+    }
+
+    func testNotificationPermissionStatusReplyDataUsesWireValues() {
+        XCTAssertEqual(NotificationPermissionStatus.granted.replyData.status, "granted")
+        XCTAssertEqual(NotificationPermissionStatus.denied.replyData.status, "denied")
+        XCTAssertEqual(NotificationPermissionStatus.notDetermined.replyData.status, "not_determined")
+    }
+
     func testSocialAuthRouteAcceptsOnlyAllowlistedLeaderProviderPaths() {
         let baseURL = URL(string: "https://studyleaders.nurio.kr")!
         let cases: [(String, SocialAuthProvider)] = [

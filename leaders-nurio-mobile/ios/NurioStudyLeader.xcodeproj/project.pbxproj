@@ -36,6 +36,7 @@
 		D00000000000000000000001 /* NotificationDestination.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000031 /* NotificationDestination.swift */; };
 		D00000000000000000000002 /* NativePushTokenStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000032 /* NativePushTokenStore.swift */; };
 		D00000000000000000000003 /* RegisterDeviceTokenComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000033 /* RegisterDeviceTokenComponent.swift */; };
+		D00000000000000000000008 /* NotificationPermissionComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000038 /* NotificationPermissionComponent.swift */; };
 		D00000000000000000000004 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = D000000000000000000000C1 /* FirebaseCore */; };
 		D00000000000000000000005 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = D000000000000000000000C2 /* FirebaseMessaging */; };
 		D00000000000000000000200 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = D00000000000000000000201 /* FirebaseCrashlytics */; };
@@ -80,6 +81,7 @@
 		D00000000000000000000031 /* NotificationDestination.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationDestination.swift; sourceTree = "<group>"; };
 		D00000000000000000000032 /* NativePushTokenStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativePushTokenStore.swift; sourceTree = "<group>"; };
 		D00000000000000000000033 /* RegisterDeviceTokenComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterDeviceTokenComponent.swift; sourceTree = "<group>"; };
+		D00000000000000000000038 /* NotificationPermissionComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationPermissionComponent.swift; sourceTree = "<group>"; };
 		D00000000000000000000034 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		D00000000000000000000035 /* NurioStudyLeader.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NurioStudyLeader.entitlements; sourceTree = "<group>"; };
 		D00000000000000000000036 /* NativeAuth.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = NativeAuth.xcconfig; sourceTree = "<group>"; };
@@ -184,6 +186,7 @@
 			children = (
 				A0000000000000000000003B /* SignInWithOAuthComponent.swift */,
 				D00000000000000000000033 /* RegisterDeviceTokenComponent.swift */,
+				D00000000000000000000038 /* NotificationPermissionComponent.swift */,
 			);
 			path = Bridge;
 			sourceTree = "<group>";
@@ -362,6 +365,7 @@
 				D00000000000000000000001 /* NotificationDestination.swift in Sources */,
 				D00000000000000000000002 /* NativePushTokenStore.swift in Sources */,
 				D00000000000000000000003 /* RegisterDeviceTokenComponent.swift in Sources */,
+				D00000000000000000000008 /* NotificationPermissionComponent.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

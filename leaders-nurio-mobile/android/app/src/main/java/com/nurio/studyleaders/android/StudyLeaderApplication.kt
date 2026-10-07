@@ -18,6 +18,7 @@ import dev.hotwire.navigation.routing.SystemNavigationRouteDecisionHandler
 import kotlinx.serialization.json.Json
 import com.nurio.studyleaders.android.bridge.SignInWithOAuthComponent
 import com.nurio.studyleaders.android.bridge.RegisterDeviceTokenComponent
+import com.nurio.studyleaders.android.bridge.NotificationPermissionComponent
 import com.nurio.studyleaders.android.fragments.WebFragment
 import com.nurio.studyleaders.android.fragments.WebModalFragment
 import com.nurio.studyleaders.android.notifications.NotificationChannels
@@ -70,7 +71,8 @@ class StudyLeaderApplication : Application() {
 
         Hotwire.registerBridgeComponents(
             BridgeComponentFactory("sign-in-with-oauth", ::SignInWithOAuthComponent),
-            BridgeComponentFactory("register-device-token", ::RegisterDeviceTokenComponent)
+            BridgeComponentFactory("register-device-token", ::RegisterDeviceTokenComponent),
+            BridgeComponentFactory("notification-permission", ::NotificationPermissionComponent)
         )
 
         Hotwire.defaultFragmentDestination = WebFragment::class

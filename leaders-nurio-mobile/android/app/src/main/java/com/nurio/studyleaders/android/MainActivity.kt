@@ -1,14 +1,17 @@
 package com.nurio.studyleaders.android
 
 import android.Manifest
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.browser.customtabs.CustomTabsIntent
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -20,6 +23,7 @@ import com.nurio.studyleaders.android.auth.SocialAuthRoute
 import com.nurio.studyleaders.android.notifications.NotificationDestination
 import com.nurio.studyleaders.android.notifications.NotificationPayload
 import com.nurio.studyleaders.android.notifications.NotificationPermissionHost
+import com.nurio.studyleaders.android.notifications.NotificationPermissionStatus
 import com.nurio.studyleaders.android.notifications.PendingNotificationRoute
 import dev.hotwire.navigation.activities.HotwireActivity
 import dev.hotwire.navigation.navigator.Navigator
@@ -34,11 +38,15 @@ class MainActivity : HotwireActivity(), NotificationPermissionHost {
     }
 
     private var pendingAuthUrl: String? = null
+    private val pushPermissionPreferences by lazy {
+        getSharedPreferences(PUSH_PERMISSION_PREFERENCES, MODE_PRIVATE)
+    }
     private val pendingNotificationRoute = PendingNotificationRoute()
     private val notificationPermissionCallbacks = mutableListOf<(Boolean) -> Unit>()
     private val notificationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
+        pushPermissionPreferences.edit().putBoolean(PUSH_PERMISSION_REQUESTED_KEY, true).apply()
         val callbacks = notificationPermissionCallbacks.toList()
         notificationPermissionCallbacks.clear()
         callbacks.forEach { it(granted) }
@@ -131,8 +139,7 @@ class MainActivity : HotwireActivity(), NotificationPermissionHost {
             return
         }
 
-        val preferences = getSharedPreferences(PUSH_PERMISSION_PREFERENCES, MODE_PRIVATE)
-        if (preferences.getBoolean(PUSH_PERMISSION_REQUESTED_KEY, false)) {
+        if (pushPermissionPreferences.getBoolean(PUSH_PERMISSION_REQUESTED_KEY, false)) {
             callback(false)
             return
         }
@@ -140,8 +147,25 @@ class MainActivity : HotwireActivity(), NotificationPermissionHost {
         notificationPermissionCallbacks += callback
         if (notificationPermissionCallbacks.size > 1) return
 
-        preferences.edit().putBoolean(PUSH_PERMISSION_REQUESTED_KEY, true).apply()
         notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+    }
+
+    override fun notificationPermissionStatus(): NotificationPermissionStatus =
+        NotificationPermissionStatus.resolve(
+            notificationsEnabled = NotificationManagerCompat.from(this).areNotificationsEnabled(),
+            sdkInt = Build.VERSION.SDK_INT,
+            hasRequested = pushPermissionPreferences.getBoolean(PUSH_PERMISSION_REQUESTED_KEY, false)
+        )
+
+    override fun openNotificationSettings() {
+        val notificationSettings = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+            .putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+        val appDetails = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, "package:$packageName".toUri())
+        try {
+            startActivity(notificationSettings)
+        } catch (_: ActivityNotFoundException) {
+            startActivity(appDetails)
+        }
     }
 
     override fun onDestroy() {
