@@ -44,6 +44,7 @@
 		E00000000000000000000001 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = E00000000000000000000003 /* GoogleSignIn */; };
 		F30000000000000000000001 /* PaymentCrashContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = F30000000000000000000031 /* PaymentCrashContext.swift */; };
 		F30000000000000000000002 /* PaymentTelemetryComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = F30000000000000000000032 /* PaymentTelemetryComponent.swift */; };
+		E7A0000000000000000000A1 /* NotificationPermissionComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7A0000000000000000000A2 /* NotificationPermissionComponent.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -95,6 +96,7 @@
 		D00000000000000000000037 /* NativeAuth.debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = NativeAuth.debug.xcconfig; sourceTree = "<group>"; };
 		F30000000000000000000031 /* PaymentCrashContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentCrashContext.swift; sourceTree = "<group>"; };
 		F30000000000000000000032 /* PaymentTelemetryComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentTelemetryComponent.swift; sourceTree = "<group>"; };
+		E7A0000000000000000000A2 /* NotificationPermissionComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationPermissionComponent.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -198,6 +200,7 @@
 			children = (
 				A0000000000000000000003B /* SignInWithOAuthComponent.swift */,
 				D00000000000000000000033 /* RegisterDeviceTokenComponent.swift */,
+				E7A0000000000000000000A2 /* NotificationPermissionComponent.swift */,
 				F30000000000000000000032 /* PaymentTelemetryComponent.swift */,
 			);
 			path = Bridge;
@@ -410,6 +413,7 @@
 				D00000000000000000000001 /* NotificationDestination.swift in Sources */,
 				D00000000000000000000002 /* NativePushTokenStore.swift in Sources */,
 				D00000000000000000000003 /* RegisterDeviceTokenComponent.swift in Sources */,
+				E7A0000000000000000000A1 /* NotificationPermissionComponent.swift in Sources */,
 				A00000000000000000000003 /* AppEnvironment.swift in Sources */,
 				A00000000000000000000004 /* AppRouteCoordinator.swift in Sources */,
 				A00000000000000000000005 /* StudyScopePolicy.swift in Sources */,

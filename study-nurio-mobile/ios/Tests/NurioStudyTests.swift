@@ -1,10 +1,25 @@
 import AuthenticationServices
 import HotwireNative
+import UserNotifications
 import WebKit
 import XCTest
 @testable import NurioStudy
 
 final class NurioStudyTests: XCTestCase {
+    func testNotificationPermissionStatusMapsAuthorizationStatuses() {
+        XCTAssertEqual(NotificationPermissionStatus(.authorized), .granted)
+        XCTAssertEqual(NotificationPermissionStatus(.provisional), .granted)
+        XCTAssertEqual(NotificationPermissionStatus(.ephemeral), .granted)
+        XCTAssertEqual(NotificationPermissionStatus(.denied), .denied)
+        XCTAssertEqual(NotificationPermissionStatus(.notDetermined), .notDetermined)
+    }
+
+    func testNotificationPermissionStatusEncodesWireValue() {
+        XCTAssertEqual(NotificationPermissionStatus.granted.messageData.status, "granted")
+        XCTAssertEqual(NotificationPermissionStatus.denied.messageData.status, "denied")
+        XCTAssertEqual(NotificationPermissionStatus.notDetermined.messageData.status, "not_determined")
+    }
+
     func testPaymentCrashContextHashesReferenceAndClearsState() {
         let reporter = RecordingPaymentCrashReporter()
         let context = PaymentCrashContext(reporter: reporter, appSurface: "nurio_study")

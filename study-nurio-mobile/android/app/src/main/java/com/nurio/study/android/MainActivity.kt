@@ -12,6 +12,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.browser.customtabs.CustomTabColorSchemeParams
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.net.toUri
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -28,6 +29,7 @@ import com.nurio.study.android.microphone.MicrophonePermissionRequestState
 import com.nurio.study.android.notifications.NotificationDestination
 import com.nurio.study.android.notifications.NotificationPayload
 import com.nurio.study.android.notifications.NotificationPermissionHost
+import com.nurio.study.android.notifications.NotificationPermissionStatus
 import com.nurio.study.android.notifications.PendingNotificationRoute
 import com.nurio.study.android.webview.LegacyWebViewInsets
 import dev.hotwire.navigation.activities.HotwireActivity
@@ -52,6 +54,7 @@ class MainActivity : HotwireActivity(), MicPermissionHost, NotificationPermissio
     private val notificationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
+        markNotificationPermissionRequested()
         val callbacks = notificationPermissionCallbacks.toList()
         notificationPermissionCallbacks.clear()
         callbacks.forEach { it(granted) }
@@ -209,8 +212,21 @@ class MainActivity : HotwireActivity(), MicPermissionHost, NotificationPermissio
         notificationPermissionCallbacks += callback
         if (notificationPermissionCallbacks.size > 1) return
 
-        preferences.edit().putBoolean(PUSH_PERMISSION_REQUESTED_KEY, true).apply()
+        markNotificationPermissionRequested()
         notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+    }
+
+    override fun notificationPermissionStatus(): NotificationPermissionStatus =
+        NotificationPermissionStatus.resolve(
+            notificationsEnabled = NotificationManagerCompat.from(this).areNotificationsEnabled(),
+            sdkInt = Build.VERSION.SDK_INT,
+            hasRequested = getSharedPreferences(PUSH_PERMISSION_PREFERENCES, MODE_PRIVATE)
+                .getBoolean(PUSH_PERMISSION_REQUESTED_KEY, false)
+        )
+
+    private fun markNotificationPermissionRequested() {
+        getSharedPreferences(PUSH_PERMISSION_PREFERENCES, MODE_PRIVATE)
+            .edit().putBoolean(PUSH_PERMISSION_REQUESTED_KEY, true).apply()
     }
 
     override fun requestMicrophonePermission(callback: (Boolean) -> Unit) {
