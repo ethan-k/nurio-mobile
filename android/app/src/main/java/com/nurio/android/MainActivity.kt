@@ -20,6 +20,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Lifecycle
 import com.nurio.android.localization.LocaleCookieBootstrapper
+import com.nurio.android.notifications.NotificationPermissionRequester
+import com.nurio.android.notifications.NotificationPermissionState
 import com.nurio.android.notifications.NotificationRoute
 import com.nurio.android.payments.PaymentCrashTelemetry
 import com.nurio.android.payments.PaymentFailureKind
@@ -35,7 +37,9 @@ import dev.hotwire.navigation.activities.HotwireActivity
 import dev.hotwire.navigation.navigator.Navigator
 import dev.hotwire.navigation.navigator.NavigatorConfiguration
 
-class MainActivity : HotwireActivity(), PaymentRecoveryHost {
+class MainActivity : HotwireActivity(), PaymentRecoveryHost, NotificationPermissionRequester {
+    private val pendingNotificationPermissionCallbacks = mutableListOf<() -> Unit>()
+
     private lateinit var startupCoordinator: MainActivityStartupCoordinator
     private val navigationHandler = Handler(Looper.getMainLooper())
     private val navigationLifecycleCallbacks = object : FragmentManager.FragmentLifecycleCallbacks() {
@@ -377,6 +381,34 @@ class MainActivity : HotwireActivity(), PaymentRecoveryHost {
         } else {
             uri
         }
+    }
+
+    override fun requestNotificationPermission(onResolved: () -> Unit) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+            ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            onResolved()
+            return
+        }
+        pendingNotificationPermissionCallbacks.add(onResolved)
+        requestNotificationPermissionIfNeeded()
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode != NOTIFICATION_PERMISSION_REQUEST_CODE) return
+
+        if (grantResults.isNotEmpty()) {
+            NotificationPermissionState.markRequested(this)
+        }
+        val callbacks = pendingNotificationPermissionCallbacks.toList()
+        pendingNotificationPermissionCallbacks.clear()
+        callbacks.forEach { it() }
     }
 
     private fun requestNotificationPermissionIfNeeded() {

@@ -30,6 +30,9 @@
 		A00000000000000000000011 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000042 /* PrivacyInfo.xcprivacy */; };
 		A00000000000000000000012 /* NativeAppleSignInCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000043 /* NativeAppleSignInCoordinator.swift */; };
 		B000000000000000000000001 /* NativePushTokenStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000000000000000000000031 /* NativePushTokenStore.swift */; };
+		B000000000000000000000005 /* NotificationPermissionComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000000000000000000000035 /* NotificationPermissionComponent.swift */; };
+		B000000000000000000000006 /* NotificationPermissionStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000000000000000000000036 /* NotificationPermissionStatus.swift */; };
+		F80000000000000000000001 /* NotificationPermissionStatusTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F80000000000000000000031 /* NotificationPermissionStatusTests.swift */; };
 		B000000000000000000000002 /* RegisterDeviceTokenComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000000000000000000000032 /* RegisterDeviceTokenComponent.swift */; };
 		B000000000000000000000003 /* CheckoutColdBootWebViewPolicyDecisionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000000000000000000000033 /* CheckoutColdBootWebViewPolicyDecisionHandler.swift */; };
 		C00000000000000000000005 /* KakaoSDKCommon in Frameworks */ = {isa = PBXBuildFile; productRef = C00000000000000000000002 /* KakaoSDKCommon */; };
@@ -83,6 +86,9 @@
 		A00000000000000000000043 /* NativeAppleSignInCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeAppleSignInCoordinator.swift; sourceTree = "<group>"; };
 		A00000000000000000000044 /* Nurio.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Nurio.entitlements; sourceTree = "<group>"; };
 		B000000000000000000000031 /* NativePushTokenStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativePushTokenStore.swift; sourceTree = "<group>"; };
+		B000000000000000000000035 /* NotificationPermissionComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationPermissionComponent.swift; sourceTree = "<group>"; };
+		B000000000000000000000036 /* NotificationPermissionStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationPermissionStatus.swift; sourceTree = "<group>"; };
+		F80000000000000000000031 /* NotificationPermissionStatusTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationPermissionStatusTests.swift; sourceTree = "<group>"; };
 		B000000000000000000000032 /* RegisterDeviceTokenComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterDeviceTokenComponent.swift; sourceTree = "<group>"; };
 		B000000000000000000000033 /* CheckoutColdBootWebViewPolicyDecisionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckoutColdBootWebViewPolicyDecisionHandler.swift; sourceTree = "<group>"; };
 		D00000000000000000000031 /* NativeKakaoSignInCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeKakaoSignInCoordinator.swift; sourceTree = "<group>"; };
@@ -200,6 +206,8 @@
 			children = (
 				A0000000000000000000003B /* SignInWithOAuthComponent.swift */,
 				B000000000000000000000032 /* RegisterDeviceTokenComponent.swift */,
+				B000000000000000000000035 /* NotificationPermissionComponent.swift */,
+				B000000000000000000000036 /* NotificationPermissionStatus.swift */,
 				F30000000000000000000032 /* PaymentTelemetryComponent.swift */,
 				D40000000000000000000031 /* KeyboardInsetsComponent.swift */,
 			);
@@ -214,6 +222,7 @@
 				F40000000000000000000031 /* NativeImageCacheTests.swift */,
 				F10000000000000000000031 /* NativeLocaleBootstrapTests.swift */,
 				F20000000000000000000031 /* SceneStartupCoordinatorTests.swift */,
+				F80000000000000000000031 /* NotificationPermissionStatusTests.swift */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -404,6 +413,8 @@
 				F30000000000000000000001 /* PaymentCrashContext.swift in Sources */,
 				F30000000000000000000002 /* PaymentTelemetryComponent.swift in Sources */,
 				D40000000000000000000001 /* KeyboardInsetsComponent.swift in Sources */,
+				B000000000000000000000005 /* NotificationPermissionComponent.swift in Sources */,
+				B000000000000000000000006 /* NotificationPermissionStatus.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -416,6 +427,7 @@
 				F40000000000000000000001 /* NativeImageCacheTests.swift in Sources */,
 				F10000000000000000000001 /* NativeLocaleBootstrapTests.swift in Sources */,
 				F20000000000000000000001 /* SceneStartupCoordinatorTests.swift in Sources */,
+				F80000000000000000000001 /* NotificationPermissionStatusTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

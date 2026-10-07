@@ -12,6 +12,7 @@ import dev.hotwire.navigation.config.registerRouteDecisionHandlers
 import dev.hotwire.navigation.routing.AppNavigationRouteDecisionHandler
 import dev.hotwire.navigation.routing.BrowserTabRouteDecisionHandler
 import dev.hotwire.navigation.routing.SystemNavigationRouteDecisionHandler
+import com.nurio.android.bridge.NotificationPermissionComponent
 import com.nurio.android.bridge.RegisterDeviceTokenComponent
 import com.nurio.android.bridge.PaymentRecoveryComponent
 import com.nurio.android.bridge.PaymentTelemetryComponent
@@ -64,6 +65,7 @@ class NurioApplication : Application() {
 
         Hotwire.registerBridgeComponents(
             BridgeComponentFactory("register-device-token", ::RegisterDeviceTokenComponent),
+            BridgeComponentFactory("notification-permission", ::NotificationPermissionComponent),
             BridgeComponentFactory("payment-recovery", ::PaymentRecoveryComponent),
             BridgeComponentFactory("payment-telemetry", ::PaymentTelemetryComponent),
             BridgeComponentFactory("sign-in-with-oauth", ::SignInWithOAuthComponent)

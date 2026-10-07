@@ -98,6 +98,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         Hotwire.registerBridgeComponents([
             SignInWithOAuthComponent.self,
             RegisterDeviceTokenComponent.self,
+            NotificationPermissionComponent.self,
             PaymentTelemetryComponent.self,
             KeyboardInsetsComponent.self,
         ])
