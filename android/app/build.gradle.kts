@@ -40,8 +40,8 @@ android {
         applicationId = "com.nurio.android"
         minSdk = 28
         targetSdk = 36
-        versionCode = 24
-        versionName = "1.0.19"
+        versionCode = 25
+        versionName = "1.0.20"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         manifestPlaceholders["crashlyticsCollectionEnabled"] = true
