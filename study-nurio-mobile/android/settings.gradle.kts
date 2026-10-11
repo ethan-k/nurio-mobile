@@ -17,6 +17,11 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         maven { url = uri("https://devrepo.kakao.com/nexus/content/groups/public/") }
+        // LiveKit's audio routing dependency (com.github.davidliu:audioswitch) is only on JitPack.
+        maven {
+            url = uri("https://jitpack.io")
+            content { includeGroup("com.github.davidliu") }
+        }
     }
 }
 

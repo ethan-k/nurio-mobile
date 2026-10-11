@@ -13,6 +13,7 @@ import dev.hotwire.navigation.routing.AppNavigationRouteDecisionHandler
 import dev.hotwire.navigation.routing.BrowserTabRouteDecisionHandler
 import dev.hotwire.navigation.routing.SystemNavigationRouteDecisionHandler
 import kotlinx.serialization.json.Json
+import com.nurio.study.android.bridge.AiTutorCallComponent
 import com.nurio.study.android.bridge.SignInWithOAuthComponent
 import com.nurio.study.android.bridge.NotificationPermissionComponent
 import com.nurio.study.android.bridge.RegisterDeviceTokenComponent
@@ -59,7 +60,8 @@ class StudyApplication : Application() {
             BridgeComponentFactory("sign-in-with-oauth", ::SignInWithOAuthComponent),
             BridgeComponentFactory("payment-telemetry", ::PaymentTelemetryComponent),
             BridgeComponentFactory("register-device-token", ::RegisterDeviceTokenComponent),
-            BridgeComponentFactory("notification-permission", ::NotificationPermissionComponent)
+            BridgeComponentFactory("notification-permission", ::NotificationPermissionComponent),
+            BridgeComponentFactory("ai-tutor-call", ::AiTutorCallComponent)
         )
 
         Hotwire.defaultFragmentDestination = WebFragment::class

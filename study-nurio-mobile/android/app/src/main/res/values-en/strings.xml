@@ -11,4 +11,21 @@
     <string name="microphone_permission_settings_message">To start AI English conversation practice, allow Nurio Study to use the microphone in Settings.</string>
     <string name="microphone_permission_settings_cancel">Not now</string>
     <string name="microphone_permission_settings_open">Open Settings</string>
+    <string name="ai_tutor_call_title">Class review</string>
+    <string name="ai_tutor_call_timer_placeholder">--:--</string>
+    <string name="ai_tutor_call_status_provisioning">Preparing your review…</string>
+    <string name="ai_tutor_call_status_connecting">Connecting…</string>
+    <string name="ai_tutor_call_status_tutor_joining">Your AI partner is joining…</string>
+    <string name="ai_tutor_call_status_live">Listening — speak whenever you\'re ready.</string>
+    <string name="ai_tutor_call_status_reconnecting">Reconnecting… If you were mid-sentence, please repeat it.</string>
+    <string name="ai_tutor_call_status_failed">We couldn\'t start the review. Please try again in a moment.</string>
+    <string name="ai_tutor_call_status_ending">Ending the review…</string>
+    <string name="ai_tutor_call_mute">Mute</string>
+    <string name="ai_tutor_call_unmute">Unmute</string>
+    <string name="ai_tutor_call_end">End review</string>
+    <string name="ai_tutor_call_retry">Try again</string>
+    <string name="ai_tutor_call_notification_channel_name">Class review calls</string>
+    <string name="ai_tutor_call_notification_channel_description">Keeps an ongoing class review call running when you leave the app</string>
+    <string name="ai_tutor_call_notification_title">Class review in progress</string>
+    <string name="ai_tutor_call_notification_text">Tap to return to the call</string>
 </resources>

@@ -16,6 +16,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.net.toUri
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.nurio.study.android.aitutor.AiTutorCallController
 import com.nurio.study.android.auth.NativeAuthCallback
 import com.nurio.study.android.auth.NativeAuthCallbackConsumer
 import com.nurio.study.android.auth.NativeAuthCallbackSource
@@ -32,6 +33,8 @@ import com.nurio.study.android.notifications.NotificationPermissionHost
 import com.nurio.study.android.notifications.NotificationPermissionStatus
 import com.nurio.study.android.notifications.PendingNotificationRoute
 import com.nurio.study.android.webview.LegacyWebViewInsets
+import dev.hotwire.core.turbo.visit.VisitAction
+import dev.hotwire.core.turbo.visit.VisitOptions
 import dev.hotwire.navigation.activities.HotwireActivity
 import dev.hotwire.navigation.navigator.Navigator
 import dev.hotwire.navigation.navigator.NavigatorConfiguration
@@ -119,6 +122,26 @@ class MainActivity : HotwireActivity(), MicPermissionHost, NotificationPermissio
         }
 
         pendingNotificationRoute.consume()?.let(navigator::route)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        AiTutorCallController.setReviewRouter(::routeAiTutorReview)
+    }
+
+    override fun onPause() {
+        AiTutorCallController.setReviewRouter(null)
+        super.onPause()
+    }
+
+    // The finished class-review call replaces its /practice/<id> page with the review.
+    private fun routeAiTutorReview(reviewUrl: String) {
+        val navigator = readyNavigator
+        if (navigator != null) {
+            navigator.route(reviewUrl, VisitOptions(action = VisitAction.REPLACE))
+        } else {
+            pendingNotificationRoute.accept(reviewUrl)
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

@@ -216,5 +216,7 @@ dependencies {
     implementation(libs.firebase.messaging)
     implementation(libs.firebase.crashlytics)
 
+    implementation(libs.livekit.android)
+
     testImplementation(libs.junit)
 }

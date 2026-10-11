@@ -15,4 +15,9 @@
     <color name="bottom_nav_background">#FFFFFF</color>
     <color name="bottom_nav_selected">#F64060</color>
     <color name="bottom_nav_unselected">#9CA3AF</color>
+
+    <color name="ai_tutor_call_background">#172033</color>
+    <color name="ai_tutor_call_text">#FFFFFF</color>
+    <color name="ai_tutor_call_secondary_text">#C7D2E3</color>
+    <color name="ai_tutor_call_end">#E5484D</color>
 </resources>

@@ -11,4 +11,21 @@
     <string name="microphone_permission_settings_message">AI 영어회화 연습을 시작하려면 설정에서 Nurio Study의 마이크 권한을 허용해 주세요.</string>
     <string name="microphone_permission_settings_cancel">나중에</string>
     <string name="microphone_permission_settings_open">설정 열기</string>
+    <string name="ai_tutor_call_title">수업 복습</string>
+    <string name="ai_tutor_call_timer_placeholder">--:--</string>
+    <string name="ai_tutor_call_status_provisioning">복습을 준비하고 있어요…</string>
+    <string name="ai_tutor_call_status_connecting">연결하고 있어요…</string>
+    <string name="ai_tutor_call_status_tutor_joining">AI 파트너가 들어오고 있어요…</string>
+    <string name="ai_tutor_call_status_live">듣고 있어요. 편하게 말해 주세요.</string>
+    <string name="ai_tutor_call_status_reconnecting">다시 연결하고 있어요… 말하던 중이었다면 한 번 더 말해 주세요.</string>
+    <string name="ai_tutor_call_status_failed">복습을 시작하지 못했어요. 잠시 후 다시 시도해 주세요.</string>
+    <string name="ai_tutor_call_status_ending">복습을 마치고 있어요…</string>
+    <string name="ai_tutor_call_mute">음소거</string>
+    <string name="ai_tutor_call_unmute">음소거 해제</string>
+    <string name="ai_tutor_call_end">복습 마치기</string>
+    <string name="ai_tutor_call_retry">다시 시도</string>
+    <string name="ai_tutor_call_notification_channel_name">수업 복습 통화</string>
+    <string name="ai_tutor_call_notification_channel_description">앱을 벗어나도 진행 중인 수업 복습 통화를 유지해요</string>
+    <string name="ai_tutor_call_notification_title">수업 복습 진행 중</string>
+    <string name="ai_tutor_call_notification_text">눌러서 통화 화면으로 돌아가기</string>
 </resources>
