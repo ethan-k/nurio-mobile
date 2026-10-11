@@ -45,6 +45,13 @@
 		F30000000000000000000001 /* PaymentCrashContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = F30000000000000000000031 /* PaymentCrashContext.swift */; };
 		F30000000000000000000002 /* PaymentTelemetryComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = F30000000000000000000032 /* PaymentTelemetryComponent.swift */; };
 		E7A0000000000000000000A1 /* NotificationPermissionComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7A0000000000000000000A2 /* NotificationPermissionComponent.swift */; };
+		AB70000000000000000000B1 /* AiTutorCallAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB70000000000000000000F1 /* AiTutorCallAPI.swift */; };
+		AB70000000000000000000B2 /* AiTutorCallCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB70000000000000000000F2 /* AiTutorCallCoordinator.swift */; };
+		AB70000000000000000000B3 /* AiTutorLiveCall.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB70000000000000000000F3 /* AiTutorLiveCall.swift */; };
+		AB70000000000000000000B4 /* AiTutorCallViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB70000000000000000000F4 /* AiTutorCallViewController.swift */; };
+		AB70000000000000000000B5 /* AiTutorCallComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB70000000000000000000F5 /* AiTutorCallComponent.swift */; };
+		AB70000000000000000000B6 /* AiTutorCallTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB70000000000000000000F6 /* AiTutorCallTests.swift */; };
+		AB70000000000000000000B7 /* LiveKit in Frameworks */ = {isa = PBXBuildFile; productRef = AB70000000000000000000C2 /* LiveKit */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -97,6 +104,12 @@
 		F30000000000000000000031 /* PaymentCrashContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentCrashContext.swift; sourceTree = "<group>"; };
 		F30000000000000000000032 /* PaymentTelemetryComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentTelemetryComponent.swift; sourceTree = "<group>"; };
 		E7A0000000000000000000A2 /* NotificationPermissionComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationPermissionComponent.swift; sourceTree = "<group>"; };
+		AB70000000000000000000F1 /* AiTutorCallAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AiTutorCallAPI.swift; sourceTree = "<group>"; };
+		AB70000000000000000000F2 /* AiTutorCallCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AiTutorCallCoordinator.swift; sourceTree = "<group>"; };
+		AB70000000000000000000F3 /* AiTutorLiveCall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AiTutorLiveCall.swift; sourceTree = "<group>"; };
+		AB70000000000000000000F4 /* AiTutorCallViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AiTutorCallViewController.swift; sourceTree = "<group>"; };
+		AB70000000000000000000F5 /* AiTutorCallComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AiTutorCallComponent.swift; sourceTree = "<group>"; };
+		AB70000000000000000000F6 /* AiTutorCallTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AiTutorCallTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -112,6 +125,7 @@
 				C00000000000000000000006 /* KakaoSDKAuth in Frameworks */,
 				C00000000000000000000007 /* KakaoSDKUser in Frameworks */,
 				A0000000000000000000000F /* HotwireNative in Frameworks */,
+				AB70000000000000000000B7 /* LiveKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -151,6 +165,7 @@
 				A00000000000000000000064 /* Routing */,
 				A00000000000000000000065 /* Bridge */,
 				F30000000000000000000040 /* Payments */,
+				AB70000000000000000000A0 /* AiTutor */,
 				A00000000000000000000031 /* AppDelegate.swift */,
 				A00000000000000000000032 /* SceneController.swift */,
 				D00000000000000000000031 /* NotificationDestination.swift */,
@@ -202,6 +217,7 @@
 				D00000000000000000000033 /* RegisterDeviceTokenComponent.swift */,
 				E7A0000000000000000000A2 /* NotificationPermissionComponent.swift */,
 				F30000000000000000000032 /* PaymentTelemetryComponent.swift */,
+				AB70000000000000000000F5 /* AiTutorCallComponent.swift */,
 			);
 			path = Bridge;
 			sourceTree = "<group>";
@@ -218,6 +234,7 @@
 			isa = PBXGroup;
 			children = (
 				A00000000000000000000041 /* NurioStudyTests.swift */,
+				AB70000000000000000000F6 /* AiTutorCallTests.swift */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -230,6 +247,17 @@
 				D00000000000000000000036 /* NativeAuth.xcconfig */,
 			);
 			path = Config;
+			sourceTree = "<group>";
+		};
+		AB70000000000000000000A0 /* AiTutor */ = {
+			isa = PBXGroup;
+			children = (
+				AB70000000000000000000F1 /* AiTutorCallAPI.swift */,
+				AB70000000000000000000F2 /* AiTutorCallCoordinator.swift */,
+				AB70000000000000000000F3 /* AiTutorLiveCall.swift */,
+				AB70000000000000000000F4 /* AiTutorCallViewController.swift */,
+			);
+			path = AiTutor;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -260,6 +288,7 @@
 				D000000000000000000000C2 /* FirebaseMessaging */,
 				D00000000000000000000201 /* FirebaseCrashlytics */,
 				E00000000000000000000003 /* GoogleSignIn */,
+				AB70000000000000000000C2 /* LiveKit */,
 			);
 			productName = NurioStudy;
 			productReference = A00000000000000000000030 /* NurioStudy.app */;
@@ -317,6 +346,7 @@
 				C00000000000000000000001 /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */,
 				D000000000000000000000C0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				E00000000000000000000002 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+				AB70000000000000000000C1 /* XCRemoteSwiftPackageReference "client-sdk-swift" */,
 			);
 			productRefGroup = A00000000000000000000061 /* Products */;
 			projectDirPath = "";
@@ -431,6 +461,11 @@
 				A00000000000000000000017 /* NativeAppleSignInCoordinator.swift in Sources */,
 				F30000000000000000000001 /* PaymentCrashContext.swift in Sources */,
 				F30000000000000000000002 /* PaymentTelemetryComponent.swift in Sources */,
+				AB70000000000000000000B1 /* AiTutorCallAPI.swift in Sources */,
+				AB70000000000000000000B2 /* AiTutorCallCoordinator.swift in Sources */,
+				AB70000000000000000000B3 /* AiTutorLiveCall.swift in Sources */,
+				AB70000000000000000000B4 /* AiTutorCallViewController.swift in Sources */,
+				AB70000000000000000000B5 /* AiTutorCallComponent.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -439,6 +474,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A00000000000000000000010 /* NurioStudyTests.swift in Sources */,
+				AB70000000000000000000B6 /* AiTutorCallTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -764,6 +800,14 @@
 				minimumVersion = 9.2.0;
 			};
 		};
+		AB70000000000000000000C1 /* XCRemoteSwiftPackageReference "client-sdk-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/livekit/client-sdk-swift";
+			requirement = {
+				kind = exactVersion;
+				version = 2.16.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -806,6 +850,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = E00000000000000000000002 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
 			productName = GoogleSignIn;
+		};
+		AB70000000000000000000C2 /* LiveKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AB70000000000000000000C1 /* XCRemoteSwiftPackageReference "client-sdk-swift" */;
+			productName = LiveKit;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

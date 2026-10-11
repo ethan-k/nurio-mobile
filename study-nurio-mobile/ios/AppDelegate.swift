@@ -93,6 +93,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             RegisterDeviceTokenComponent.self,
             NotificationPermissionComponent.self,
             PaymentTelemetryComponent.self,
+            AiTutorCallComponent.self,
         ])
 
         Hotwire.registerRouteDecisionHandlers([

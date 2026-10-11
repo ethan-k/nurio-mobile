@@ -28,6 +28,22 @@ final class AppRouteCoordinator {
         navigationHandler?.route(url)
     }
 
+    /// Replaces the current screen with `url` so Back does not return to a
+    /// page the learner has finished (e.g. the class review call page).
+    func replaceCurrentVisit(with url: URL) {
+        let proposal = VisitProposal(
+            url: url,
+            options: VisitOptions(action: .replace),
+            properties: Hotwire.config.pathConfiguration.properties(for: url)
+        )
+
+        if let navigationHandler {
+            navigationHandler.route(proposal)
+        } else {
+            pendingNotificationURL = url
+        }
+    }
+
     func handleNotification(path: String?, url: String?) {
         let destination = NotificationDestination.resolve(
             path: path,

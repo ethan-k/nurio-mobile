@@ -2,3 +2,17 @@
 "microphone_permission_settings_message" = "To start AI English conversation practice, allow Nurio Study to use the microphone in Settings.";
 "microphone_permission_settings_cancel" = "Not now";
 "microphone_permission_settings_open" = "Open Settings";
+"ai_tutor_call_title" = "Class review";
+"ai_tutor_call_mute" = "Mute";
+"ai_tutor_call_unmute" = "Unmute";
+"ai_tutor_call_end" = "End review";
+"ai_tutor_call_remaining_accessibility" = "Time left: %@";
+"ai_tutor_call_status_microphone" = "Allow microphone access to begin.";
+"ai_tutor_call_status_provisioning" = "Preparing your review…";
+"ai_tutor_call_status_connecting" = "Connecting…";
+"ai_tutor_call_status_waiting" = "Your AI partner is joining…";
+"ai_tutor_call_status_live" = "Listening — speak whenever you're ready.";
+"ai_tutor_call_status_reconnecting" = "Reconnecting… If you were mid-sentence, please repeat it.";
+"ai_tutor_call_status_ending" = "Ending the review…";
+"ai_tutor_call_status_error" = "We couldn't start the review. Tap End review and try again in a moment.";
+"ai_tutor_call_status_microphone_denied" = "Microphone access is off. Turn it on in your settings and try again.";
