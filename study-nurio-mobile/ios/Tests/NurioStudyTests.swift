@@ -902,6 +902,24 @@ final class NurioStudyTests: XCTestCase {
     }
 
     @MainActor
+    func testForegroundPushForTheVisibleStudyScreenIsRecognized() throws {
+        let baseURL = try XCTUnwrap(URL(string: "https://study.nurio.kr"))
+        let visibleURL = try XCTUnwrap(URL(string: "https://study.nurio.kr/study-groups/14/chat/88?lang=ko"))
+
+        XCTAssertTrue(NotificationDestination.isShowing(path: "/study-groups/14/chat/88", url: nil, visibleURL: visibleURL, baseURL: baseURL))
+        XCTAssertTrue(NotificationDestination.isShowing(path: nil, url: "https://study.nurio.kr/study-groups/14/chat/88/", visibleURL: visibleURL, baseURL: baseURL))
+    }
+
+    func testForegroundPushForAnotherStudyScreenIsNotRecognized() throws {
+        let baseURL = try XCTUnwrap(URL(string: "https://study.nurio.kr"))
+        let visibleURL = try XCTUnwrap(URL(string: "https://study.nurio.kr/study-groups/14/chat/88"))
+
+        XCTAssertFalse(NotificationDestination.isShowing(path: "/study-groups/14/chat/89", url: nil, visibleURL: visibleURL, baseURL: baseURL))
+        XCTAssertFalse(NotificationDestination.isShowing(path: nil, url: nil, visibleURL: visibleURL, baseURL: baseURL))
+        XCTAssertFalse(NotificationDestination.isShowing(path: "/admin/chats", url: nil, visibleURL: visibleURL, baseURL: baseURL))
+        XCTAssertFalse(NotificationDestination.isShowing(path: "/study-groups/14/chat/88", url: nil, visibleURL: nil, baseURL: baseURL))
+    }
+
     @MainActor
     func testNotificationRouteQueuesUntilHandlerIsInstalledAndThenRoutesImmediately() {
         let coordinator = AppRouteCoordinator()

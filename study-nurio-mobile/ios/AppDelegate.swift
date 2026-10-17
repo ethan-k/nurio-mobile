@@ -129,7 +129,23 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         willPresent notification: UNNotification,
         withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
     ) {
-        completionHandler([ .banner, .sound, .badge ])
+        let userInfo = notification.request.content.userInfo
+        let path = userInfo["path"] as? String
+        let url = userInfo["url"] as? String
+        Task { @MainActor in
+            // A chat push for the room already on screen would only repeat what
+            // the live page just rendered, so it is dropped silently.
+            if NotificationDestination.isShowing(
+                path: path,
+                url: url,
+                visibleURL: AppRouteCoordinator.shared.visibleURL,
+                baseURL: AppEnvironment.baseURL
+            ) {
+                completionHandler([])
+            } else {
+                completionHandler([ .banner, .sound, .badge ])
+            }
+        }
     }
 
     func userNotificationCenter(

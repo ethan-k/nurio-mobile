@@ -10,6 +10,11 @@ final class AppRouteCoordinator {
 
     init() {}
 
+    /// The URL of the web view the learner is looking at, if the navigator is up.
+    var visibleURL: URL? {
+        (navigationHandler as? Navigator)?.activeWebView.url
+    }
+
     func installNavigationHandler(_ navigationHandler: NavigationHandler) {
         self.navigationHandler = navigationHandler
 

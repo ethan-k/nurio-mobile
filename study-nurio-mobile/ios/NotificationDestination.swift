@@ -16,6 +16,26 @@ enum NotificationDestination {
             ?? root
     }
 
+    /// True when the push points at the screen the visible web view already shows.
+    /// Only the path is compared: the push and the page may differ in query
+    /// parameters such as `lang` without being different screens.
+    static func isShowing(path: String?, url: String?, visibleURL: URL?, baseURL: URL) -> Bool {
+        guard
+            let visibleURL,
+            let base = validBaseComponents(baseURL),
+            let destination = resolveCandidate(path, base: base) ?? resolveCandidate(url, base: base),
+            visibleURL.host?.lowercased() == destination.host?.lowercased()
+        else { return false }
+
+        return normalizedPath(visibleURL) == normalizedPath(destination)
+    }
+
+    private static func normalizedPath(_ url: URL) -> String {
+        let path = url.path
+        guard path.count > 1, path.hasSuffix("/") else { return path.isEmpty ? "/" : path }
+        return String(path.dropLast())
+    }
+
     private static func resolveCandidate(_ candidate: String?, base: URLComponents) -> URL? {
         guard let value = candidate?.trimmingCharacters(in: .whitespacesAndNewlines), !value.isEmpty,
               let components = URLComponents(string: value),
