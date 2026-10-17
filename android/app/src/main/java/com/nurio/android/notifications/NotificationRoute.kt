@@ -52,6 +52,21 @@ internal object NotificationRoute {
         }
     }
 
+    /**
+     * True when the push points at the visible screen. Only the path is compared: the push
+     * and the page may differ in query parameters such as `lang` without being different screens.
+     */
+    fun isShowing(pushPath: String?, visibleLocation: String?, baseUrl: String): Boolean {
+        val push = destination(pushPath, baseUrl)?.let(::parseUri) ?: return false
+        val visible = destination(visibleLocation, baseUrl)?.let(::parseUri) ?: return false
+
+        return push.host.equals(visible.host, ignoreCase = true) &&
+            normalizedPath(push) == normalizedPath(visible)
+    }
+
+    private fun normalizedPath(uri: URI): String =
+        uri.path.orEmpty().trimEnd('/').ifEmpty { "/" }
+
     fun refreshingDestination(destination: String, token: String): String {
         val fragment = destination.substringAfter('#', missingDelimiterValue = "")
         val withoutFragment = destination.substringBefore('#')

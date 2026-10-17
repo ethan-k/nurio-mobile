@@ -1,7 +1,9 @@
 package com.nurio.android.notifications
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class NotificationRouteTest {
@@ -64,5 +66,20 @@ class NotificationRouteTest {
                 "notification-789",
             ),
         )
+    }
+
+    @Test
+    fun `recognizes a push for the screen that is already visible`() {
+        assertTrue(NotificationRoute.isShowing("/events/42/chat", "https://nurio.kr/events/42/chat?lang=ko", "https://nurio.kr"))
+        assertTrue(NotificationRoute.isShowing("/events/42/chat/", "https://nurio.kr/events/42/chat", "https://nurio.kr"))
+        assertTrue(NotificationRoute.isShowing("https://www.nurio.kr/events/42/chat", "https://nurio.kr/events/42/chat", "https://nurio.kr"))
+    }
+
+    @Test
+    fun `does not treat a different or unknown screen as visible`() {
+        assertFalse(NotificationRoute.isShowing("/events/43/chat", "https://nurio.kr/events/42/chat", "https://nurio.kr"))
+        assertFalse(NotificationRoute.isShowing("/events/42", "https://nurio.kr/events/42/chat", "https://nurio.kr"))
+        assertFalse(NotificationRoute.isShowing("/events/42/chat", null, "https://nurio.kr"))
+        assertFalse(NotificationRoute.isShowing(null, "https://nurio.kr/events/42/chat", "https://nurio.kr"))
     }
 }

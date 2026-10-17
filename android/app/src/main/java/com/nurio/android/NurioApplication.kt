@@ -44,8 +44,12 @@ class NurioApplication : Application() {
 
         // "NurioApp/1.0.17 (22)" lets the server show the running version on the
         // my page and nudge members whose build is behind the Play Store release.
+        // "nurio-messaging-style/1" tells the server this build renders data-only chat
+        // pushes as stacked MessagingStyle notifications; the device-token registration
+        // fetch runs inside this WebView, so DeviceToken#user_agent records it.
         Hotwire.config.applicationUserAgentPrefix =
-            "Nurio Android; NurioPaymentReturn/1; NurioImageCache/1; NurioApp/${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})"
+            "Nurio Android; NurioPaymentReturn/1; NurioImageCache/1; nurio-messaging-style/1; " +
+            "NurioApp/${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})"
 
         // Bridge components (sign-in-with-oauth, register-device-token) decode/encode
         // message JSON through Hotwire.config.jsonConverter. It is null by default, so

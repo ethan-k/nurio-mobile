@@ -23,6 +23,7 @@ import com.nurio.android.localization.LocaleCookieBootstrapper
 import com.nurio.android.notifications.NotificationPermissionRequester
 import com.nurio.android.notifications.NotificationPermissionState
 import com.nurio.android.notifications.NotificationRoute
+import com.nurio.android.notifications.VisibleWebLocation
 import com.nurio.android.payments.PaymentCrashTelemetry
 import com.nurio.android.payments.PaymentFailureKind
 import com.nurio.android.payments.PaymentRecovery
@@ -46,6 +47,7 @@ class MainActivity : HotwireActivity(), PaymentRecoveryHost, NotificationPermiss
     private val navigationLifecycleCallbacks = object : FragmentManager.FragmentLifecycleCallbacks() {
         override fun onFragmentResumed(fragmentManager: FragmentManager, fragment: Fragment) {
             startupCoordinator.onDestinationStateChanged()
+            publishVisibleLocation()
         }
     }
     private val paymentRecoveryHandler = Handler(Looper.getMainLooper())
@@ -111,9 +113,15 @@ class MainActivity : HotwireActivity(), PaymentRecoveryHost, NotificationPermiss
     override fun onPostResume() {
         super.onPostResume()
         startupCoordinator.onHostResumed()
+        publishVisibleLocation()
+    }
+
+    private fun publishVisibleLocation() {
+        VisibleWebLocation.current = delegate.currentNavigator?.location
     }
 
     override fun onPause() {
+        VisibleWebLocation.current = null
         paymentRecoveryHandler.removeCallbacks(paymentRecoveryRunnable)
         dismissPaymentReturnPrompt()
         startupCoordinator.onHostPaused()
