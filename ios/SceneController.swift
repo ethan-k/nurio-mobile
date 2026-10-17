@@ -6,6 +6,12 @@ import UIKit
 final class SceneController: UIResponder {
     var window: UIWindow?
 
+    /// Some WKWebView states never fire `visibilitychange` on return, so chat
+    /// listens for this event to re-sync anything it missed in the background.
+    static let appResumedScript = "window.dispatchEvent(new Event(\"nurio:app-resumed\"))"
+
+    private var didEnterBackground = false
+
     private lazy var navigator = Navigator(
         configuration: .init(
             name: "Nurio",
@@ -101,6 +107,19 @@ extension SceneController: UIWindowSceneDelegate {
     func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
         guard let url = Self.url(from: userActivity) else { return }
         startupCoordinator.handleIncoming(url)
+    }
+
+    func sceneDidEnterBackground(_ scene: UIScene) {
+        didEnterBackground = true
+    }
+
+    // The launch foreground transition is not a return; only one that follows
+    // a real trip to the background is.
+    func sceneWillEnterForeground(_ scene: UIScene) {
+        guard didEnterBackground else { return }
+
+        didEnterBackground = false
+        navigator.activeWebView.evaluateJavaScript(Self.appResumedScript, completionHandler: nil)
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {

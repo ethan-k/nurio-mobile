@@ -41,6 +41,7 @@ class MainActivity : HotwireActivity(), PaymentRecoveryHost, NotificationPermiss
     private val pendingNotificationPermissionCallbacks = mutableListOf<() -> Unit>()
 
     private lateinit var startupCoordinator: MainActivityStartupCoordinator
+    private var hasResumedOnce = false
     private val navigationHandler = Handler(Looper.getMainLooper())
     private val navigationLifecycleCallbacks = object : FragmentManager.FragmentLifecycleCallbacks() {
         override fun onFragmentResumed(fragmentManager: FragmentManager, fragment: Fragment) {
@@ -92,10 +93,19 @@ class MainActivity : HotwireActivity(), PaymentRecoveryHost, NotificationPermiss
 
     override fun onResume() {
         super.onResume()
+        // The launch resume is not a return to the foreground; every later one is.
+        if (hasResumedOnce) dispatchAppResumed() else hasResumedOnce = true
         if (!PaymentRecovery.hasPendingExternalAppHandoff()) return
 
         paymentRecoveryHandler.removeCallbacks(paymentRecoveryRunnable)
         paymentRecoveryHandler.postDelayed(paymentRecoveryRunnable, PAYMENT_RETURN_GRACE_PERIOD_MILLIS)
+    }
+
+    // Some WebView builds do not fire `visibilitychange` reliably on return, so chat
+    // listens for this event to re-sync anything it missed while in the background.
+    private fun dispatchAppResumed() {
+        val webView = delegate.currentNavigator?.session?.webView ?: return
+        webView.evaluateJavascript(APP_RESUMED_SCRIPT, null)
     }
 
     override fun onPostResume() {
@@ -429,6 +439,7 @@ class MainActivity : HotwireActivity(), PaymentRecoveryHost, NotificationPermiss
 
     companion object {
         const val EXTRA_NOTIFICATION_ID = "notification_id"
+        const val APP_RESUMED_SCRIPT = "window.dispatchEvent(new Event(\"nurio:app-resumed\"))"
 
         private const val TAG = "MainActivity"
         private const val NOTIFICATION_PERMISSION_REQUEST_CODE = 1001
