@@ -14,6 +14,7 @@ import dev.hotwire.navigation.routing.BrowserTabRouteDecisionHandler
 import dev.hotwire.navigation.routing.SystemNavigationRouteDecisionHandler
 import kotlinx.serialization.json.Json
 import com.nurio.study.android.bridge.AiTutorCallComponent
+import com.nurio.study.android.bridge.KeyboardInsetsComponent
 import com.nurio.study.android.bridge.SignInWithOAuthComponent
 import com.nurio.study.android.bridge.NotificationPermissionComponent
 import com.nurio.study.android.bridge.RegisterDeviceTokenComponent
@@ -61,7 +62,8 @@ class StudyApplication : Application() {
             BridgeComponentFactory("payment-telemetry", ::PaymentTelemetryComponent),
             BridgeComponentFactory("register-device-token", ::RegisterDeviceTokenComponent),
             BridgeComponentFactory("notification-permission", ::NotificationPermissionComponent),
-            BridgeComponentFactory("ai-tutor-call", ::AiTutorCallComponent)
+            BridgeComponentFactory("ai-tutor-call", ::AiTutorCallComponent),
+            BridgeComponentFactory("keyboard-insets", ::KeyboardInsetsComponent)
         )
 
         Hotwire.defaultFragmentDestination = WebFragment::class
