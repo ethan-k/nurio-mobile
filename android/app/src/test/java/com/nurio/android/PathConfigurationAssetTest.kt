@@ -98,4 +98,48 @@ class PathConfigurationAssetTest {
             }
         }
     }
+
+    @Test
+    fun `chat screens disable pull to refresh and keep the default stack`() {
+        val asset = listOf(
+            File("src/main/assets/json/path-configuration.json"),
+            File("app/src/main/assets/json/path-configuration.json")
+        ).first(File::isFile)
+        val shared = listOf(
+            File("../../shared/path-configuration.json"),
+            File("../shared/path-configuration.json")
+        ).first(File::isFile)
+        val chatPaths = listOf(
+            "/chat",
+            "/chat?lang=ko",
+            "/events/34/chat",
+            "/events/34/chat?thread=7&lang=en",
+            "/friendships/12/chat",
+            "/clubs/seoul-runners/chat",
+            "/clubs/seoul-runners/plans/9/chat",
+            "/korean-program/cohorts/3/chat"
+        )
+        val refreshablePaths = listOf("/events", "/events/34", "/chatbot", "/clubs/seoul-runners")
+
+        listOf(asset, shared).forEach { configuration ->
+            val rules = Json.parseToJsonElement(configuration.readText()).jsonObject.getValue("rules").jsonArray
+            fun propertiesFor(path: String) = rules.filter { rule ->
+                rule.jsonObject.getValue("patterns").jsonArray.any {
+                    Regex(it.jsonPrimitive.content).containsMatchIn(path)
+                }
+            }.flatMap { rule ->
+                rule.jsonObject.getValue("properties").jsonObject.entries
+            }.associate { it.key to it.value.jsonPrimitive.content }
+
+            chatPaths.forEach { path ->
+                val properties = propertiesFor(path)
+                assertEquals("$configuration: $path refresh", "false", properties["pull_to_refresh_enabled"])
+                assertEquals("$configuration: $path context", "default", properties["context"])
+                assertEquals("$configuration: $path fragment", "hotwire://fragment/web", properties["uri"])
+            }
+            refreshablePaths.forEach { path ->
+                assertEquals("$configuration: $path refresh", "true", propertiesFor(path)["pull_to_refresh_enabled"])
+            }
+        }
+    }
 }

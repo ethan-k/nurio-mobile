@@ -67,6 +67,18 @@
         "context": "default",
         "pull_to_refresh_enabled": false
       }
+    },
+    {
+      "patterns": [
+        "^/chat(?:\\?.*)?$",
+        "^/events/\\d+/chat(?:[/?]|$)",
+        "^/friendships/\\d+/chat(?:[/?]|$)",
+        "^/clubs/[^/]+/(?:plans/\\d+/)?chat(?:[/?]|$)",
+        "^/korean-program/cohorts/\\d+/chat(?:[/?]|$)"
+      ],
+      "properties": {
+        "pull_to_refresh_enabled": false
+      }
     }
   ]
 }

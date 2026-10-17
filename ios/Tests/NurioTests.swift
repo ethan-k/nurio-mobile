@@ -134,6 +134,50 @@ final class NurioTests: XCTestCase {
         }
     }
 
+    func testChatScreensDisablePullToRefreshOnTheDefaultStack() throws {
+        let configurationURL = try XCTUnwrap(
+            Bundle(for: AppDelegate.self).url(forResource: AppEnvironment.pathConfigurationResourceName, withExtension: "json")
+        )
+        let configuration = try XCTUnwrap(
+            JSONSerialization.jsonObject(with: Data(contentsOf: configurationURL)) as? [String: Any]
+        )
+        let rules = try XCTUnwrap(configuration["rules"] as? [[String: Any]])
+
+        func properties(for path: String) throws -> [String: Any] {
+            var merged: [String: Any] = [:]
+            for rule in rules {
+                let patterns = try XCTUnwrap(rule["patterns"] as? [String])
+                if try patterns.contains(where: { pattern in
+                    let regex = try NSRegularExpression(pattern: pattern)
+                    return regex.firstMatch(in: path, range: NSRange(path.startIndex..., in: path)) != nil
+                }) {
+                    merged.merge(try XCTUnwrap(rule["properties"] as? [String: Any])) { _, new in new }
+                }
+            }
+            return merged
+        }
+
+        let chatPaths = [
+            "/chat",
+            "/chat?lang=ko",
+            "/events/34/chat",
+            "/events/34/chat?thread=7&lang=en",
+            "/friendships/12/chat",
+            "/clubs/seoul-runners/chat",
+            "/clubs/seoul-runners/plans/9/chat",
+            "/korean-program/cohorts/3/chat",
+        ]
+        for path in chatPaths {
+            let chat = try properties(for: path)
+            XCTAssertEqual(chat["pull_to_refresh_enabled"] as? Bool, false, path)
+            XCTAssertEqual(chat["context"] as? String, "default", path)
+        }
+
+        for path in [ "/events", "/events/34", "/chatbot", "/clubs/seoul-runners" ] {
+            XCTAssertEqual(try properties(for: path)["pull_to_refresh_enabled"] as? Bool, true, path)
+        }
+    }
+
     func testCheckoutRetrySelectsTicketDestinationSessionWithoutMatchingGatewayNavigation() {
         let baseURL = URL(string: "https://nurio.kr")!
         let ticketURL = URL(string: "https://nurio.kr/orders/new?event_id=34&step=tickets")!
