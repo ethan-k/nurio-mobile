@@ -12,6 +12,7 @@ import dev.hotwire.navigation.config.registerRouteDecisionHandlers
 import dev.hotwire.navigation.routing.AppNavigationRouteDecisionHandler
 import dev.hotwire.navigation.routing.BrowserTabRouteDecisionHandler
 import dev.hotwire.navigation.routing.SystemNavigationRouteDecisionHandler
+import com.nurio.android.bridge.KeyboardInsetsComponent
 import com.nurio.android.bridge.NotificationPermissionComponent
 import com.nurio.android.bridge.RegisterDeviceTokenComponent
 import com.nurio.android.bridge.PaymentRecoveryComponent
@@ -68,7 +69,8 @@ class NurioApplication : Application() {
             BridgeComponentFactory("notification-permission", ::NotificationPermissionComponent),
             BridgeComponentFactory("payment-recovery", ::PaymentRecoveryComponent),
             BridgeComponentFactory("payment-telemetry", ::PaymentTelemetryComponent),
-            BridgeComponentFactory("sign-in-with-oauth", ::SignInWithOAuthComponent)
+            BridgeComponentFactory("sign-in-with-oauth", ::SignInWithOAuthComponent),
+            BridgeComponentFactory("keyboard-insets", ::KeyboardInsetsComponent)
         )
 
         Hotwire.defaultFragmentDestination = WebFragment::class
