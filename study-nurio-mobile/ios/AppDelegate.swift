@@ -94,6 +94,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             NotificationPermissionComponent.self,
             PaymentTelemetryComponent.self,
             AiTutorCallComponent.self,
+            KeyboardInsetsComponent.self,
         ])
 
         Hotwire.registerRouteDecisionHandlers([
