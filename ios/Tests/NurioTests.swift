@@ -200,6 +200,25 @@ final class NurioTests: XCTestCase {
         }
     }
 
+    func testForegroundPushForTheVisibleScreenIsRecognized() throws {
+        let baseURL = try XCTUnwrap(URL(string: "https://nurio.kr"))
+        let visibleURL = try XCTUnwrap(URL(string: "https://nurio.kr/events/34/chat?lang=ko"))
+
+        XCTAssertTrue(PushNotificationRoute.isShowing([ "path": "/events/34/chat" ], visibleURL: visibleURL, baseURL: baseURL))
+        XCTAssertTrue(PushNotificationRoute.isShowing([ "path": "/events/34/chat/" ], visibleURL: visibleURL, baseURL: baseURL))
+        XCTAssertTrue(PushNotificationRoute.isShowing([ "url": "https://www.nurio.kr/events/34/chat" ], visibleURL: visibleURL, baseURL: baseURL))
+    }
+
+    func testForegroundPushForAnotherScreenIsNotRecognized() throws {
+        let baseURL = try XCTUnwrap(URL(string: "https://nurio.kr"))
+        let visibleURL = try XCTUnwrap(URL(string: "https://nurio.kr/events/34/chat"))
+
+        XCTAssertFalse(PushNotificationRoute.isShowing([ "path": "/events/35/chat" ], visibleURL: visibleURL, baseURL: baseURL))
+        XCTAssertFalse(PushNotificationRoute.isShowing([ "path": "/events/34" ], visibleURL: visibleURL, baseURL: baseURL))
+        XCTAssertFalse(PushNotificationRoute.isShowing([:], visibleURL: visibleURL, baseURL: baseURL))
+        XCTAssertFalse(PushNotificationRoute.isShowing([ "path": "/events/34/chat" ], visibleURL: nil, baseURL: baseURL))
+    }
+
     func testSignInURLUsesExistingAuthLoginRoute() {
         XCTAssertEqual(
             AppEnvironment.signInURL.absoluteString,

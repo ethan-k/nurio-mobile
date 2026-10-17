@@ -154,7 +154,20 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         willPresent notification: UNNotification,
         withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
     ) {
-        completionHandler([ .banner, .sound, .badge ])
+        Task { @MainActor in
+            // A chat push for the room already on screen would only repeat what
+            // the live page just rendered, so it is dropped silently.
+            let visibleURL = (AppRouteCoordinator.shared.navigationHandler as? Navigator)?.activeWebView.url
+            if PushNotificationRoute.isShowing(
+                notification.request.content.userInfo,
+                visibleURL: visibleURL,
+                baseURL: AppEnvironment.baseURL
+            ) {
+                completionHandler([])
+            } else {
+                completionHandler([ .banner, .sound, .badge ])
+            }
+        }
     }
 
     func userNotificationCenter(
@@ -195,6 +208,30 @@ enum PushNotificationRoute {
         }
 
         return nil
+    }
+
+    /// True when the push points at the screen the visible web view already shows.
+    /// Only the path is compared: the push and the page may differ in query
+    /// parameters such as `lang` without being different screens.
+    nonisolated static func isShowing(
+        _ userInfo: [AnyHashable: Any],
+        visibleURL: URL?,
+        baseURL: URL
+    ) -> Bool {
+        guard
+            let visibleURL,
+            let visible = NativeAppOpenURL.webURL(from: visibleURL, baseURL: baseURL),
+            let destination = destinationURL(from: userInfo, baseURL: baseURL)
+        else { return false }
+
+        return visible.host?.lowercased() == destination.host?.lowercased() &&
+            normalizedPath(visible) == normalizedPath(destination)
+    }
+
+    nonisolated private static func normalizedPath(_ url: URL) -> String {
+        let path = url.path
+        guard path.count > 1, path.hasSuffix("/") else { return path.isEmpty ? "/" : path }
+        return String(path.dropLast())
     }
 
     nonisolated static func refreshingURL(_ url: URL, token: String) -> URL {
