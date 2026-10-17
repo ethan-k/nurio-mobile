@@ -46,11 +46,13 @@ class MainActivity : HotwireActivity(), MicPermissionHost, NotificationPermissio
         private const val PUSH_PERMISSION_REQUESTED_KEY = "permission_requested"
         private const val LEGACY_MICROPHONE_PERMISSION_PREFERENCES = "nurio_study_microphone"
         const val NOTIFICATION_DESTINATION_EXTRA = "notification_destination"
+        const val APP_RESUMED_SCRIPT = "window.dispatchEvent(new Event(\"nurio:app-resumed\"))"
     }
 
     private var pendingAuthUrl: String? = null
     private val pendingNotificationRoute = PendingNotificationRoute()
     private var readyNavigator: Navigator? = null
+    private var hasResumedOnce = false
     private val notificationPermissionCallbacks = mutableListOf<(Boolean) -> Unit>()
     private val microphonePermissionRequestState = MicrophonePermissionRequestState()
     private var microphoneSettingsDialog: AlertDialog? = null
@@ -127,6 +129,15 @@ class MainActivity : HotwireActivity(), MicPermissionHost, NotificationPermissio
     override fun onResume() {
         super.onResume()
         AiTutorCallController.setReviewRouter(::routeAiTutorReview)
+        // The launch resume is not a return to the foreground; every later one is.
+        if (hasResumedOnce) dispatchAppResumed() else hasResumedOnce = true
+    }
+
+    // Some WebView builds do not fire `visibilitychange` reliably on return, so chat
+    // listens for this event to re-sync anything it missed while in the background.
+    private fun dispatchAppResumed() {
+        val webView = delegate.currentNavigator?.session?.webView ?: return
+        webView.evaluateJavascript(APP_RESUMED_SCRIPT, null)
     }
 
     override fun onPause() {

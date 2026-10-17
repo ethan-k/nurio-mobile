@@ -209,6 +209,10 @@ final class StudyWKUIController: WKUIController {
 final class SceneController: UIResponder {
     var window: UIWindow?
 
+    static let appResumedScript = "window.dispatchEvent(new Event(\"nurio:app-resumed\"))"
+
+    private var didEnterBackground = false
+
     private lazy var navigator: Navigator = {
         let navigator = Navigator(
             configuration: .init(
@@ -377,10 +381,18 @@ extension SceneController: UIWindowSceneDelegate {
     func sceneWillEnterForeground(_ scene: UIScene) {
         let visitable = navigator.activeNavigationController.topViewController as? any Visitable
         updateIdleTimer(for: visitable?.currentVisitableURL)
+
+        // The launch foreground transition is not a return; only one that follows
+        // a real trip to the background is. Some WKWebView states never fire
+        // `visibilitychange` on return, so chat listens for this event instead.
+        guard didEnterBackground else { return }
+        didEnterBackground = false
+        navigator.activeWebView.evaluateJavaScript(Self.appResumedScript, completionHandler: nil)
     }
 
     func sceneDidEnterBackground(_ scene: UIScene) {
         updateIdleTimer(for: nil)
+        didEnterBackground = true
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {
