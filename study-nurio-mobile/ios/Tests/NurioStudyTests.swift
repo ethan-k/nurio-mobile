@@ -902,6 +902,7 @@ final class NurioStudyTests: XCTestCase {
     }
 
     @MainActor
+    @MainActor
     func testNotificationRouteQueuesUntilHandlerIsInstalledAndThenRoutesImmediately() {
         let coordinator = AppRouteCoordinator()
         let handler = NavigationHandlerSpy()
