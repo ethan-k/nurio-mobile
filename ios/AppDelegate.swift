@@ -23,6 +23,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         configureAppearance()
         configureHotwire()
         configureKakaoSDK()
+        configureLiveActivities()
         return true
     }
 
@@ -101,6 +102,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             NotificationPermissionComponent.self,
             PaymentTelemetryComponent.self,
             KeyboardInsetsComponent.self,
+            LiveActivityTokensComponent.self,
+            EventGroupLiveActivityComponent.self,
         ])
 
         Hotwire.registerRouteDecisionHandlers([
@@ -126,6 +129,12 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 #if DEBUG
         Hotwire.config.debugLoggingEnabled = true
 #endif
+    }
+
+    private func configureLiveActivities() {
+        if #available(iOS 16.2, *) {
+            EventGroupLiveActivityManager.shared.start()
+        }
     }
 
     private func configureKakaoSDK() {

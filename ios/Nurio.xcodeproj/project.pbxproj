@@ -7,10 +7,22 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		018AD9311E132F63B8D3252B /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9938B3F47F0E5122605C46CA /* SwiftUI.framework */; };
+		13BD5D758FAC3011306FC574 /* LiveActivityTokenStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B13B30662E7E5B0EE85C98FD /* LiveActivityTokenStore.swift */; };
+		2F0143DBFF296D727B34D211 /* NurioLiveActivity.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = F6EFFCE5EE2F172F0EEB8FFF /* NurioLiveActivity.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		329CEF4AA28E407B2AD5E7E5 /* ActivityKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F01A55C6F73C7FBBACA1E956 /* ActivityKit.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
+		37223C6929F85D22248053E8 /* EventGroupLiveActivityWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD15B48C3457FAA047F58E1F /* EventGroupLiveActivityWidget.swift */; };
+		3815ECF53993E4168E87A4E5 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 51AF14F49A157D886762ABBA /* Foundation.framework */; };
+		4284E8BBC01D795791BA2844 /* EventGroupLiveActivityComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68E35F502B72F6F388D2601F /* EventGroupLiveActivityComponent.swift */; };
+		42E8F51B4CC66F4D3C5306C9 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8D6691306BE65815F7FE8E7E /* WidgetKit.framework */; };
 		54AD91C72FB3F8D000BF72BB /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 54AD91C62FB3F8D000BF72BB /* GoogleService-Info.plist */; };
 		54AD91CA2FB3FE0600BF72BB /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 54AD91C92FB3FE0600BF72BB /* FirebaseCore */; };
 		54AD91CC2FB3FE0600BF72BB /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 54AD91CB2FB3FE0600BF72BB /* FirebaseMessaging */; };
 		54AD91D02FB3FE0600BF72BB /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 54AD91D02FB3FE0600BF72BC /* FirebaseCrashlytics */; };
+		553F38203EA4B77E84D4A3F3 /* EventGroupAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D80AD86AACC6A9B24C5087D /* EventGroupAttributes.swift */; };
+		6EDFE0EACB41367A6FE8177B /* ActivityKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F01A55C6F73C7FBBACA1E956 /* ActivityKit.framework */; };
+		8D2F1187057D06DE2EA896BE /* EventGroupAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D80AD86AACC6A9B24C5087D /* EventGroupAttributes.swift */; };
+		974B3434305DC85141E1337B /* NurioLiveActivityBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8413F722D55177C912990053 /* NurioLiveActivityBundle.swift */; };
 		A00000000000000000000001 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000031 /* AppDelegate.swift */; };
 		A00000000000000000000002 /* SceneController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000032 /* SceneController.swift */; };
 		A00000000000000000000003 /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000033 /* AppEnvironment.swift */; };
@@ -29,30 +41,42 @@
 		A00000000000000000000010 /* NurioTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000041 /* NurioTests.swift */; };
 		A00000000000000000000011 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000042 /* PrivacyInfo.xcprivacy */; };
 		A00000000000000000000012 /* NativeAppleSignInCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000043 /* NativeAppleSignInCoordinator.swift */; };
+		AA8DFD8012AD9BD3F3E31160 /* LiveActivityTokenStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0826D68B7EE68C13054AAAED /* LiveActivityTokenStoreTests.swift */; };
+		AFB293F56DF8F32A5F55F755 /* EventGroupSyncRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = F62CE0AD7B7B3ABFEA64603B /* EventGroupSyncRequest.swift */; };
 		B000000000000000000000001 /* NativePushTokenStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000000000000000000000031 /* NativePushTokenStore.swift */; };
-		B000000000000000000000005 /* NotificationPermissionComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000000000000000000000035 /* NotificationPermissionComponent.swift */; };
-		B000000000000000000000006 /* NotificationPermissionStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000000000000000000000036 /* NotificationPermissionStatus.swift */; };
-		F80000000000000000000001 /* NotificationPermissionStatusTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F80000000000000000000031 /* NotificationPermissionStatusTests.swift */; };
 		B000000000000000000000002 /* RegisterDeviceTokenComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000000000000000000000032 /* RegisterDeviceTokenComponent.swift */; };
 		B000000000000000000000003 /* CheckoutColdBootWebViewPolicyDecisionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000000000000000000000033 /* CheckoutColdBootWebViewPolicyDecisionHandler.swift */; };
+		B000000000000000000000005 /* NotificationPermissionComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000000000000000000000035 /* NotificationPermissionComponent.swift */; };
+		B000000000000000000000006 /* NotificationPermissionStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000000000000000000000036 /* NotificationPermissionStatus.swift */; };
 		C00000000000000000000005 /* KakaoSDKCommon in Frameworks */ = {isa = PBXBuildFile; productRef = C00000000000000000000002 /* KakaoSDKCommon */; };
 		C00000000000000000000006 /* KakaoSDKAuth in Frameworks */ = {isa = PBXBuildFile; productRef = C00000000000000000000003 /* KakaoSDKAuth */; };
 		C00000000000000000000007 /* KakaoSDKUser in Frameworks */ = {isa = PBXBuildFile; productRef = C00000000000000000000004 /* KakaoSDKUser */; };
 		D00000000000000000000001 /* NativeKakaoSignInCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D00000000000000000000031 /* NativeKakaoSignInCoordinator.swift */; };
+		D40000000000000000000001 /* KeyboardInsetsComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40000000000000000000031 /* KeyboardInsetsComponent.swift */; };
+		D5F16E60A41878FDA6C64305 /* EventGroupActivityPruning.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23D613926A5B333A1602BE8C /* EventGroupActivityPruning.swift */; };
+		D7F5FA00AC224480E1F072F7 /* EventGroupLiveActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC1483B2065BB28CF4EAF88C /* EventGroupLiveActivityManager.swift */; };
+		DCAB0C34168F597BB2FEDDAC /* LiveActivityTokensComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3615A327EBCBCA88B34BF807 /* LiveActivityTokensComponent.swift */; };
 		F10000000000000000000001 /* NativeLocaleBootstrapTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000031 /* NativeLocaleBootstrapTests.swift */; };
 		F10000000000000000000002 /* NativeLocaleBootstrap.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000032 /* NativeLocaleBootstrap.swift */; };
 		F20000000000000000000001 /* SceneStartupCoordinatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F20000000000000000000031 /* SceneStartupCoordinatorTests.swift */; };
 		F20000000000000000000002 /* SceneStartupCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F20000000000000000000032 /* SceneStartupCoordinator.swift */; };
 		F30000000000000000000001 /* PaymentCrashContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = F30000000000000000000031 /* PaymentCrashContext.swift */; };
 		F30000000000000000000002 /* PaymentTelemetryComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = F30000000000000000000032 /* PaymentTelemetryComponent.swift */; };
-		D40000000000000000000001 /* KeyboardInsetsComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40000000000000000000031 /* KeyboardInsetsComponent.swift */; };
-		F50000000000000000000001 /* NativeImageCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = F50000000000000000000031 /* NativeImageCache.swift */; };
 		F40000000000000000000001 /* NativeImageCacheTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F40000000000000000000031 /* NativeImageCacheTests.swift */; };
+		F50000000000000000000001 /* NativeImageCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = F50000000000000000000031 /* NativeImageCache.swift */; };
 		F70000000000000000000001 /* PaymentGatewayPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = F70000000000000000000031 /* PaymentGatewayPresentation.swift */; };
 		F70000000000000000000002 /* PaymentGatewayPresentationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F70000000000000000000032 /* PaymentGatewayPresentationTests.swift */; };
+		F80000000000000000000001 /* NotificationPermissionStatusTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F80000000000000000000031 /* NotificationPermissionStatusTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		2B1E8114691A0406D891A1EF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A00000000000000000000100 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = FE1155C084952274FD6130B2;
+			remoteInfo = NurioLiveActivity;
+		};
 		A00000000000000000000020 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = A00000000000000000000100 /* Project object */;
@@ -62,8 +86,31 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		1958DC4F2B4D162F21CEC13E /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				2F0143DBFF296D727B34D211 /* NurioLiveActivity.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		0826D68B7EE68C13054AAAED /* LiveActivityTokenStoreTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LiveActivityTokenStoreTests.swift; sourceTree = "<group>"; };
+		0D80AD86AACC6A9B24C5087D /* EventGroupAttributes.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EventGroupAttributes.swift; sourceTree = "<group>"; };
+		23D613926A5B333A1602BE8C /* EventGroupActivityPruning.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EventGroupActivityPruning.swift; sourceTree = "<group>"; };
+		3615A327EBCBCA88B34BF807 /* LiveActivityTokensComponent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LiveActivityTokensComponent.swift; sourceTree = "<group>"; };
+		51AF14F49A157D886762ABBA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		54AD91C62FB3F8D000BF72BB /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		68E35F502B72F6F388D2601F /* EventGroupLiveActivityComponent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EventGroupLiveActivityComponent.swift; sourceTree = "<group>"; };
+		8413F722D55177C912990053 /* NurioLiveActivityBundle.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NurioLiveActivityBundle.swift; sourceTree = "<group>"; };
+		8D6691306BE65815F7FE8E7E /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		9938B3F47F0E5122605C46CA /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		A00000000000000000000030 /* Nurio.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Nurio.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A00000000000000000000031 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		A00000000000000000000032 /* SceneController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneController.swift; sourceTree = "<group>"; };
@@ -85,31 +132,49 @@
 		A00000000000000000000042 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		A00000000000000000000043 /* NativeAppleSignInCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeAppleSignInCoordinator.swift; sourceTree = "<group>"; };
 		A00000000000000000000044 /* Nurio.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Nurio.entitlements; sourceTree = "<group>"; };
+		AC1483B2065BB28CF4EAF88C /* EventGroupLiveActivityManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EventGroupLiveActivityManager.swift; sourceTree = "<group>"; };
 		B000000000000000000000031 /* NativePushTokenStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativePushTokenStore.swift; sourceTree = "<group>"; };
-		B000000000000000000000035 /* NotificationPermissionComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationPermissionComponent.swift; sourceTree = "<group>"; };
-		B000000000000000000000036 /* NotificationPermissionStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationPermissionStatus.swift; sourceTree = "<group>"; };
-		F80000000000000000000031 /* NotificationPermissionStatusTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationPermissionStatusTests.swift; sourceTree = "<group>"; };
 		B000000000000000000000032 /* RegisterDeviceTokenComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterDeviceTokenComponent.swift; sourceTree = "<group>"; };
 		B000000000000000000000033 /* CheckoutColdBootWebViewPolicyDecisionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckoutColdBootWebViewPolicyDecisionHandler.swift; sourceTree = "<group>"; };
+		B000000000000000000000035 /* NotificationPermissionComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationPermissionComponent.swift; sourceTree = "<group>"; };
+		B000000000000000000000036 /* NotificationPermissionStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationPermissionStatus.swift; sourceTree = "<group>"; };
+		B13B30662E7E5B0EE85C98FD /* LiveActivityTokenStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LiveActivityTokenStore.swift; sourceTree = "<group>"; };
+		C4707EF1FBE89A0EC56BC4A9 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		CD15B48C3457FAA047F58E1F /* EventGroupLiveActivityWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EventGroupLiveActivityWidget.swift; sourceTree = "<group>"; };
 		D00000000000000000000031 /* NativeKakaoSignInCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeKakaoSignInCoordinator.swift; sourceTree = "<group>"; };
+		D40000000000000000000031 /* KeyboardInsetsComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardInsetsComponent.swift; sourceTree = "<group>"; };
+		F01A55C6F73C7FBBACA1E956 /* ActivityKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ActivityKit.framework; path = System/Library/Frameworks/ActivityKit.framework; sourceTree = SDKROOT; };
 		F10000000000000000000031 /* NativeLocaleBootstrapTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeLocaleBootstrapTests.swift; sourceTree = "<group>"; };
 		F10000000000000000000032 /* NativeLocaleBootstrap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeLocaleBootstrap.swift; sourceTree = "<group>"; };
 		F20000000000000000000031 /* SceneStartupCoordinatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneStartupCoordinatorTests.swift; sourceTree = "<group>"; };
 		F20000000000000000000032 /* SceneStartupCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneStartupCoordinator.swift; sourceTree = "<group>"; };
 		F30000000000000000000031 /* PaymentCrashContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentCrashContext.swift; sourceTree = "<group>"; };
 		F30000000000000000000032 /* PaymentTelemetryComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentTelemetryComponent.swift; sourceTree = "<group>"; };
-		D40000000000000000000031 /* KeyboardInsetsComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardInsetsComponent.swift; sourceTree = "<group>"; };
-		F50000000000000000000031 /* NativeImageCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeImageCache.swift; sourceTree = "<group>"; };
 		F40000000000000000000031 /* NativeImageCacheTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeImageCacheTests.swift; sourceTree = "<group>"; };
+		F50000000000000000000031 /* NativeImageCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeImageCache.swift; sourceTree = "<group>"; };
 		F60000000000000000000031 /* Production.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Production.xcconfig; sourceTree = "<group>"; };
 		F60000000000000000000032 /* ProductionDebug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = ProductionDebug.xcconfig; sourceTree = "<group>"; };
 		F60000000000000000000033 /* Local.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Local.xcconfig; sourceTree = "<group>"; };
 		F60000000000000000000034 /* LocalOverrides.xcconfig.example */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = LocalOverrides.xcconfig.example; sourceTree = "<group>"; };
+		F62CE0AD7B7B3ABFEA64603B /* EventGroupSyncRequest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EventGroupSyncRequest.swift; sourceTree = "<group>"; };
+		F6EFFCE5EE2F172F0EEB8FFF /* NurioLiveActivity.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NurioLiveActivity.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		F70000000000000000000031 /* PaymentGatewayPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentGatewayPresentation.swift; sourceTree = "<group>"; };
 		F70000000000000000000032 /* PaymentGatewayPresentationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentGatewayPresentationTests.swift; sourceTree = "<group>"; };
+		F80000000000000000000031 /* NotificationPermissionStatusTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationPermissionStatusTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		6F339195C601AE1C6BFCE5A8 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3815ECF53993E4168E87A4E5 /* Foundation.framework in Frameworks */,
+				42E8F51B4CC66F4D3C5306C9 /* WidgetKit.framework in Frameworks */,
+				018AD9311E132F63B8D3252B /* SwiftUI.framework in Frameworks */,
+				6EDFE0EACB41367A6FE8177B /* ActivityKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		A00000000000000000000050 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -121,6 +186,7 @@
 				C00000000000000000000006 /* KakaoSDKAuth in Frameworks */,
 				C00000000000000000000007 /* KakaoSDKUser in Frameworks */,
 				A0000000000000000000000F /* HotwireNative in Frameworks */,
+				329CEF4AA28E407B2AD5E7E5 /* ActivityKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -134,12 +200,38 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		122C90029D484D44FB662BCC /* NurioLiveActivity */ = {
+			isa = PBXGroup;
+			children = (
+				C4707EF1FBE89A0EC56BC4A9 /* Info.plist */,
+				8413F722D55177C912990053 /* NurioLiveActivityBundle.swift */,
+				CD15B48C3457FAA047F58E1F /* EventGroupLiveActivityWidget.swift */,
+			);
+			name = NurioLiveActivity;
+			path = NurioLiveActivity;
+			sourceTree = "<group>";
+		};
+		7B7B84AEFD0C20AB94D12D87 /* LiveActivity */ = {
+			isa = PBXGroup;
+			children = (
+				0D80AD86AACC6A9B24C5087D /* EventGroupAttributes.swift */,
+				B13B30662E7E5B0EE85C98FD /* LiveActivityTokenStore.swift */,
+				23D613926A5B333A1602BE8C /* EventGroupActivityPruning.swift */,
+				F62CE0AD7B7B3ABFEA64603B /* EventGroupSyncRequest.swift */,
+				AC1483B2065BB28CF4EAF88C /* EventGroupLiveActivityManager.swift */,
+			);
+			name = LiveActivity;
+			path = LiveActivity;
+			sourceTree = "<group>";
+		};
 		A00000000000000000000060 = {
 			isa = PBXGroup;
 			children = (
 				A00000000000000000000062 /* Nurio */,
 				A00000000000000000000066 /* Tests */,
 				A00000000000000000000061 /* Products */,
+				FB622D053361FDD77F8DB941 /* Frameworks */,
+				122C90029D484D44FB662BCC /* NurioLiveActivity */,
 			);
 			sourceTree = "<group>";
 		};
@@ -148,6 +240,7 @@
 			children = (
 				A00000000000000000000030 /* Nurio.app */,
 				A00000000000000000000040 /* NurioTests.xctest */,
+				F6EFFCE5EE2F172F0EEB8FFF /* NurioLiveActivity.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -169,6 +262,7 @@
 				A000000000000000000000A0 /* LaunchScreen.storyboard */,
 				A0000000000000000000003F /* ios_v1.json */,
 				54AD91C62FB3F8D000BF72BB /* GoogleService-Info.plist */,
+				7B7B84AEFD0C20AB94D12D87 /* LiveActivity */,
 			);
 			name = Nurio;
 			sourceTree = "<group>";
@@ -210,6 +304,8 @@
 				B000000000000000000000036 /* NotificationPermissionStatus.swift */,
 				F30000000000000000000032 /* PaymentTelemetryComponent.swift */,
 				D40000000000000000000031 /* KeyboardInsetsComponent.swift */,
+				3615A327EBCBCA88B34BF807 /* LiveActivityTokensComponent.swift */,
+				68E35F502B72F6F388D2601F /* EventGroupLiveActivityComponent.swift */,
 			);
 			path = Bridge;
 			sourceTree = "<group>";
@@ -223,6 +319,7 @@
 				F10000000000000000000031 /* NativeLocaleBootstrapTests.swift */,
 				F20000000000000000000031 /* SceneStartupCoordinatorTests.swift */,
 				F80000000000000000000031 /* NotificationPermissionStatusTests.swift */,
+				0826D68B7EE68C13054AAAED /* LiveActivityTokenStoreTests.swift */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -237,6 +334,14 @@
 			path = Payments;
 			sourceTree = "<group>";
 		};
+		C968E55AD84CD30FC7FE01DE /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				51AF14F49A157D886762ABBA /* Foundation.framework */,
+			);
+			name = iOS;
+			sourceTree = "<group>";
+		};
 		F60000000000000000000040 /* Config */ = {
 			isa = PBXGroup;
 			children = (
@@ -246,6 +351,17 @@
 				F60000000000000000000034 /* LocalOverrides.xcconfig.example */,
 			);
 			path = Config;
+			sourceTree = "<group>";
+		};
+		FB622D053361FDD77F8DB941 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				F01A55C6F73C7FBBACA1E956 /* ActivityKit.framework */,
+				C968E55AD84CD30FC7FE01DE /* iOS */,
+				8D6691306BE65815F7FE8E7E /* WidgetKit.framework */,
+				9938B3F47F0E5122605C46CA /* SwiftUI.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -258,11 +374,13 @@
 				A00000000000000000000080 /* Sources */,
 				A00000000000000000000050 /* Frameworks */,
 				A00000000000000000000081 /* Resources */,
+				1958DC4F2B4D162F21CEC13E /* Embed Foundation Extensions */,
 				54AD91D02FB3FE0600BF72BD /* Upload Crashlytics dSYMs */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				2E640BFA082DD62AD396E919 /* PBXTargetDependency */,
 			);
 			name = Nurio;
 			packageProductDependencies = (
@@ -296,6 +414,23 @@
 			productReference = A00000000000000000000040 /* NurioTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
+		FE1155C084952274FD6130B2 /* NurioLiveActivity */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 765E980C675E9318E0177E27 /* Build configuration list for PBXNativeTarget "NurioLiveActivity" */;
+			buildPhases = (
+				29477802B8F85D29D8790821 /* Sources */,
+				6F339195C601AE1C6BFCE5A8 /* Frameworks */,
+				02DC88E538CEA74B597456D0 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = NurioLiveActivity;
+			productName = NurioLiveActivity;
+			productReference = F6EFFCE5EE2F172F0EEB8FFF /* NurioLiveActivity.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -312,6 +447,9 @@
 					A00000000000000000000071 = {
 						CreatedOnToolsVersion = 15.3;
 						TestTargetID = A00000000000000000000070;
+					};
+					FE1155C084952274FD6130B2 = {
+						CreatedOnToolsVersion = 15.3;
 					};
 				};
 			};
@@ -335,11 +473,19 @@
 			targets = (
 				A00000000000000000000070 /* Nurio */,
 				A00000000000000000000071 /* NurioTests */,
+				FE1155C084952274FD6130B2 /* NurioLiveActivity */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		02DC88E538CEA74B597456D0 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		A00000000000000000000081 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -386,6 +532,16 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		29477802B8F85D29D8790821 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				974B3434305DC85141E1337B /* NurioLiveActivityBundle.swift in Sources */,
+				37223C6929F85D22248053E8 /* EventGroupLiveActivityWidget.swift in Sources */,
+				553F38203EA4B77E84D4A3F3 /* EventGroupAttributes.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		A00000000000000000000080 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -415,6 +571,13 @@
 				D40000000000000000000001 /* KeyboardInsetsComponent.swift in Sources */,
 				B000000000000000000000005 /* NotificationPermissionComponent.swift in Sources */,
 				B000000000000000000000006 /* NotificationPermissionStatus.swift in Sources */,
+				8D2F1187057D06DE2EA896BE /* EventGroupAttributes.swift in Sources */,
+				13BD5D758FAC3011306FC574 /* LiveActivityTokenStore.swift in Sources */,
+				D5F16E60A41878FDA6C64305 /* EventGroupActivityPruning.swift in Sources */,
+				AFB293F56DF8F32A5F55F755 /* EventGroupSyncRequest.swift in Sources */,
+				D7F5FA00AC224480E1F072F7 /* EventGroupLiveActivityManager.swift in Sources */,
+				DCAB0C34168F597BB2FEDDAC /* LiveActivityTokensComponent.swift in Sources */,
+				4284E8BBC01D795791BA2844 /* EventGroupLiveActivityComponent.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -428,12 +591,19 @@
 				F10000000000000000000001 /* NativeLocaleBootstrapTests.swift in Sources */,
 				F20000000000000000000001 /* SceneStartupCoordinatorTests.swift in Sources */,
 				F80000000000000000000001 /* NotificationPermissionStatusTests.swift in Sources */,
+				AA8DFD8012AD9BD3F3E31160 /* LiveActivityTokenStoreTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		2E640BFA082DD62AD396E919 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = NurioLiveActivity;
+			target = FE1155C084952274FD6130B2 /* NurioLiveActivity */;
+			targetProxy = 2B1E8114691A0406D891A1EF /* PBXContainerItemProxy */;
+		};
 		A00000000000000000000090 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = A00000000000000000000070 /* Nurio */;
@@ -453,6 +623,91 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		0376314DDFC607542D7518DA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = M83USWXB66;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = NurioLiveActivity/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0.17;
+				PRODUCT_BUNDLE_IDENTIFIER = com.nurio.ios.LiveActivity;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		2439F75E1A40FB8BF60D3BF6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = M83USWXB66;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = NurioLiveActivity/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0.17;
+				PRODUCT_BUNDLE_IDENTIFIER = com.nurio.ios.LiveActivity;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		24838599CFCED6C036EA19E7 /* Local */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = M83USWXB66;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = NurioLiveActivity/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0.17;
+				PRODUCT_BUNDLE_IDENTIFIER = com.nurio.ios.LiveActivity;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Local;
+		};
 		A000000000000000000000B0 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -786,6 +1041,16 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		765E980C675E9318E0177E27 /* Build configuration list for PBXNativeTarget "NurioLiveActivity" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2439F75E1A40FB8BF60D3BF6 /* Release */,
+				0376314DDFC607542D7518DA /* Debug */,
+				24838599CFCED6C036EA19E7 /* Local */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		A000000000000000000000B8 /* Build configuration list for PBXProject "Nurio" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

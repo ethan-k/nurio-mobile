@@ -1,7 +1,8 @@
 require "xcodeproj"
 
-# Change only the Nurio app's build configurations, preserving the test target
-# and the formatting of this hand-maintained project file.
+# Change only the Nurio app's build configurations (and its embedded Live
+# Activity extension, whose versions App Store validation requires to match),
+# preserving the test target and the formatting of this hand-maintained project file.
 class IosReleaseVersion
   CLOSED_STATES = %w[
     ACCEPTED PENDING_APPLE_RELEASE PENDING_DEVELOPER_RELEASE
@@ -12,14 +13,15 @@ class IosReleaseVersion
 
   attr_reader :path, :original, :bumped
 
-  def initialize(path, target_name: "Nurio")
+  def initialize(path, target_name: "Nurio", embedded_target_names: ["NurioLiveActivity"])
     @path = path
     @original = File.read(path)
     project = Xcodeproj::Project.open(File.dirname(path))
     target = project.targets.find { |item| item.name == target_name }
     raise "#{target_name} app target is missing" unless target
 
-    @settings = target.build_configurations.to_h do |config|
+    embedded = project.targets.select { |item| embedded_target_names.include?(item.name) }
+    @settings = [target, *embedded].flat_map(&:build_configurations).to_h do |config|
       [config.uuid, config.build_settings.slice("MARKETING_VERSION", "CURRENT_PROJECT_VERSION")]
     end
     @settings.values.each do |settings|

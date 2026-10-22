@@ -65,6 +65,8 @@
 	</array>
 	<key>NSCameraUsageDescription</key>
 	<string>Nurio uses the camera so you can take a profile photo.</string>
+	<key>NSSupportsLiveActivities</key>
+	<true/>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Nurio may save profile photos you take in the app when needed.</string>
 	<key>NSPhotoLibraryUsageDescription</key>

@@ -47,6 +47,10 @@ class IosBetaTest < ReleaseLaneTest
     file = IosReleaseVersion.new(@project)
     assert_equal version, file.version
     assert_equal build, file.build
+    # The embedded Live Activity extension must ship with the app's version.
+    extension = IosReleaseVersion.new(@project, target_name: "NurioLiveActivity", embedded_target_names: [])
+    assert_equal version, extension.version
+    assert_equal build, extension.build
     # Changing the app's version must not change the NurioTests target.
     original_tests = @original_project.scan(/MARKETING_VERSION = 1\.0\.1;/).size
     assert_equal original_tests, File.read(@project).scan(/MARKETING_VERSION = 1\.0\.1;/).size
