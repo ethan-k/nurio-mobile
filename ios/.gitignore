@@ -10,7 +10,8 @@
 
 # Xcode generated workspace metadata
 *.xcodeproj/project.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist
-*.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
+*.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/*
+!Package.resolved
 
 # Build outputs
 build/

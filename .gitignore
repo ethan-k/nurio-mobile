@@ -31,7 +31,6 @@ ios/build/
 ios/DerivedData/
 ios/**/xcuserdata/
 study-nurio-mobile/ios/**/xcuserdata/
-ios/*.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
 study-nurio-mobile/ios/*.xcodeproj/project.xcworkspace/xcuserdata/
 study-nurio-mobile/ios/GoogleService-Info.plist
 ios/Pods/
