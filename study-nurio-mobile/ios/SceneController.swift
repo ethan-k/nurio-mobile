@@ -49,7 +49,7 @@ enum AiPracticeNativePolicy {
             return false
         }
 
-        return requestedOrigin == trustedOrigin && requestedOrigin.scheme == "https"
+        return requestedOrigin == trustedOrigin && requestedOrigin.isSecureForMicrophone
     }
 
     static func shouldGrantMicrophoneCapture(
@@ -114,13 +114,25 @@ enum AiPracticeNativePolicy {
             return false
         }
 
-        return requestedOrigin == trustedOrigin && requestedOrigin.scheme == "https"
+        return requestedOrigin == trustedOrigin && requestedOrigin.isSecureForMicrophone
     }
 
     private struct Origin: Equatable {
         let scheme: String
         let host: String
         let port: Int?
+
+        var isSecureForMicrophone: Bool {
+            scheme == "https" || isLocalDevelopmentHTTP
+        }
+
+        private var isLocalDevelopmentHTTP: Bool {
+#if DEBUG
+            scheme == "http" && (host == "lvh.me" || host.hasSuffix(".lvh.me"))
+#else
+            false
+#endif
+        }
 
         init?(url: URL) {
             guard url.user == nil, url.password == nil, let scheme = url.scheme, let host = url.host else {

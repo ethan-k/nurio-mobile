@@ -150,6 +150,43 @@ final class NurioStudyTests: XCTestCase {
         }
     }
 
+    func testAIPracticeMicrophoneOriginAllowsLocalHTTPOnlyInDebug() {
+        let baseURL = URL(string: "http://study.lvh.me:3000")!
+        let isTrusted = AiPracticeNativePolicy.isTrustedMicrophoneOrigin(
+            protocol: "http",
+            host: "study.lvh.me",
+            port: 3000,
+            baseURL: baseURL
+        )
+
+#if DEBUG
+        XCTAssertTrue(isTrusted)
+#else
+        XCTAssertFalse(isTrusted)
+#endif
+    }
+
+    func testAIPracticeMicrophoneOriginRejectsHTTPOutsideLocalDevelopmentHosts() {
+        let baseURL = URL(string: "http://study.nurio.kr:3000")!
+
+        XCTAssertFalse(
+            AiPracticeNativePolicy.isTrustedMicrophoneOrigin(
+                protocol: "http",
+                host: "study.nurio.kr",
+                port: 3000,
+                baseURL: baseURL
+            )
+        )
+        XCTAssertFalse(
+            AiPracticeNativePolicy.isTrustedMicrophoneOrigin(
+                protocol: "http",
+                host: "evil.lvh.me.example",
+                port: 3000,
+                baseURL: URL(string: "http://evil.lvh.me.example:3000")!
+            )
+        )
+    }
+
     func testAIPracticeMicrophoneGrantRequiresMainFrameTrustedSessionAndAudioOnly() {
         let baseURL = URL(string: "https://study.nurio.kr")!
         let sessionURL = URL(string: "https://study.nurio.kr/practice/42?lang=ko")!
