@@ -78,7 +78,7 @@
       <EnvironmentVariables>
          <EnvironmentVariable
             key = "NURIO_BASE_URL"
-            value = "http://study.lvh.me:3000"
+            value = "https://study.lvh.me:3443"
             isEnabled = "YES">
          </EnvironmentVariable>
       </EnvironmentVariables>
