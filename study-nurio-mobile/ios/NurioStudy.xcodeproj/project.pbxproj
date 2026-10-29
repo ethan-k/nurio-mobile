@@ -276,6 +276,7 @@
 				A00000000000000000000081 /* Resources */,
 				D00000000000000000000084 /* Copy Study Firebase configuration */,
 				D00000000000000000000202 /* Upload Crashlytics dSYMs */,
+				D00000000000000000000086 /* Allow local HTTP backend (Debug) */,
 			);
 			buildRules = (
 			);
@@ -385,6 +386,22 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		D00000000000000000000086 /* Allow local HTTP backend (Debug) */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Allow local HTTP backend (Debug)";
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/allow-local-http.stamp",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -eu\nif [ \"${CONFIGURATION:-}\" != \"Debug\" ]; then\n  exit 0\nfi\nPLIST=\"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\"\n/usr/libexec/PlistBuddy -c \"Delete :NSAppTransportSecurity\" \"$PLIST\" 2>/dev/null || true\n/usr/libexec/PlistBuddy -c \"Add :NSAppTransportSecurity dict\" -c \"Add :NSAppTransportSecurity:NSAllowsArbitraryLoads bool true\" \"$PLIST\"\nmkdir -p \"${DERIVED_FILE_DIR}\"\ntouch \"${DERIVED_FILE_DIR}/allow-local-http.stamp\"\n";
+		};
 		D00000000000000000000085 /* Verify Study Google auth configuration */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
@@ -654,6 +671,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = M83USWXB66;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
