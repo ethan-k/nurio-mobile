@@ -422,6 +422,25 @@ final class NurioStudyTests: XCTestCase {
         }
     }
 
+    func testPlacementEvaluationPagesStayOnTheMainStack() throws {
+        let configurationURL = try XCTUnwrap(
+            Bundle.main.url(forResource: AppEnvironment.pathConfigurationResourceName, withExtension: "json")
+        )
+        let pathConfiguration = PathConfiguration(sources: [.file(configurationURL)])
+
+        [
+            "/placement/new",
+            "/placement/new?lang=ko",
+            "/placement/42/writing",
+            "/placement/42/speaking",
+            "/placement/42",
+        ].forEach { path in
+            XCTAssertEqual(pathConfiguration.properties(for: path)["context"] as? String, "default", path)
+        }
+
+        XCTAssertEqual(pathConfiguration.properties(for: "/practice/new")["context"] as? String, "modal")
+    }
+
     func testAIPracticeNativeConfigurationIsBundled() throws {
         XCTAssertFalse(
             (Bundle.main.object(forInfoDictionaryKey: "NSMicrophoneUsageDescription") as? String)?

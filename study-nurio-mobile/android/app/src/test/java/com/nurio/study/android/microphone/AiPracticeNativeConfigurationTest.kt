@@ -41,6 +41,25 @@ class AiPracticeNativeConfigurationTest {
     }
 
     @Test
+    fun `placement evaluation pages override the modal rule for new pages`() {
+        val rules = Json.parseToJsonElement(
+            projectFile("src/main/assets/json/path-configuration.json").readText()
+        ).jsonObject.getValue("rules").jsonArray
+        val patternsOf = { index: Int ->
+            rules[index].jsonObject.getValue("patterns").jsonArray.map { it.jsonPrimitive.content }
+        }
+
+        val modalRuleIndex = rules.indices.first { patternsOf(it).contains("/new$") }
+        val placementRuleIndex = rules.indices.firstOrNull { patternsOf(it).contains("^/placement(?:[/?]|$)") }
+
+        assertNotNull("placement path rule is missing", placementRuleIndex)
+        assertTrue(placementRuleIndex!! > modalRuleIndex)
+        val properties = rules[placementRuleIndex].jsonObject.getValue("properties").jsonObject
+        assertEquals("default", properties.getValue("context").jsonPrimitive.content)
+        assertEquals("hotwire://fragment/web", properties.getValue("uri").jsonPrimitive.content)
+    }
+
+    @Test
     fun `web fragment supplies the live shared WebView location to microphone policy`() {
         val fragment = projectFile(
             "src/main/java/com/nurio/study/android/fragments/WebFragment.kt"

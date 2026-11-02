@@ -81,6 +81,15 @@
     },
     {
       "patterns": [
+        "^/placement(?:[/?]|$)"
+      ],
+      "properties": {
+        "context": "default",
+        "uri": "hotwire://fragment/web"
+      }
+    },
+    {
+      "patterns": [
         "/settings.*"
       ],
       "properties": {
