@@ -4,11 +4,17 @@ import java.net.URI
 
 internal object AiPracticeNativePolicy {
     private val sessionPath = Regex("^/practice/\\d+/?$")
+    private val placementSpeakingPath = Regex("^/placement/\\d+/speaking/?$")
 
     fun isSessionLocation(location: String): Boolean {
         return runCatching { URI(location).rawPath }
             .getOrNull()
             ?.matches(sessionPath) == true
+    }
+
+    private fun isMicrophonePageLocation(location: String): Boolean {
+        val path = runCatching { URI(location).rawPath }.getOrNull() ?: return false
+        return path.matches(sessionPath) || path.matches(placementSpeakingPath)
     }
 
     fun isTrustedMicrophoneRequest(
@@ -22,7 +28,7 @@ internal object AiPracticeNativePolicy {
 
         return requestedOrigin == trustedOrigin &&
             currentOrigin == trustedOrigin &&
-            isSessionLocation(currentLocation)
+            isMicrophonePageLocation(currentLocation)
     }
 
     fun grantableAudioResources(

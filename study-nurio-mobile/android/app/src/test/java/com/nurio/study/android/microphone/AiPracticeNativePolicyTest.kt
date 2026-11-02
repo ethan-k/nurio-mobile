@@ -68,6 +68,38 @@ class AiPracticeNativePolicyTest {
     }
 
     @Test
+    fun `trusts microphone capture on the placement speaking page`() {
+        listOf(
+            "$baseUrl/placement/42/speaking",
+            "$baseUrl/placement/42/speaking?lang=ko"
+        ).forEach { currentLocation ->
+            assertTrue(
+                currentLocation,
+                AiPracticeNativePolicy.isTrustedMicrophoneRequest(baseUrl, currentLocation, baseUrl)
+            )
+        }
+
+        listOf(
+            baseUrl to "$baseUrl/placement/42",
+            baseUrl to "$baseUrl/placement/42/writing",
+            baseUrl to "$baseUrl/placement/new",
+            baseUrl to "$baseUrl/placement/abc/speaking",
+            baseUrl to "https://evil.example/placement/42/speaking",
+            "https://evil.example" to "$baseUrl/placement/42/speaking"
+        ).forEach { (origin, currentLocation) ->
+            assertFalse(
+                "$origin from $currentLocation",
+                AiPracticeNativePolicy.isTrustedMicrophoneRequest(origin, currentLocation, baseUrl)
+            )
+        }
+    }
+
+    @Test
+    fun `placement speaking page is not an AI practice session`() {
+        assertFalse(AiPracticeNativePolicy.isSessionLocation("$baseUrl/placement/42/speaking"))
+    }
+
+    @Test
     fun `grants only audio-only capture requests`() {
         assertArrayEquals(
             arrayOf(audioResource),

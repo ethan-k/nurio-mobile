@@ -267,6 +267,50 @@ final class NurioStudyTests: XCTestCase {
         XCTAssertFalse(shouldGrant(type: .cameraAndMicrophone, webViewURL: sessionURL))
     }
 
+    func testMicrophoneGrantAllowsPlacementSpeakingPage() {
+        let baseURL = URL(string: "https://study.nurio.kr")!
+
+        func shouldGrant(webViewURL: String, originHost: String = "study.nurio.kr") -> Bool {
+            AiPracticeNativePolicy.shouldGrantMicrophoneCapture(
+                type: .microphone,
+                originProtocol: "https",
+                originHost: originHost,
+                originPort: 443,
+                isMainFrame: true,
+                frameURL: URL(string: "https://study.nurio.kr/placement/42/writing")!,
+                webViewURL: URL(string: webViewURL)!,
+                baseURL: baseURL
+            )
+        }
+
+        XCTAssertTrue(shouldGrant(webViewURL: "https://study.nurio.kr/placement/42/speaking"))
+        XCTAssertTrue(shouldGrant(webViewURL: "https://study.nurio.kr/placement/42/speaking?lang=ko"))
+
+        [
+            "https://study.nurio.kr/placement/42",
+            "https://study.nurio.kr/placement/42/writing",
+            "https://study.nurio.kr/placement/new",
+            "https://study.nurio.kr/placement/abc/speaking",
+            "https://evil.example/placement/42/speaking",
+        ].forEach { location in
+            XCTAssertFalse(shouldGrant(webViewURL: location), location)
+        }
+        XCTAssertFalse(
+            shouldGrant(
+                webViewURL: "https://study.nurio.kr/placement/42/speaking",
+                originHost: "evil.example"
+            )
+        )
+    }
+
+    func testPlacementSpeakingPageIsNotAnAIPracticeSession() {
+        XCTAssertFalse(
+            AiPracticeNativePolicy.isSessionURL(
+                URL(string: "https://study.nurio.kr/placement/42/speaking")!
+            )
+        )
+    }
+
     func testAIPracticeMicrophoneDispositionGrantsOnlyAvailableTrustedRequests() {
         for systemPermission in [
             AiPracticeNativePolicy.SystemMicrophonePermission.authorized,

@@ -7,6 +7,7 @@ import WebKit
 
 enum AiPracticeNativePolicy {
     private static let sessionPathPattern = #"^/practice/[0-9]+/?$"#
+    private static let placementSpeakingPathPattern = #"^/placement/[0-9]+/speaking/?$"#
 
     enum SystemMicrophonePermission: CaseIterable {
         case authorized
@@ -33,6 +34,16 @@ enum AiPracticeNativePolicy {
 
     static func isTrustedSessionURL(_ url: URL, baseURL: URL) -> Bool {
         isSessionURL(url) && hasTrustedHTTPSOrigin(url, baseURL: baseURL)
+    }
+
+    private static func isMicrophonePageURL(_ url: URL) -> Bool {
+        guard let path = URLComponents(url: url, resolvingAgainstBaseURL: false)?.percentEncodedPath else {
+            return false
+        }
+
+        return [sessionPathPattern, placementSpeakingPathPattern].contains { pattern in
+            path.range(of: pattern, options: .regularExpression) != nil
+        }
     }
 
     static func isTrustedMicrophoneOrigin(
@@ -71,7 +82,8 @@ enum AiPracticeNativePolicy {
                   baseURL: baseURL
               ),
               let webViewURL,
-              isTrustedSessionURL(webViewURL, baseURL: baseURL) else {
+              isMicrophonePageURL(webViewURL),
+              hasTrustedHTTPSOrigin(webViewURL, baseURL: baseURL) else {
             return false
         }
 
