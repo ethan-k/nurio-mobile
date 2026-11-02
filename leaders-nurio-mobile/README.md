@@ -32,11 +32,8 @@ xcodebuild \
   test
 ```
 
-Override the server only for local QA:
-
-```bash
-NURIO_BASE_URL=http://studyleaders.lvh.me:3000 xcodebuild ...
-```
+Pick the server with the Xcode scheme: `NurioStudyLeader` uses production and
+`NurioStudyLeader Local` uses `http://studyleaders.lvh.me:3000`.
 
 ### Android
 

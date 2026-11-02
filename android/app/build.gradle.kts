@@ -22,7 +22,7 @@ if (keystorePropertiesFile.exists()) {
 val debugBaseUri = URI(
     providers.gradleProperty("nurioBaseUrl")
         .orElse(providers.environmentVariable("NURIO_BASE_URL"))
-        .orElse("https://nurio.kr")
+        .orElse("http://10.0.2.2:3000")
         .get()
         .trimEnd('/')
 )

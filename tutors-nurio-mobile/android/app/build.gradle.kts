@@ -40,8 +40,14 @@ android {
 
     buildTypes {
         debug {
-            buildConfigField("String", "BASE_URL", "\"https://tutors.nurio.kr\"")
+            buildConfigField("String", "BASE_URL", "\"http://tutors.lvh.me:3000\"")
             buildConfigField("Boolean", "DEBUG_LOGGING", "true")
+        }
+        create("productionDebug") {
+            initWith(getByName("debug"))
+            buildConfigField("String", "BASE_URL", "\"https://tutors.nurio.kr\"")
+            isDebuggable = true
+            signingConfig = signingConfigs.getByName("debug")
         }
         release {
             isMinifyEnabled = false

@@ -111,7 +111,7 @@ fun String.asBuildConfigString(): String =
         "\""
 
 val studyDebugBaseUrl = providers.gradleProperty("nurioStudyBaseUrl")
-    .orElse("https://study.nurio.kr")
+    .orElse("http://study.lvh.me:3000")
     .get()
 
 android {

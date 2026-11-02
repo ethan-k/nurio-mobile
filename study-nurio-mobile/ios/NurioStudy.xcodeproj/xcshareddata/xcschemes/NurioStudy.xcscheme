@@ -75,13 +75,6 @@
             ReferencedContainer = "container:NurioStudy.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
-      <EnvironmentVariables>
-         <EnvironmentVariable
-            key = "NURIO_BASE_URL"
-            value = "https://study.lvh.me:3443"
-            isEnabled = "YES">
-         </EnvironmentVariable>
-      </EnvironmentVariables>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"

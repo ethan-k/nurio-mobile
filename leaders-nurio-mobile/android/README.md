@@ -21,15 +21,13 @@ ANDROID_HOME=/Users/ws/Library/Android/sdk ./gradlew \
 
 For release signing, copy `keystore.properties.example` to the ignored `keystore.properties` file and use the Play upload key. Never commit the keystore or passwords.
 
-For local emulator QA, keep the production default unchanged and override the
-debug build explicitly. The `adb reverse` mapping preserves the
-`studyleaders.lvh.me` host so Rails uses the Study Leader route constraint:
+Pick the server in Android Studio's Build Variants panel: `debug` uses the local
+server and `productionDebug` uses production. The `adb reverse` mapping preserves
+the `studyleaders.lvh.me` host so Rails uses the Study Leader route constraint:
 
 ```bash
 adb reverse tcp:3000 tcp:3000
-ANDROID_HOME=/Users/ws/Library/Android/sdk ./gradlew \
-  :app:assembleDebug \
-  -PNURIO_BASE_URL=http://studyleaders.lvh.me:3000
+ANDROID_HOME=/Users/ws/Library/Android/sdk ./gradlew :app:assembleDebug
 ```
 
 ## Runtime Contract

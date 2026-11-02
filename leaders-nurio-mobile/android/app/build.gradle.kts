@@ -52,12 +52,12 @@ val kakaoNativeAppKey = providers
     .trim()
 val kakaoManifestAppKey = kakaoNativeAppKey.ifBlank { "not_configured" }
 val kakaoAuthEnabled = kakaoNativeAppKey.isNotBlank()
-// Keep release builds pinned to production while allowing an explicit local
-// server override for debug emulator QA (for example, -PNURIO_BASE_URL=...).
+// debug targets the local server (run `adb reverse tcp:3000 tcp:3000` first);
+// productionDebug and release stay pinned to production.
 val debugBaseUrl = providers
     .gradleProperty("NURIO_BASE_URL")
     .orElse(providers.environmentVariable("NURIO_BASE_URL"))
-    .orElse("https://studyleaders.nurio.kr")
+    .orElse("http://studyleaders.lvh.me:3000")
     .get()
     .trim()
     .trimEnd('/')
@@ -130,7 +130,7 @@ android {
         create("productionDebug") {
             initWith(getByName("debug"))
             manifestPlaceholders["crashlyticsCollectionEnabled"] = false
-            buildConfigField("String", "BASE_URL", debugBaseUrl.asBuildConfigString())
+            buildConfigField("String", "BASE_URL", "\"https://studyleaders.nurio.kr\"")
             isDebuggable = true
             signingConfig = signingConfigs.getByName("debug")
         }
