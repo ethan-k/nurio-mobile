@@ -64,6 +64,8 @@
 		<string>kakaokompassauth</string>
 		<string>kakaolink</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>Nurio Study uses the camera only when you choose to take a photo to upload.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Nurio Study uses the microphone to hear your voice and provide feedback during AI English conversation practice.</string>
 	<key>UIBackgroundModes</key>

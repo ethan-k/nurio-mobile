@@ -374,6 +374,29 @@ final class NurioStudyTests: XCTestCase {
         XCTAssertTrue(state.beginPresentation())
     }
 
+    func testCameraPurposeStringIsDeclaredAndLocalized() throws {
+        let expectedCopy = [
+            "en": "Nurio Study uses the camera only when you choose to take a photo to upload.",
+            "ko": "사진을 찍어 업로드할 때만 카메라를 사용합니다.",
+        ]
+
+        let declared = try XCTUnwrap(Bundle.main.infoDictionary?["NSCameraUsageDescription"] as? String)
+        XCTAssertEqual(declared, expectedCopy["en"])
+
+        for (localization, copy) in expectedCopy {
+            let url = try XCTUnwrap(
+                Bundle.main.url(
+                    forResource: "InfoPlist",
+                    withExtension: "strings",
+                    subdirectory: nil,
+                    localization: localization
+                )
+            )
+            let strings = try XCTUnwrap(NSDictionary(contentsOf: url))
+            XCTAssertEqual(strings["NSCameraUsageDescription"] as? String, copy)
+        }
+    }
+
     func testMicrophoneCopyIsLocalizedInEnglishAndKorean() throws {
         let expectedCopy: [String: [String: String]] = [
             "en": [
