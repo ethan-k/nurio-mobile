@@ -1,3 +1,4 @@
+import AVFoundation
 import HotwireNative
 import KakaoSDKAuth
 import SwiftUI
@@ -12,13 +13,26 @@ final class SceneController: UIResponder {
 
     private var didEnterBackground = false
 
-    private lazy var navigator = Navigator(
-        configuration: .init(
-            name: "Nurio",
-            startLocation: AppEnvironment.coldStartURL
-        ),
-        delegate: self
-    )
+    private lazy var navigator: Navigator = {
+        let navigator = Navigator(
+            configuration: .init(
+                name: "Nurio",
+                startLocation: AppEnvironment.coldStartURL
+            ),
+            delegate: self
+        )
+        navigator.webkitUIDelegate = MicrophoneCaptureWKUIController(
+            delegate: navigator,
+            trustedBaseURL: AppEnvironment.baseURL,
+            microphonePermission: Self.currentMicrophonePermission,
+            showMicrophoneSettingsRecovery: { [weak self] in
+                self?.presentMicrophoneSettingsRecovery()
+            }
+        )
+        return navigator
+    }()
+
+    private let microphoneSettingsRecoveryState = MicrophoneSettingsRecoveryState()
 
     private lazy var startupCoordinator = SceneStartupCoordinator(
         localeBootstrapper: NativeLocaleBootstrap(baseURL: AppEnvironment.baseURL),
@@ -42,6 +56,65 @@ final class SceneController: UIResponder {
             DispatchQueue.main.async(execute: action)
         }
     )
+
+    private static func currentMicrophonePermission() -> MicrophoneCapturePolicy.SystemMicrophonePermission {
+        switch AVCaptureDevice.authorizationStatus(for: .audio) {
+        case .authorized:
+            return .authorized
+        case .notDetermined:
+            return .notDetermined
+        case .denied:
+            return .denied
+        case .restricted:
+            return .restricted
+        @unknown default:
+            return .restricted
+        }
+    }
+
+    private func presentMicrophoneSettingsRecovery() {
+        DispatchQueue.main.async { [weak self] in
+            guard let self,
+                  self.microphoneSettingsRecoveryState.beginPresentation() else {
+                return
+            }
+
+            let presenter = self.navigator.activeNavigationController
+            guard presenter.viewIfLoaded?.window != nil,
+                  presenter.presentedViewController == nil else {
+                self.microphoneSettingsRecoveryState.finishPresentation()
+                return
+            }
+
+            let alert = UIAlertController(
+                title: NSLocalizedString("microphone_permission_settings_title", comment: ""),
+                message: NSLocalizedString("microphone_permission_settings_message", comment: ""),
+                preferredStyle: .alert
+            )
+            alert.addAction(
+                UIAlertAction(
+                    title: NSLocalizedString("microphone_permission_settings_cancel", comment: ""),
+                    style: .cancel
+                ) { [weak self] _ in
+                    self?.microphoneSettingsRecoveryState.finishPresentation()
+                }
+            )
+            alert.addAction(
+                UIAlertAction(
+                    title: NSLocalizedString("microphone_permission_settings_open", comment: ""),
+                    style: .default
+                ) { [weak self] _ in
+                    self?.microphoneSettingsRecoveryState.finishPresentation()
+                    guard let settingsURL = URL(string: UIApplication.openSettingsURLString),
+                          UIApplication.shared.canOpenURL(settingsURL) else {
+                        return
+                    }
+                    UIApplication.shared.open(settingsURL)
+                }
+            )
+            presenter.present(alert, animated: true)
+        }
+    }
 
     private func presentError(_ message: String) {
         let alert = UIAlertController(title: "Visit failed", message: message, preferredStyle: .alert)

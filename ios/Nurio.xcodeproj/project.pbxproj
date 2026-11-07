@@ -67,6 +67,10 @@
 		F70000000000000000000001 /* PaymentGatewayPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = F70000000000000000000031 /* PaymentGatewayPresentation.swift */; };
 		F70000000000000000000002 /* PaymentGatewayPresentationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F70000000000000000000032 /* PaymentGatewayPresentationTests.swift */; };
 		F80000000000000000000001 /* NotificationPermissionStatusTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F80000000000000000000031 /* NotificationPermissionStatusTests.swift */; };
+		F90000000000000000000001 /* MicrophoneCapturePolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = F90000000000000000000031 /* MicrophoneCapturePolicy.swift */; };
+		F90000000000000000000002 /* MicrophoneCapturePolicyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F90000000000000000000032 /* MicrophoneCapturePolicyTests.swift */; };
+		F90000000000000000000003 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = F90000000000000000000041 /* InfoPlist.strings */; };
+		F90000000000000000000004 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = F90000000000000000000042 /* Localizable.strings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -161,6 +165,12 @@
 		F70000000000000000000031 /* PaymentGatewayPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentGatewayPresentation.swift; sourceTree = "<group>"; };
 		F70000000000000000000032 /* PaymentGatewayPresentationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentGatewayPresentationTests.swift; sourceTree = "<group>"; };
 		F80000000000000000000031 /* NotificationPermissionStatusTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationPermissionStatusTests.swift; sourceTree = "<group>"; };
+		F90000000000000000000031 /* MicrophoneCapturePolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicrophoneCapturePolicy.swift; sourceTree = "<group>"; };
+		F90000000000000000000032 /* MicrophoneCapturePolicyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicrophoneCapturePolicyTests.swift; sourceTree = "<group>"; };
+		F90000000000000000000033 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		F90000000000000000000034 /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		F90000000000000000000035 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		F90000000000000000000036 /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/Localizable.strings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -256,7 +266,10 @@
 				A00000000000000000000031 /* AppDelegate.swift */,
 				F50000000000000000000031 /* NativeImageCache.swift */,
 				A00000000000000000000032 /* SceneController.swift */,
+				F90000000000000000000031 /* MicrophoneCapturePolicy.swift */,
 				A0000000000000000000003E /* Info.plist */,
+				F90000000000000000000041 /* InfoPlist.strings */,
+				F90000000000000000000042 /* Localizable.strings */,
 				A00000000000000000000042 /* PrivacyInfo.xcprivacy */,
 				A0000000000000000000003C /* Assets.xcassets */,
 				A000000000000000000000A0 /* LaunchScreen.storyboard */,
@@ -320,6 +333,7 @@
 				F20000000000000000000031 /* SceneStartupCoordinatorTests.swift */,
 				F80000000000000000000031 /* NotificationPermissionStatusTests.swift */,
 				0826D68B7EE68C13054AAAED /* LiveActivityTokenStoreTests.swift */,
+				F90000000000000000000032 /* MicrophoneCapturePolicyTests.swift */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -460,6 +474,7 @@
 			knownRegions = (
 				en,
 				Base,
+				ko,
 			);
 			mainGroup = A00000000000000000000060;
 			packageReferences = (
@@ -495,6 +510,8 @@
 				54AD91C72FB3F8D000BF72BB /* GoogleService-Info.plist in Resources */,
 				A0000000000000000000000E /* ios_v1.json in Resources */,
 				A00000000000000000000011 /* PrivacyInfo.xcprivacy in Resources */,
+				F90000000000000000000003 /* InfoPlist.strings in Resources */,
+				F90000000000000000000004 /* Localizable.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -578,6 +595,7 @@
 				D7F5FA00AC224480E1F072F7 /* EventGroupLiveActivityManager.swift in Sources */,
 				DCAB0C34168F597BB2FEDDAC /* LiveActivityTokensComponent.swift in Sources */,
 				4284E8BBC01D795791BA2844 /* EventGroupLiveActivityComponent.swift in Sources */,
+				F90000000000000000000001 /* MicrophoneCapturePolicy.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -592,6 +610,7 @@
 				F20000000000000000000001 /* SceneStartupCoordinatorTests.swift in Sources */,
 				F80000000000000000000001 /* NotificationPermissionStatusTests.swift in Sources */,
 				AA8DFD8012AD9BD3F3E31160 /* LiveActivityTokenStoreTests.swift in Sources */,
+				F90000000000000000000002 /* MicrophoneCapturePolicyTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -618,6 +637,24 @@
 				A0000000000000000000003D /* Base */,
 			);
 			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+		F90000000000000000000041 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				F90000000000000000000033 /* en */,
+				F90000000000000000000034 /* ko */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		F90000000000000000000042 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				F90000000000000000000035 /* en */,
+				F90000000000000000000036 /* ko */,
+			);
+			name = Localizable.strings;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */

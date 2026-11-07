@@ -65,6 +65,8 @@
 	</array>
 	<key>NSCameraUsageDescription</key>
 	<string>Nurio uses the camera so you can take a profile photo.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>nurio uses the microphone to translate what you say during First Spark conversations.</string>
 	<key>NSSupportsLiveActivities</key>
 	<true/>
 	<key>NSPhotoLibraryAddUsageDescription</key>
