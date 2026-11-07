@@ -12,7 +12,7 @@ import com.nurio.android.payments.findPaymentRecoveryHost
 import dev.hotwire.core.turbo.session.Session
 import dev.hotwire.core.turbo.webview.HotwireWebChromeClient
 
-class PaymentWebChromeClient(session: Session) : HotwireWebChromeClient(session) {
+open class PaymentWebChromeClient(session: Session) : HotwireWebChromeClient(session) {
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreateWindow(
         webView: WebView,

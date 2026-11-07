@@ -14,4 +14,8 @@
     <string name="payment_check_status">Check status</string>
     <string name="payment_window_title">Payment</string>
     <string name="dismiss">Dismiss</string>
+    <string name="microphone_permission_settings_title">Microphone access needed</string>
+    <string name="microphone_permission_settings_message">To translate what you say during First Spark, allow nurio to use the microphone in Settings.</string>
+    <string name="microphone_permission_settings_cancel">Not now</string>
+    <string name="microphone_permission_settings_open">Open Settings</string>
 </resources>

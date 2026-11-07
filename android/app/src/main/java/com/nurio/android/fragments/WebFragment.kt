@@ -2,6 +2,9 @@ package com.nurio.android.fragments
 
 import android.os.Bundle
 import android.view.View
+import com.nurio.android.BuildConfig
+import com.nurio.android.microphone.MicPermissionHost
+import com.nurio.android.microphone.MicrophoneWebChromeClient
 import com.nurio.android.webview.PaymentWebChromeClient
 import dev.hotwire.core.turbo.webview.HotwireWebChromeClient
 import dev.hotwire.navigation.destinations.HotwireDestinationDeepLink
@@ -15,6 +18,14 @@ class WebFragment : HotwireWebFragment() {
     }
 
     override fun createWebChromeClient(): HotwireWebChromeClient {
-        return PaymentWebChromeClient(navigator.session)
+        val session = navigator.session
+        val permissionHost = activity as? MicPermissionHost
+            ?: return PaymentWebChromeClient(session)
+        return MicrophoneWebChromeClient(
+            session = session,
+            microphonePermissionHost = permissionHost,
+            trustedBaseUrl = BuildConfig.BASE_URL,
+            currentLocation = { session.webView.url }
+        )
     }
 }

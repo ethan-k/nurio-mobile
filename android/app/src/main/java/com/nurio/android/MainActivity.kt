@@ -8,18 +8,25 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.provider.Settings
 import android.util.Log
 import android.view.View
 import java.util.UUID
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import androidx.core.os.ConfigurationCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Lifecycle
 import com.nurio.android.localization.LocaleCookieBootstrapper
+import com.nurio.android.microphone.MicPermissionHost
+import com.nurio.android.microphone.MicrophonePermissionRequestAction
+import com.nurio.android.microphone.MicrophonePermissionRequestState
 import com.nurio.android.notifications.NotificationPermissionRequester
 import com.nurio.android.notifications.NotificationPermissionState
 import com.nurio.android.notifications.NotificationRoute
@@ -38,8 +45,30 @@ import dev.hotwire.navigation.activities.HotwireActivity
 import dev.hotwire.navigation.navigator.Navigator
 import dev.hotwire.navigation.navigator.NavigatorConfiguration
 
-class MainActivity : HotwireActivity(), PaymentRecoveryHost, NotificationPermissionRequester {
+class MainActivity :
+    HotwireActivity(),
+    PaymentRecoveryHost,
+    NotificationPermissionRequester,
+    MicPermissionHost {
     private val pendingNotificationPermissionCallbacks = mutableListOf<() -> Unit>()
+    private val microphonePermissionRequestState = MicrophonePermissionRequestState()
+    private var microphoneSettingsDialog: AlertDialog? = null
+    private val microphonePermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        val result = microphonePermissionRequestState.complete(
+            granted = granted,
+            shouldShowRequestPermissionRationale = !granted &&
+                ActivityCompat.shouldShowRequestPermissionRationale(
+                    this,
+                    Manifest.permission.RECORD_AUDIO
+                )
+        ) ?: return@registerForActivityResult
+
+        if (result.showSettingsRecovery) {
+            showMicrophoneSettingsDialog()
+        }
+    }
 
     private lateinit var startupCoordinator: MainActivityStartupCoordinator
     private var hasResumedOnce = false
@@ -133,6 +162,9 @@ class MainActivity : HotwireActivity(), PaymentRecoveryHost, NotificationPermiss
         navigationHandler.removeCallbacksAndMessages(null)
         supportFragmentManager.unregisterFragmentLifecycleCallbacks(navigationLifecycleCallbacks)
         paymentRecoveryHandler.removeCallbacks(paymentRecoveryRunnable)
+        microphonePermissionRequestState.cancel()
+        microphoneSettingsDialog?.dismiss()
+        microphoneSettingsDialog = null
         super.onDestroy()
     }
 
@@ -399,6 +431,38 @@ class MainActivity : HotwireActivity(), PaymentRecoveryHost, NotificationPermiss
         } else {
             uri
         }
+    }
+
+    override fun requestMicrophonePermission(callback: (Boolean) -> Unit) {
+        val permissionGranted =
+            ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) ==
+                PackageManager.PERMISSION_GRANTED
+
+        when (microphonePermissionRequestState.request(permissionGranted, callback)) {
+            MicrophonePermissionRequestAction.LAUNCH_RUNTIME_REQUEST ->
+                microphonePermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+            MicrophonePermissionRequestAction.COMPLETE_GRANTED,
+            MicrophonePermissionRequestAction.AWAIT_RUNTIME_RESULT -> Unit
+        }
+    }
+
+    private fun showMicrophoneSettingsDialog() {
+        if (isFinishing || isDestroyed || microphoneSettingsDialog?.isShowing == true) return
+
+        microphoneSettingsDialog = AlertDialog.Builder(this)
+            .setTitle(R.string.microphone_permission_settings_title)
+            .setMessage(R.string.microphone_permission_settings_message)
+            .setNegativeButton(R.string.microphone_permission_settings_cancel, null)
+            .setPositiveButton(R.string.microphone_permission_settings_open) { _, _ ->
+                startActivity(
+                    Intent(
+                        Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                        "package:$packageName".toUri()
+                    )
+                )
+            }
+            .setOnDismissListener { microphoneSettingsDialog = null }
+            .show()
     }
 
     override fun requestNotificationPermission(onResolved: () -> Unit) {
