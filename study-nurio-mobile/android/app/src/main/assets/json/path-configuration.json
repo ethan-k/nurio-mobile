@@ -15,7 +15,8 @@
     },
     {
       "patterns": [
-        "/practice/\\d+(?:\\?.*)?$"
+        "/practice/\\d+(?:\\?.*)?$",
+        "/episodes/\\d+(?:\\?.*)?$"
       ],
       "properties": {
         "context": "default",
