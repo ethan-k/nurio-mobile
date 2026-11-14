@@ -25,6 +25,7 @@ import com.nurio.android.payments.PaymentCrashTelemetry
 import com.nurio.android.payments.PaymentRecovery
 import com.nurio.android.routing.CheckoutColdBootRouteDecisionHandler
 import com.nurio.android.routing.OAuthRouteDecisionHandler
+import com.nurio.android.routing.StudyHostRouteDecisionHandler
 import com.nurio.android.webview.NurioHotwireWebView
 import kotlinx.serialization.json.Json
 
@@ -62,6 +63,7 @@ class NurioApplication : Application() {
             // Must run before AppNavigationRouteDecisionHandler so checkout
             // re-entry can cold-boot a web view stuck on a payment gateway.
             CheckoutColdBootRouteDecisionHandler(),
+            StudyHostRouteDecisionHandler(),
             OAuthRouteDecisionHandler(),
             AppNavigationRouteDecisionHandler(),
             BrowserTabRouteDecisionHandler(),
