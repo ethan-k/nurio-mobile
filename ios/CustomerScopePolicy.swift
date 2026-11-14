@@ -27,4 +27,16 @@ enum CustomerScopePolicy {
 
         return false
     }
+
+    /// nurio study is a separate product; its links leave the customer app for Safari.
+    static func opensInSystemBrowser(_ url: URL, appHost: String? = AppEnvironment.baseURL.host?.lowercased()) -> Bool {
+        guard
+            let scheme = url.scheme?.lowercased(), scheme == "http" || scheme == "https",
+            let appHost
+        else {
+            return false
+        }
+
+        return url.host?.lowercased() == "study.\(appHost)"
+    }
 }

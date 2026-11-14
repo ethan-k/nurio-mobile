@@ -598,6 +598,16 @@ final class NurioTests: XCTestCase {
         XCTAssertFalse(CustomerScopePolicy.isBlocked(baseURL.appendingPathComponent("events/42")))
     }
 
+    func testStudyHostLinksOpenInTheSystemBrowser() {
+        let appHost = "nurio.kr"
+        XCTAssertTrue(CustomerScopePolicy.opensInSystemBrowser(URL(string: "https://study.nurio.kr/?utm_source=nurio_events")!, appHost: appHost))
+        XCTAssertTrue(CustomerScopePolicy.opensInSystemBrowser(URL(string: "https://STUDY.nurio.kr/classes")!, appHost: appHost))
+        XCTAssertFalse(CustomerScopePolicy.opensInSystemBrowser(URL(string: "https://nurio.kr/events")!, appHost: appHost))
+        XCTAssertFalse(CustomerScopePolicy.opensInSystemBrowser(URL(string: "https://studyleaders.nurio.kr/")!, appHost: appHost))
+        XCTAssertFalse(CustomerScopePolicy.opensInSystemBrowser(URL(string: "https://study.example.com/")!, appHost: appHost))
+        XCTAssertFalse(CustomerScopePolicy.opensInSystemBrowser(URL(string: "nurio://study.nurio.kr/")!, appHost: appHost))
+    }
+
     func testNativeAppOpenURLRoutesToRequestedCustomerPage() {
         let openURL = URL(string: "nurio://open?url=https%3A%2F%2Fnurio.kr%2Fevents%2F42%3Fref%3Dhome")!
         let webURL = NativeAppOpenURL.webURL(

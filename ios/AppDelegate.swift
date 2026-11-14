@@ -108,6 +108,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
         Hotwire.registerRouteDecisionHandlers([
             CustomerScopeRouteDecisionHandler(),
+            StudyHostRouteDecisionHandler(),
             OAuthRouteDecisionHandler(),
             AppNavigationRouteDecisionHandler(),
             SafariViewControllerRouteDecisionHandler(),
