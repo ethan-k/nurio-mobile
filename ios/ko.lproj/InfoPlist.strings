@@ -1,1 +1,2 @@
 "NSMicrophoneUsageDescription" = "퍼스트 스파크 대화 중 말한 내용을 번역하기 위해 마이크를 사용합니다.";
+"NSCameraUsageDescription" = "프로필 사진 촬영과 휴먼 빙고 QR 코드 스캔에 카메라를 사용합니다.";

@@ -64,7 +64,7 @@
 		<string>kakaolink</string>
 	</array>
 	<key>NSCameraUsageDescription</key>
-	<string>Nurio uses the camera so you can take a profile photo.</string>
+	<string>nurio uses the camera to take a profile photo and to scan Human Bingo QR codes.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>nurio uses the microphone to translate what you say during First Spark conversations.</string>
 	<key>NSSupportsLiveActivities</key>

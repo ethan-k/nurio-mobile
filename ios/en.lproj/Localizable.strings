@@ -2,3 +2,7 @@
 "microphone_permission_settings_message" = "To translate what you say during First Spark, allow nurio to use the microphone in Settings.";
 "microphone_permission_settings_cancel" = "Not now";
 "microphone_permission_settings_open" = "Open Settings";
+"camera_permission_settings_title" = "Camera access needed";
+"camera_permission_settings_message" = "To scan Human Bingo QR codes, allow nurio to use the camera in Settings.";
+"camera_permission_settings_cancel" = "Not now";
+"camera_permission_settings_open" = "Open Settings";

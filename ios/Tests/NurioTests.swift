@@ -45,7 +45,7 @@ final class NurioTests: XCTestCase {
 
         XCTAssertEqual(
             appBundle.object(forInfoDictionaryKey: "NSCameraUsageDescription") as? String,
-            "Nurio uses the camera so you can take a profile photo."
+            "nurio uses the camera to take a profile photo and to scan Human Bingo QR codes."
         )
         XCTAssertEqual(
             appBundle.object(forInfoDictionaryKey: "NSPhotoLibraryUsageDescription") as? String,

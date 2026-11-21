@@ -1,1 +1,2 @@
 "NSMicrophoneUsageDescription" = "nurio uses the microphone to translate what you say during First Spark conversations.";
+"NSCameraUsageDescription" = "nurio uses the camera to take a profile photo and to scan Human Bingo QR codes.";

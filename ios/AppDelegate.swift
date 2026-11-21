@@ -87,6 +87,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         // The factory is used by both the main and modal Hotwire sessions.
         Hotwire.config.makeCustomWebView = { configuration in
             configuration.setURLSchemeHandler(NativeImageSchemeHandler(), forURLScheme: NativeImageURL.scheme)
+            CameraCaptureRecoveryMessageHandler.install(in: configuration.userContentController)
             let webView = WKWebView(frame: .zero, configuration: configuration)
 #if DEBUG
             if #available(iOS 16.4, *) { webView.isInspectable = true }

@@ -183,3 +183,114 @@ final class MicrophoneCapturePolicyTests: XCTestCase {
         }
     }
 }
+
+final class CameraCapturePolicyTests: XCTestCase {
+    private let confirmURL = URL(string: "https://nurio.kr/events/42/human_bingo/confirm")!
+
+    private func shouldGrant(
+        type: WKMediaCaptureType = .camera,
+        originProtocol: String = "https",
+        originHost: String = "nurio.kr",
+        originPort: Int = 443,
+        isMainFrame: Bool = true,
+        frameURL: URL? = URL(string: "https://nurio.kr/events/42/human_bingo/confirm"),
+        webViewURL: URL?,
+        baseURL: URL = URL(string: "https://nurio.kr")!
+    ) -> Bool {
+        CameraCapturePolicy.shouldGrantCameraCapture(
+            type: type,
+            originProtocol: originProtocol,
+            originHost: originHost,
+            originPort: originPort,
+            isMainFrame: isMainFrame,
+            frameURL: frameURL,
+            webViewURL: webViewURL,
+            baseURL: baseURL
+        )
+    }
+
+    func testGrantsVideoOnTheHumanBingoConfirmPage() {
+        for path in ["/events/42/human_bingo/confirm", "/events/7/human_bingo/confirm/?lang=ko"] {
+            let url = URL(string: "https://nurio.kr\(path)")!
+            XCTAssertTrue(shouldGrant(originHost: "NURIO.KR", originPort: 0, frameURL: url, webViewURL: url))
+        }
+
+        let baseURL = URL(string: "https://preview.nurio.kr:8443")!
+        let url = baseURL.appendingPathComponent("events/42/human_bingo/confirm")
+        XCTAssertTrue(shouldGrant(
+            originHost: "preview.nurio.kr", originPort: 8443, frameURL: url, webViewURL: url, baseURL: baseURL
+        ))
+    }
+
+    func testDeniesOtherPathsInTheFrameOrWebView() {
+        for path in [
+            "/",
+            "/events/42/human_bingo",
+            "/events/42/human_bingo/confirm/extra",
+            "/events/42/first_spark/translator",
+            "/events/abc/human_bingo/confirm",
+            "/events/%34%32/human_bingo/confirm",
+        ] {
+            let url = URL(string: "https://nurio.kr\(path)")!
+            XCTAssertFalse(shouldGrant(webViewURL: url), path)
+            XCTAssertFalse(shouldGrant(frameURL: url, webViewURL: confirmURL), path)
+        }
+        XCTAssertFalse(shouldGrant(frameURL: nil, webViewURL: confirmURL))
+        XCTAssertFalse(shouldGrant(webViewURL: nil))
+    }
+
+    func testDeniesSubframesAndRequestsThatIncludeAudio() {
+        XCTAssertFalse(shouldGrant(isMainFrame: false, webViewURL: confirmURL))
+        XCTAssertFalse(shouldGrant(type: .cameraAndMicrophone, webViewURL: confirmURL))
+        XCTAssertFalse(shouldGrant(type: .microphone, webViewURL: confirmURL))
+    }
+
+    func testRequiresTheConfiguredHTTPSOriginThroughout() {
+        XCTAssertFalse(shouldGrant(originProtocol: "http", originPort: 80, webViewURL: confirmURL))
+        XCTAssertFalse(shouldGrant(originHost: "evil.example", webViewURL: confirmURL))
+        XCTAssertFalse(shouldGrant(originPort: 8443, webViewURL: confirmURL))
+        for origin in ["http://nurio.kr", "https://study.nurio.kr", "https://nurio.kr:8443", "https://user@nurio.kr"] {
+            let url = URL(string: "\(origin)/events/42/human_bingo/confirm")!
+            XCTAssertFalse(shouldGrant(frameURL: url, webViewURL: confirmURL), origin)
+            XCTAssertFalse(shouldGrant(webViewURL: url), origin)
+        }
+        let httpBase = URL(string: "http://nurio.kr")!
+        let httpConfirm = URL(string: "http://nurio.kr/events/42/human_bingo/confirm")!
+        XCTAssertFalse(shouldGrant(
+            originProtocol: "http", originPort: 80, frameURL: httpConfirm, webViewURL: httpConfirm, baseURL: httpBase
+        ))
+    }
+
+    func testCameraAuthorizationDeterminesGrantAndSettingsRecovery() {
+        XCTAssertEqual(CameraCapturePolicy.disposition(for: .authorized), .grant)
+        XCTAssertEqual(CameraCapturePolicy.disposition(for: .notDetermined), .grant)
+        XCTAssertEqual(CameraCapturePolicy.disposition(for: .denied), .denyAndShowSettings)
+        XCTAssertEqual(CameraCapturePolicy.disposition(for: .restricted), .deny)
+    }
+
+    func testCameraPurposeAndSettingsRecoveryAreLocalized() throws {
+        let copy = [
+            "en": "nurio uses the camera to take a profile photo and to scan Human Bingo QR codes.",
+            "ko": "프로필 사진 촬영과 휴먼 빙고 QR 코드 스캔에 카메라를 사용합니다.",
+        ]
+        let key = "NSCameraUsageDescription"
+        XCTAssertEqual(Bundle.main.infoDictionary?[key] as? String, copy["en"])
+
+        for (locale, purpose) in copy {
+            let purposeURL = try XCTUnwrap(
+                Bundle.main.url(forResource: "InfoPlist", withExtension: "strings", subdirectory: nil, localization: locale)
+            )
+            let purposeStrings = try XCTUnwrap(NSDictionary(contentsOf: purposeURL))
+            XCTAssertEqual(purposeStrings[key] as? String, purpose)
+
+            let settingsURL = try XCTUnwrap(
+                Bundle.main.url(forResource: "Localizable", withExtension: "strings", subdirectory: nil, localization: locale)
+            )
+            let settingsStrings = try XCTUnwrap(NSDictionary(contentsOf: settingsURL))
+            for suffix in ["title", "message", "cancel", "open"] {
+                let settingsKey = "camera_permission_settings_\(suffix)"
+                XCTAssertFalse(((settingsStrings[settingsKey] as? String) ?? "").isEmpty, "\(locale): \(settingsKey)")
+            }
+        }
+    }
+}

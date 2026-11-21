@@ -26,13 +26,16 @@ final class SceneController: UIResponder {
             trustedBaseURL: AppEnvironment.baseURL,
             microphonePermission: Self.currentMicrophonePermission,
             showMicrophoneSettingsRecovery: { [weak self] in
-                self?.presentMicrophoneSettingsRecovery()
+                self?.presentCaptureSettingsRecovery(for: "microphone")
+            },
+            showCameraSettingsRecovery: { [weak self] in
+                self?.presentCaptureSettingsRecovery(for: "camera")
             }
         )
         return navigator
     }()
 
-    private let microphoneSettingsRecoveryState = MicrophoneSettingsRecoveryState()
+    private let captureSettingsRecoveryState = MicrophoneSettingsRecoveryState()
 
     private lazy var startupCoordinator = SceneStartupCoordinator(
         localeBootstrapper: NativeLocaleBootstrap(baseURL: AppEnvironment.baseURL),
@@ -72,39 +75,40 @@ final class SceneController: UIResponder {
         }
     }
 
-    private func presentMicrophoneSettingsRecovery() {
+    private func presentCaptureSettingsRecovery(for capture: String) {
         DispatchQueue.main.async { [weak self] in
             guard let self,
-                  self.microphoneSettingsRecoveryState.beginPresentation() else {
+                  self.captureSettingsRecoveryState.beginPresentation() else {
                 return
             }
 
             let presenter = self.navigator.activeNavigationController
             guard presenter.viewIfLoaded?.window != nil,
                   presenter.presentedViewController == nil else {
-                self.microphoneSettingsRecoveryState.finishPresentation()
+                self.captureSettingsRecoveryState.finishPresentation()
                 return
             }
 
+            let prefix = "\(capture)_permission_settings"
             let alert = UIAlertController(
-                title: NSLocalizedString("microphone_permission_settings_title", comment: ""),
-                message: NSLocalizedString("microphone_permission_settings_message", comment: ""),
+                title: NSLocalizedString("\(prefix)_title", comment: ""),
+                message: NSLocalizedString("\(prefix)_message", comment: ""),
                 preferredStyle: .alert
             )
             alert.addAction(
                 UIAlertAction(
-                    title: NSLocalizedString("microphone_permission_settings_cancel", comment: ""),
+                    title: NSLocalizedString("\(prefix)_cancel", comment: ""),
                     style: .cancel
                 ) { [weak self] _ in
-                    self?.microphoneSettingsRecoveryState.finishPresentation()
+                    self?.captureSettingsRecoveryState.finishPresentation()
                 }
             )
             alert.addAction(
                 UIAlertAction(
-                    title: NSLocalizedString("microphone_permission_settings_open", comment: ""),
+                    title: NSLocalizedString("\(prefix)_open", comment: ""),
                     style: .default
                 ) { [weak self] _ in
-                    self?.microphoneSettingsRecoveryState.finishPresentation()
+                    self?.captureSettingsRecoveryState.finishPresentation()
                     guard let settingsURL = URL(string: UIApplication.openSettingsURLString),
                           UIApplication.shared.canOpenURL(settingsURL) else {
                         return

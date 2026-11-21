@@ -1,3 +1,4 @@
+import AVFoundation
 import Foundation
 import HotwireNative
 import WebKit
@@ -89,7 +90,7 @@ enum MicrophoneCapturePolicy {
         }
     }
 
-    private static func hasTrustedHTTPSOrigin(_ url: URL, baseURL: URL) -> Bool {
+    fileprivate static func hasTrustedHTTPSOrigin(_ url: URL, baseURL: URL) -> Bool {
         guard let requestedOrigin = Origin(url: url),
               let trustedOrigin = Origin(url: baseURL) else {
             return false
@@ -128,6 +129,65 @@ enum MicrophoneCapturePolicy {
     }
 }
 
+enum CameraCapturePolicy {
+    fileprivate static let confirmPathPattern = #"^/events/[0-9]+/human_bingo/confirm/?$"#
+
+    static func shouldGrantCameraCapture(
+        type: WKMediaCaptureType,
+        originProtocol: String,
+        originHost: String,
+        originPort: Int,
+        isMainFrame: Bool,
+        frameURL: URL?,
+        webViewURL: URL?,
+        baseURL: URL
+    ) -> Bool {
+        guard type == .camera,
+              isMainFrame,
+              MicrophoneCapturePolicy.isTrustedMicrophoneOrigin(
+                  protocol: originProtocol,
+                  host: originHost,
+                  port: originPort,
+                  baseURL: baseURL
+              ),
+              let frameURL,
+              let webViewURL else {
+            return false
+        }
+
+        return isTrustedConfirmURL(frameURL, baseURL: baseURL)
+            && isTrustedConfirmURL(webViewURL, baseURL: baseURL)
+    }
+
+    private static func isTrustedConfirmURL(_ url: URL, baseURL: URL) -> Bool {
+        guard MicrophoneCapturePolicy.hasTrustedHTTPSOrigin(url, baseURL: baseURL),
+              let path = URLComponents(url: url, resolvingAgainstBaseURL: false)?.percentEncodedPath else {
+            return false
+        }
+
+        return path.range(of: confirmPathPattern, options: .regularExpression) != nil
+    }
+
+    enum Disposition {
+        case grant
+        case deny
+        case denyAndShowSettings
+    }
+
+    static func disposition(for permission: AVAuthorizationStatus) -> Disposition {
+        switch permission {
+        case .authorized, .notDetermined:
+            return .grant
+        case .denied:
+            return .denyAndShowSettings
+        case .restricted:
+            return .deny
+        @unknown default:
+            return .deny
+        }
+    }
+}
+
 final class MicrophoneSettingsRecoveryState {
     private(set) var isPresenting = false
 
@@ -142,22 +202,90 @@ final class MicrophoneSettingsRecoveryState {
     }
 }
 
-/// Hotwire's UI controller plus a microphone capture decision for the First Spark translator.
+final class CameraCaptureRecoveryMessageHandler: NSObject, WKScriptMessageHandler {
+    private static let messageName = "nurioBingoCameraDenied"
+
+    static func install(in controller: WKUserContentController) {
+        controller.add(CameraCaptureRecoveryMessageHandler(), name: messageName)
+        // WebKit can reject OS-denied camera requests before calling the UI delegate.
+        controller.addUserScript(WKUserScript(
+            source: #"""
+            (() => {
+                const devices = navigator.mediaDevices;
+                if (!devices?.getUserMedia) return;
+                const getUserMedia = devices.getUserMedia;
+                const confirmPath = new RegExp("\#(CameraCapturePolicy.confirmPathPattern)");
+                devices.getUserMedia = function (constraints) {
+                    const request = getUserMedia.apply(this, arguments);
+                    if (!constraints?.video || constraints.audio || !confirmPath.test(location.pathname)) {
+                        return request;
+                    }
+                    return request.catch(error => {
+                        if (error.name === "NotAllowedError") {
+                            window.webkit.messageHandlers.\#(messageName).postMessage(null);
+                        }
+                        throw error;
+                    });
+                };
+            })();
+            """#,
+            injectionTime: .atDocumentStart,
+            forMainFrameOnly: true
+        ))
+    }
+
+    func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+        guard message.name == Self.messageName,
+              let webView = message.webView,
+              let delegate = webView.uiDelegate as? MicrophoneCaptureWKUIController else {
+            return
+        }
+
+        delegate.recoverFromCameraDenial(in: webView, frame: message.frameInfo)
+    }
+}
+
+/// Hotwire's UI controller with capture policies for First Spark and Human Bingo.
 final class MicrophoneCaptureWKUIController: WKUIController {
     private let trustedBaseURL: URL
     private let microphonePermission: () -> MicrophoneCapturePolicy.SystemMicrophonePermission
     private let showMicrophoneSettingsRecovery: () -> Void
+    private let showCameraSettingsRecovery: () -> Void
 
     init(
         delegate: WKUIControllerDelegate,
         trustedBaseURL: URL,
         microphonePermission: @escaping () -> MicrophoneCapturePolicy.SystemMicrophonePermission,
-        showMicrophoneSettingsRecovery: @escaping () -> Void
+        showMicrophoneSettingsRecovery: @escaping () -> Void,
+        showCameraSettingsRecovery: @escaping () -> Void
     ) {
         self.trustedBaseURL = trustedBaseURL
         self.microphonePermission = microphonePermission
         self.showMicrophoneSettingsRecovery = showMicrophoneSettingsRecovery
+        self.showCameraSettingsRecovery = showCameraSettingsRecovery
         super.init(delegate: delegate)
+    }
+
+    fileprivate func recoverFromCameraDenial(in webView: WKWebView, frame: WKFrameInfo) {
+        guard isTrustedCameraRequest(origin: frame.securityOrigin, frame: frame, webView: webView),
+              AVCaptureDevice.authorizationStatus(for: .video) == .denied else {
+            return
+        }
+
+        showCameraSettingsRecovery()
+    }
+
+    private func isTrustedCameraRequest(origin: WKSecurityOrigin, frame: WKFrameInfo, webView: WKWebView) -> Bool {
+        CameraCapturePolicy.shouldGrantCameraCapture(
+            type: .camera,
+            originProtocol: origin.`protocol`,
+            originHost: origin.host,
+            originPort: origin.port,
+            isMainFrame: frame.isMainFrame,
+            frameURL: frame.request.url,
+            webViewURL: webView.url,
+            baseURL: trustedBaseURL
+        )
     }
 
     func webView(
@@ -167,6 +295,20 @@ final class MicrophoneCaptureWKUIController: WKUIController {
         type: WKMediaCaptureType,
         decisionHandler: @escaping (WKPermissionDecision) -> Void
     ) {
+        if type == .camera {
+            guard isTrustedCameraRequest(origin: origin, frame: frame, webView: webView) else {
+                decisionHandler(.deny)
+                return
+            }
+
+            let disposition = CameraCapturePolicy.disposition(for: AVCaptureDevice.authorizationStatus(for: .video))
+            decisionHandler(disposition == .grant ? .grant : .deny)
+            if disposition == .denyAndShowSettings {
+                showCameraSettingsRecovery()
+            }
+            return
+        }
+
         let trustedRequest = MicrophoneCapturePolicy.shouldGrantMicrophoneCapture(
             type: type,
             originProtocol: origin.`protocol`,
