@@ -1,5 +1,7 @@
 package com.nurio.android.microphone
 
+import com.nurio.android.capture.CapturePermissionRequestAction
+import com.nurio.android.capture.CapturePermissionRequestState
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -9,39 +11,39 @@ import org.junit.Test
 class MicrophonePermissionRequestStateTest {
     @Test
     fun `missing OS grant always launches a runtime request`() {
-        val state = MicrophonePermissionRequestState()
+        val state = CapturePermissionRequestState()
         val results = mutableListOf<Boolean>()
 
         val action = state.request(permissionGranted = false, callback = results::add)
 
-        assertEquals(MicrophonePermissionRequestAction.LAUNCH_RUNTIME_REQUEST, action)
+        assertEquals(CapturePermissionRequestAction.LAUNCH_RUNTIME_REQUEST, action)
         assertTrue(results.isEmpty())
     }
 
     @Test
     fun `granted OS permission completes immediately without a runtime request`() {
-        val state = MicrophonePermissionRequestState()
+        val state = CapturePermissionRequestState()
         val results = mutableListOf<Boolean>()
 
         val action = state.request(permissionGranted = true, callback = results::add)
 
-        assertEquals(MicrophonePermissionRequestAction.COMPLETE_GRANTED, action)
+        assertEquals(CapturePermissionRequestAction.COMPLETE_GRANTED, action)
         assertEquals(listOf(true), results)
         assertNull(state.complete(granted = true, shouldShowRequestPermissionRationale = false))
     }
 
     @Test
     fun `concurrent callers share one request and receive its result exactly once`() {
-        val state = MicrophonePermissionRequestState()
+        val state = CapturePermissionRequestState()
         val firstResults = mutableListOf<Boolean>()
         val secondResults = mutableListOf<Boolean>()
 
         assertEquals(
-            MicrophonePermissionRequestAction.LAUNCH_RUNTIME_REQUEST,
+            CapturePermissionRequestAction.LAUNCH_RUNTIME_REQUEST,
             state.request(permissionGranted = false, callback = firstResults::add)
         )
         assertEquals(
-            MicrophonePermissionRequestAction.AWAIT_RUNTIME_RESULT,
+            CapturePermissionRequestAction.AWAIT_RUNTIME_RESULT,
             state.request(permissionGranted = false, callback = secondResults::add)
         )
 
@@ -67,7 +69,7 @@ class MicrophonePermissionRequestStateTest {
 
     @Test
     fun `settings recovery follows only a completed non-requestable denial`() {
-        val state = MicrophonePermissionRequestState()
+        val state = CapturePermissionRequestState()
 
         assertNull(
             state.complete(
@@ -100,7 +102,7 @@ class MicrophonePermissionRequestStateTest {
 
     @Test
     fun `destroyed lifecycle drops callers and ignores a stale result`() {
-        val state = MicrophonePermissionRequestState()
+        val state = CapturePermissionRequestState()
         var callbackCount = 0
 
         state.request(permissionGranted = false) { callbackCount += 1 }
@@ -114,7 +116,7 @@ class MicrophonePermissionRequestStateTest {
         )
         assertEquals(0, callbackCount)
         assertEquals(
-            MicrophonePermissionRequestAction.LAUNCH_RUNTIME_REQUEST,
+            CapturePermissionRequestAction.LAUNCH_RUNTIME_REQUEST,
             state.request(permissionGranted = false) { callbackCount += 1 }
         )
     }

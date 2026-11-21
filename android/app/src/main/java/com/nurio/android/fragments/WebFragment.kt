@@ -3,6 +3,7 @@ package com.nurio.android.fragments
 import android.os.Bundle
 import android.view.View
 import com.nurio.android.BuildConfig
+import com.nurio.android.camera.CameraPermissionHost
 import com.nurio.android.microphone.MicPermissionHost
 import com.nurio.android.microphone.MicrophoneWebChromeClient
 import com.nurio.android.webview.PaymentWebChromeClient
@@ -25,7 +26,8 @@ class WebFragment : HotwireWebFragment() {
             session = session,
             microphonePermissionHost = permissionHost,
             trustedBaseUrl = BuildConfig.BASE_URL,
-            currentLocation = { session.webView.url }
+            currentLocation = { session.webView.url },
+            cameraPermissionHost = permissionHost as? CameraPermissionHost
         )
     }
 }

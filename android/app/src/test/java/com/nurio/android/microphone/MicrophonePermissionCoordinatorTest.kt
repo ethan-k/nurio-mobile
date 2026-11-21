@@ -1,5 +1,6 @@
 package com.nurio.android.microphone
 
+import com.nurio.android.capture.WebCapturePermissionCoordinator
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -33,6 +34,7 @@ class MicrophonePermissionCoordinatorTest {
         listOf(
             "$baseUrl/events/42",
             "$baseUrl/events/42/first_spark",
+            "$baseUrl/events/42/human_bingo/confirm",
             "https://evil.example/events/42/first_spark/translator"
         ).forEach { currentLocation ->
             val permissionHost = FakeMicPermissionHost()
@@ -107,11 +109,12 @@ class MicrophonePermissionCoordinatorTest {
     private fun coordinator(
         permissionHost: MicPermissionHost,
         currentLocation: () -> String?
-    ) = MicrophonePermissionCoordinator(
-        microphonePermissionHost = permissionHost,
-        trustedBaseUrl = baseUrl,
-        currentLocation = currentLocation,
-        audioCaptureResource = audioResource
+    ) = WebCapturePermissionCoordinator(
+        captureResource = audioResource,
+        isTrustedRequest = { origin ->
+            MicrophoneCapturePolicy.isTrustedMicrophoneRequest(origin, currentLocation(), baseUrl)
+        },
+        requestPermission = permissionHost::requestMicrophonePermission
     )
 
     private class FakeMicPermissionHost : MicPermissionHost {

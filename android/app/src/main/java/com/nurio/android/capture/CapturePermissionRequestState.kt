@@ -1,12 +1,12 @@
-package com.nurio.android.microphone
+package com.nurio.android.capture
 
-internal enum class MicrophonePermissionRequestAction {
+internal enum class CapturePermissionRequestAction {
     COMPLETE_GRANTED,
     LAUNCH_RUNTIME_REQUEST,
     AWAIT_RUNTIME_RESULT
 }
 
-internal data class MicrophonePermissionResult(
+internal data class CapturePermissionResult(
     val granted: Boolean,
     val showSettingsRecovery: Boolean
 )
@@ -18,32 +18,32 @@ internal data class MicrophonePermissionResult(
  * permanent denial. The only pre-request input is therefore the current OS grant. Settings recovery
  * is considered only after Android has returned a denial for a request launched by this lifecycle.
  */
-internal class MicrophonePermissionRequestState {
+internal class CapturePermissionRequestState {
     private val callbacks = mutableListOf<(Boolean) -> Unit>()
     private var runtimeRequestPending = false
 
     fun request(
         permissionGranted: Boolean,
         callback: (Boolean) -> Unit
-    ): MicrophonePermissionRequestAction {
+    ): CapturePermissionRequestAction {
         if (permissionGranted) {
             callback(true)
-            return MicrophonePermissionRequestAction.COMPLETE_GRANTED
+            return CapturePermissionRequestAction.COMPLETE_GRANTED
         }
 
         callbacks += callback
         if (runtimeRequestPending) {
-            return MicrophonePermissionRequestAction.AWAIT_RUNTIME_RESULT
+            return CapturePermissionRequestAction.AWAIT_RUNTIME_RESULT
         }
 
         runtimeRequestPending = true
-        return MicrophonePermissionRequestAction.LAUNCH_RUNTIME_REQUEST
+        return CapturePermissionRequestAction.LAUNCH_RUNTIME_REQUEST
     }
 
     fun complete(
         granted: Boolean,
         shouldShowRequestPermissionRationale: Boolean
-    ): MicrophonePermissionResult? {
+    ): CapturePermissionResult? {
         if (!runtimeRequestPending) return null
 
         runtimeRequestPending = false
@@ -51,7 +51,7 @@ internal class MicrophonePermissionRequestState {
         callbacks.clear()
         pendingCallbacks.forEach { callback -> callback(granted) }
 
-        return MicrophonePermissionResult(
+        return CapturePermissionResult(
             granted = granted,
             showSettingsRecovery = !granted && !shouldShowRequestPermissionRationale
         )

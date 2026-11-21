@@ -1,5 +1,6 @@
 package com.nurio.android.microphone
 
+import com.nurio.android.capture.WebCapturePolicy
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -84,20 +85,20 @@ class MicrophoneCapturePolicyTest {
     fun `grants only audio-only capture requests`() {
         assertArrayEquals(
             arrayOf(audioResource),
-            MicrophoneCapturePolicy.grantableAudioResources(
+            WebCapturePolicy.grantableResources(
                 arrayOf(audioResource, audioResource),
                 audioResource
             )
         )
         assertTrue(
-            MicrophoneCapturePolicy.grantableAudioResources(arrayOf(videoResource), audioResource).isEmpty()
+            WebCapturePolicy.grantableResources(arrayOf(videoResource), audioResource).isEmpty()
         )
         assertTrue(
-            MicrophoneCapturePolicy.grantableAudioResources(
+            WebCapturePolicy.grantableResources(
                 arrayOf(audioResource, videoResource),
                 audioResource
             ).isEmpty()
         )
-        assertTrue(MicrophoneCapturePolicy.grantableAudioResources(emptyArray(), audioResource).isEmpty())
+        assertTrue(WebCapturePolicy.grantableResources(emptyArray(), audioResource).isEmpty())
     }
 }

@@ -18,4 +18,6 @@
     <string name="microphone_permission_settings_message">To translate what you say during First Spark, allow nurio to use the microphone in Settings.</string>
     <string name="microphone_permission_settings_cancel">Not now</string>
     <string name="microphone_permission_settings_open">Open Settings</string>
+    <string name="camera_permission_settings_title">Camera access needed</string>
+    <string name="camera_permission_settings_message">To scan Human Bingo QR codes, allow nurio to use the camera in Settings.</string>
 </resources>
