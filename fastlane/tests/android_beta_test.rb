@@ -131,6 +131,12 @@ class AndroidBetaTest < ReleaseLaneTest
     assert_equal "unstaged work", File.read(File.join(@root, "other.txt"))
   end
 
+  def test_upload_names_the_release_after_the_bundle_version
+    @lane.run_beta
+
+    assert_equal "1.0.15", @lane.upload_options[:version_name]
+  end
+
   def test_build_failure_restores_versions_without_upload_or_commit
     @lane.on_build = -> { raise "build failed" }
     assert_equal "build failed", assert_raises(RuntimeError) { @lane.run_beta }.message

@@ -529,6 +529,7 @@ platform :android do
         json_key_data: json_key_data,
         track: "internal",
         aab: "android/app/build/outputs/bundle/release/app-release.aab",
+        version_name: version_name,
         # The gradle lane context also advertises any stale debug/release APKs
         # left in outputs/apk, and supply refuses an APK and an AAB together.
         skip_upload_apk: true,
