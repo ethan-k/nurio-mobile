@@ -5,6 +5,13 @@ import SwiftUI
 @testable import Nurio
 
 final class NurioTests: XCTestCase {
+    @MainActor
+    func testWebViewPlaysVideoInlineSoTheQRScannerPreviewStaysOnThePage() {
+        let webView = AppDelegate.makeWebView(configuration: WKWebViewConfiguration())
+
+        XCTAssertTrue(webView.configuration.allowsInlineMediaPlayback)
+    }
+
     func testAppBundleEmbedsConfiguredServerURL() throws {
         let value = try XCTUnwrap(Bundle(for: AppDelegate.self).object(forInfoDictionaryKey: "NurioBaseURL") as? String)
         XCTAssertNotNil(AppEnvironment.resolveBaseURL(configuredValue: value, overrideValue: nil))

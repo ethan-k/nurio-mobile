@@ -78,6 +78,18 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         return "NurioApp/\(version) (\(build))"
     }
 
+    static func makeWebView(configuration: WKWebViewConfiguration) -> WKWebView {
+        configuration.setURLSchemeHandler(NativeImageSchemeHandler(), forURLScheme: NativeImageURL.scheme)
+        CameraCaptureRecoveryMessageHandler.install(in: configuration.userContentController)
+        // Without this the iPhone ignores `playsinline` and opens the QR scanner's camera feed in the fullscreen player.
+        configuration.allowsInlineMediaPlayback = true
+        let webView = WKWebView(frame: .zero, configuration: configuration)
+#if DEBUG
+        if #available(iOS 16.4, *) { webView.isInspectable = true }
+#endif
+        return webView
+    }
+
     private func configureHotwire() {
         Hotwire.loadPathConfiguration(from: [
             .file(Bundle.main.url(forResource: AppEnvironment.pathConfigurationResourceName, withExtension: "json")!)
@@ -85,15 +97,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
         Hotwire.config.applicationUserAgentPrefix = "Nurio iOS; NurioPaymentReturn/1; NurioImageCache/1; \(Self.appBuildUserAgentToken);"
         // The factory is used by both the main and modal Hotwire sessions.
-        Hotwire.config.makeCustomWebView = { configuration in
-            configuration.setURLSchemeHandler(NativeImageSchemeHandler(), forURLScheme: NativeImageURL.scheme)
-            CameraCaptureRecoveryMessageHandler.install(in: configuration.userContentController)
-            let webView = WKWebView(frame: .zero, configuration: configuration)
-#if DEBUG
-            if #available(iOS 16.4, *) { webView.isInspectable = true }
-#endif
-            return webView
-        }
+        Hotwire.config.makeCustomWebView = Self.makeWebView(configuration:)
         Hotwire.config.backButtonDisplayMode = .minimal
         Hotwire.config.showDoneButtonOnModals = true
 
