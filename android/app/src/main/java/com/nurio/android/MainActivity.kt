@@ -111,7 +111,6 @@ class MainActivity :
         supportFragmentManager.registerFragmentLifecycleCallbacks(navigationLifecycleCallbacks, true)
         startupCoordinator.start()
 
-        requestNotificationPermissionIfNeeded()
         handleLaunchIntent(intent)
     }
 

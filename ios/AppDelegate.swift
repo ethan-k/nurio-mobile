@@ -56,16 +56,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         PaymentCrashTelemetry.configure(appSurface: "nurio")
         Messaging.messaging().delegate = self
         UNUserNotificationCenter.current().delegate = self
-
-        UNUserNotificationCenter.current().requestAuthorization(options: [ .alert, .badge, .sound ]) { granted, error in
-            if let error {
-                NSLog("Nurio push authorization failed: \(error.localizedDescription)")
-                return
-            }
-
-            NSLog("Nurio push authorization granted: \(granted)")
-        }
-
         application.registerForRemoteNotifications()
     }
 
