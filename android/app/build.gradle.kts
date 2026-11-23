@@ -108,6 +108,22 @@ java {
     }
 }
 
+val backupPolicySources = listOf(
+    "android",
+    "study-nurio-mobile/android",
+    "leaders-nurio-mobile/android",
+    "tutors-nurio-mobile/android"
+).map { shell ->
+    fileTree(rootProject.file("../$shell/app/src/main")) {
+        include("AndroidManifest.xml", "res/xml/*.xml")
+    }
+}
+
+tasks.withType<Test>().configureEach {
+    inputs.files(backupPolicySources)
+        .withPathSensitivity(PathSensitivity.RELATIVE)
+}
+
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
