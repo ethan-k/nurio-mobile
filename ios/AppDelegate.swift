@@ -85,7 +85,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             .file(Bundle.main.url(forResource: AppEnvironment.pathConfigurationResourceName, withExtension: "json")!)
         ])
 
-        Hotwire.config.applicationUserAgentPrefix = "Nurio iOS; NurioPaymentReturn/1; NurioImageCache/1; \(Self.appBuildUserAgentToken);"
+        Hotwire.config.applicationUserAgentPrefix = "Nurio iOS; NurioPaymentReturn/1; NurioImageCache/1; \(Self.appBuildUserAgentToken); NurioLocalePaths/1;"
         // The factory is used by both the main and modal Hotwire sessions.
         Hotwire.config.makeCustomWebView = Self.makeWebView(configuration:)
         Hotwire.config.backButtonDisplayMode = .minimal
@@ -234,7 +234,7 @@ enum PushNotificationRoute {
     }
 
     nonisolated private static func normalizedPath(_ url: URL) -> String {
-        let path = url.path
+        let path = LocalePath.stripLocalePrefix(url.path)
         guard path.count > 1, path.hasSuffix("/") else { return path.isEmpty ? "/" : path }
         return String(path.dropLast())
     }

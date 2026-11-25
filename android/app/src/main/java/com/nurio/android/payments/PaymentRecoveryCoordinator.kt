@@ -1,5 +1,6 @@
 package com.nurio.android.payments
 
+import com.nurio.android.LocalePath
 import android.content.Context
 import android.content.SharedPreferences
 import java.net.URI
@@ -169,7 +170,7 @@ internal class PaymentRecoveryCoordinator(
     }
 
     private fun normalizeEventPath(path: String?): String? {
-        val match = EVENT_DETAIL_PATH.matchEntire(path.orEmpty()) ?: return null
+        val match = EVENT_DETAIL_PATH.matchEntire(LocalePath.strip(path.orEmpty())) ?: return null
         return "/events/${match.groupValues[1]}"
     }
 

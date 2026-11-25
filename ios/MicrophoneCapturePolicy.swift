@@ -25,7 +25,7 @@ enum MicrophoneCapturePolicy {
             return false
         }
 
-        return path.range(of: translatorPathPattern, options: .regularExpression) != nil
+        return LocalePath.stripLocalePrefix(path).range(of: translatorPathPattern, options: .regularExpression) != nil
     }
 
     static func isTrustedMicrophoneOrigin(
@@ -165,7 +165,7 @@ enum CameraCapturePolicy {
             return false
         }
 
-        return path.range(of: confirmPathPattern, options: .regularExpression) != nil
+        return LocalePath.stripLocalePrefix(path).range(of: confirmPathPattern, options: .regularExpression) != nil
     }
 
     enum Disposition {
@@ -217,7 +217,8 @@ final class CameraCaptureRecoveryMessageHandler: NSObject, WKScriptMessageHandle
                 const confirmPath = new RegExp("\#(CameraCapturePolicy.confirmPathPattern)");
                 devices.getUserMedia = function (constraints) {
                     const request = getUserMedia.apply(this, arguments);
-                    if (!constraints?.video || constraints.audio || !confirmPath.test(location.pathname)) {
+                    const path = location.pathname.replace(/^\/(?:en|ko)(?=\/)/i, "");
+                    if (!constraints?.video || constraints.audio || !confirmPath.test(path)) {
                         return request;
                     }
                     return request.catch(error => {

@@ -6,6 +6,104 @@ import XCTest
 @testable import NurioStudy
 
 final class NurioStudyTests: XCTestCase {
+    func testLocalePathStripsOnlyTheFirstLocaleSegment() {
+        let cases = [
+            ("/ko/events", "/events"),
+            ("/en", "/"),
+            ("/ko/", "/"),
+            ("/KO/events", "/events"),
+            ("/korean-program", "/korean-program"),
+            ("/kor/x", "/kor/x"),
+            ("/english", "/english"),
+            ("/events/ko", "/events/ko"),
+            ("/ko-kr/x", "/ko-kr/x"),
+            ("/Ko/x", "/Ko/x"),
+            ("/ko/en/x", "/en/x"),
+            ("/en?next=/ko#top", "/?next=/ko#top"),
+            ("/KO/events?lang=en#top", "/events?lang=en#top"),
+            ("/ko//x", "/x"),
+            ("/ko///x?next=//y#//top", "/x?next=//y#//top"),
+            ("//admin", "//admin"),
+            ("/events", "/events"),
+            ("", ""),
+        ]
+        for (path, expected) in cases {
+            XCTAssertEqual(LocalePath.stripLocalePrefix(path), expected, path)
+        }
+    }
+
+    func testLocalePrefixPreservesScopePolicy() {
+        let baseURL = URL(string: "https://study.nurio.kr")!
+        for path in ["/ko/admin", "/ko//admin", "/en/admin/x", "/ko/tutoring"] {
+            XCTAssertTrue(StudyScopePolicy.isBlocked(URL(string: path, relativeTo: baseURL)!.absoluteURL, appHost: baseURL.host), path)
+        }
+        XCTAssertFalse(StudyScopePolicy.isBlocked(baseURL.appendingPathComponent("ko/events"), appHost: baseURL.host))
+    }
+
+    func testLocalePrefixesPreserveBundledPathConfigurationProperties() throws {
+        let asset = try XCTUnwrap(
+            Bundle(for: AppDelegate.self).url(forResource: AppEnvironment.pathConfigurationResourceName, withExtension: "json")
+        )
+        let configuration = PathConfiguration(sources: [.file(asset)])
+        let paths = [
+            "/placement/new",
+            "/placement/12/speaking",
+            "/chat?lang=ko",
+            "/study-groups/14/chat/88",
+            "/study_group_admin/chats/5",
+            "/practice/12",
+            "/practice/new",
+            "/new",
+            "/edit",
+            "/settings",
+        ]
+        let data = try Data(contentsOf: asset)
+        let json = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        let rules = try XCTUnwrap(json["rules"] as? [[String: Any]])
+        for pattern in rules.flatMap({ $0["patterns"] as? [String] ?? [] }) where pattern.hasPrefix("^") {
+            let regex = try NSRegularExpression(pattern: pattern)
+            func matches(_ path: String) -> Bool {
+                regex.firstMatch(in: path, range: NSRange(path.startIndex..., in: path)) != nil
+            }
+            let samples = paths.filter(matches)
+            XCTAssertFalse(samples.isEmpty, "Missing sample for \(pattern)")
+            for sample in samples {
+                for locale in ["en", "ko", "KO"] {
+                    XCTAssertTrue(matches("/\(locale)\(sample)"), pattern)
+                }
+            }
+        }
+        for path in paths {
+            let expected = configuration.properties(for: path)
+            for locale in ["en", "ko", "KO"] {
+                let prefixed = "/\(locale)\(path)"
+                XCTAssertEqual(configuration.properties(for: prefixed), expected, prefixed)
+            }
+        }
+        XCTAssertEqual(configuration.properties(for: "/ko/practice/new")["context"] as? String, "modal")
+    }
+
+    @MainActor
+    func testHotwireAdvertisesLocalePathSupport() {
+        let prefix = Hotwire.config.applicationUserAgentPrefix
+        XCTAssertTrue(prefix?.contains("NurioLocalePaths/1;") == true)
+    }
+
+    func testLocalePrefixedNotificationPreservesDestinationAndScope() {
+        let baseURL = URL(string: "https://study.nurio.kr")!
+        let localizedPath = "/ko/notifications?filter=unread"
+        let localized = NotificationDestination.resolve(path: localizedPath, url: nil, baseURL: baseURL)
+        XCTAssertEqual(localized.absoluteString, "https://study.nurio.kr/ko/notifications?filter=unread")
+        let visibleURL = baseURL.appendingPathComponent("notifications")
+        XCTAssertTrue(NotificationDestination.isShowing(path: localizedPath, url: nil, visibleURL: visibleURL, baseURL: baseURL))
+        let blockedURL = URL(string: "https://study.nurio.kr/ko//admin")!
+        XCTAssertFalse(NotificationDestination.isShowing(path: "/ko//admin", url: nil, visibleURL: blockedURL, baseURL: baseURL))
+        for path in ["/ko/admin", "/ko//admin", "/en/admin/x", "/ko/tutoring"] {
+            XCTAssertEqual(NotificationDestination.resolve(path: path, url: nil, baseURL: baseURL), baseURL, path)
+        }
+    }
+
+
     func testNotificationPermissionStatusMapsAuthorizationStatuses() {
         XCTAssertEqual(NotificationPermissionStatus(.authorized), .granted)
         XCTAssertEqual(NotificationPermissionStatus(.provisional), .granted)

@@ -1,5 +1,6 @@
 package com.nurio.study.android.notifications
 
+import com.nurio.study.android.LocalePath
 import java.net.URI
 
 object NotificationDestination {
@@ -50,7 +51,7 @@ object NotificationDestination {
     private fun effectivePort(uri: URI): Int = if (uri.port == -1) 443 else uri.port
 
     private fun isBlocked(path: String): Boolean {
-        val normalized = path.lowercase()
+        val normalized = LocalePath.strip(path).lowercase()
         return blockedPrefixes.any { prefix ->
             normalized == prefix || normalized.startsWith("$prefix/")
         }

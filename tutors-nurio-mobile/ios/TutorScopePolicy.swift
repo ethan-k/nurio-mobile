@@ -11,7 +11,7 @@ enum TutorScopePolicy {
         }
 
         let host = url.host?.lowercased() ?? ""
-        let path = url.path.lowercased()
+        let path = LocalePath.stripLocalePrefix(url.path).lowercased()
 
         if let appHost, host == appHost || host.hasSuffix(".\(appHost)") {
             return blockedPrefixes.contains(where: { prefix in

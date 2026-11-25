@@ -104,7 +104,7 @@ enum PaymentGatewayData {
 enum CheckoutNavigation {
     static func isRecoveryDestination(_ url: URL, baseURL: URL) -> Bool {
         isSafeReloadURL(url, baseURL: baseURL) &&
-            (isCheckoutEntry(url, baseURL: baseURL) || url.path == "/payments/portone/complete")
+            (isCheckoutEntry(url, baseURL: baseURL) || LocalePath.stripLocalePrefix(url.path) == "/payments/portone/complete")
     }
 
     /// Hotwire's default retry calls Session.reload(), which must not reload a
@@ -133,7 +133,8 @@ enum CheckoutNavigation {
     // Merchant selection/confirmation stays full screen. Only the live gateway
     // view is presented as a modal, without changing its Hotwire session.
     static func usesMainSession(_ url: URL) -> Bool {
-        url.path == "/orders/new" || url.path.hasSuffix("/payment_summary") || url.path.hasSuffix("/purchase")
+        let path = LocalePath.stripLocalePrefix(url.path)
+        return path == "/orders/new" || path.hasSuffix("/payment_summary") || path.hasSuffix("/purchase")
     }
 
     static func isCheckoutEntry(_ url: URL, baseURL: URL) -> Bool {
@@ -141,7 +142,7 @@ enum CheckoutNavigation {
 
         // Only the checkout *entry* points — never the order confirmation page
         // (/orders/:id) or the payment-complete return, which must navigate normally.
-        let path = url.path
+        let path = LocalePath.stripLocalePrefix(url.path)
         return path == "/orders/new" ||
             path.hasSuffix("/payment_summary") ||
             path.hasSuffix("/purchase")

@@ -14,7 +14,7 @@ final class OAuthRouteDecisionHandler: RouteDecisionHandler {
         }
 
         let appHost = configuration.startLocation.host?.lowercased()
-        return location.host?.lowercased() == appHost && AppEnvironment.oauthPaths.contains(location.path)
+        return location.host?.lowercased() == appHost && AppEnvironment.oauthPaths.contains(LocalePath.stripLocalePrefix(location.path))
     }
 
     func handle(location: URL, configuration: Navigator.Configuration, navigator: Navigator) -> Router.Decision {

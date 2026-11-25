@@ -50,10 +50,17 @@ class AiPracticeNativeConfigurationTest {
         }
 
         val modalRuleIndex = rules.indices.first { patternsOf(it).contains("/new$") }
-        val placementRuleIndex = rules.indices.firstOrNull { patternsOf(it).contains("^/placement(?:[/?]|$)") }
+        val placementRuleIndex = rules.indices.firstOrNull { index ->
+            patternsOf(index).any { pattern ->
+                pattern.startsWith("^") && Regex(pattern).containsMatchIn("/placement/new")
+            }
+        }
 
         assertNotNull("placement path rule is missing", placementRuleIndex)
         assertTrue(placementRuleIndex!! > modalRuleIndex)
+        for (path in listOf("/en/placement/new", "/ko/placement/42/speaking")) {
+            assertTrue(path, patternsOf(placementRuleIndex).any { Regex(it).containsMatchIn(path) })
+        }
         val properties = rules[placementRuleIndex].jsonObject.getValue("properties").jsonObject
         assertEquals("default", properties.getValue("context").jsonPrimitive.content)
         assertEquals("hotwire://fragment/web", properties.getValue("uri").jsonPrimitive.content)

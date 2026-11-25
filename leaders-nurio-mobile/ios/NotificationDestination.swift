@@ -77,7 +77,7 @@ enum NotificationDestination {
     }
 
     private static func isBlocked(_ path: String) -> Bool {
-        let normalized = path.lowercased()
+        let normalized = LocalePath.stripLocalePrefix(path).lowercased()
         return blockedPrefixes.contains { prefix in
             normalized == prefix || normalized.hasPrefix("\(prefix)/")
         }

@@ -8,9 +8,51 @@ import kotlinx.serialization.json.jsonPrimitive
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
+import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class PathConfigurationAssetTest {
+    @Test
+    fun `locale prefixes preserve bundled path configuration properties`() {
+        val asset = listOf(
+            File("src/main/assets/json/path-configuration.json"),
+            File("app/src/main/assets/json/path-configuration.json")
+        ).first(File::isFile)
+        val rules = Json.parseToJsonElement(asset.readText()).jsonObject.getValue("rules").jsonArray
+        val paths = listOf(
+            "/schedule",
+            "/new",
+            "/edit",
+            "/sessions/12/new",
+            "/sessions/12/edit",
+        )
+        assertTrue("Missing path configuration rules", rules.isNotEmpty())
+        val patternsByRule = rules.associateWith { rule ->
+            val patterns = rule.jsonObject.getValue("patterns").jsonArray
+            assertTrue("Missing patterns for rule $rule", patterns.isNotEmpty())
+            patterns.map { Regex(it.jsonPrimitive.content) }
+        }
+        fun propertiesFor(path: String) = rules.filter { rule ->
+            patternsByRule.getValue(rule).any { it.containsMatchIn(path) }
+        }.flatMap { rule ->
+            rule.jsonObject.getValue("properties").jsonObject.entries
+        }.associate { it.key to it.value }
+
+        for (path in paths) {
+            for (locale in listOf("en", "ko", "KO")) {
+                val prefixed = "/$locale$path"
+                assertEquals(prefixed, propertiesFor(path), propertiesFor(prefixed))
+            }
+        }
+        for (pattern in patternsByRule.values.flatten()) {
+            val samples = paths.filter(pattern::containsMatchIn)
+            assertTrue("Missing sample for ${pattern.pattern}", samples.isNotEmpty())
+            for (path in samples) {
+                assertTrue("${pattern.pattern} must match /ko$path", pattern.containsMatchIn("/ko$path"))
+            }
+        }
+    }
+
     @Test
     fun `bundled path configuration exists and keeps login a full page`() {
         val asset = listOf(

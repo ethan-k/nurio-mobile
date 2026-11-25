@@ -17,7 +17,7 @@ final class SignInWithOAuthComponent: BridgeComponent {
         guard let data: ClickData = message.data() else { return }
         guard let url = absoluteURL(from: data.startPath) else { return }
 
-        if url.path == "/auth/apple" {
+        if LocalePath.stripLocalePrefix(url.path) == "/auth/apple" {
             NativeAppleSignInCoordinator.shared.presentationAnchorProvider = { [weak self] in
                 (self?.delegate?.destination as? UIViewController)?.view.window
             }

@@ -21,12 +21,13 @@ final class OAuthRouteDecisionHandler: RouteDecisionHandler {
         }
 
         let appHost = configuration.startLocation.host?.lowercased()
-        return location.host?.lowercased() == appHost && AppEnvironment.oauthPaths.contains(location.path)
+        return location.host?.lowercased() == appHost && AppEnvironment.oauthPaths.contains(LocalePath.stripLocalePrefix(location.path))
     }
 
     func handle(proposal: VisitProposal, configuration: Navigator.Configuration, navigator: any Navigating) -> Router.Decision {
         let location = proposal.url
-        if location.path == "/auth/apple" {
+        let path = LocalePath.stripLocalePrefix(location.path)
+        if path == "/auth/apple" {
             NativeAppleSignInCoordinator.shared.presentationAnchorProvider = { [weak navigator] in
                 navigator?.activeNavigationController.view.window
             }
@@ -42,7 +43,7 @@ final class OAuthRouteDecisionHandler: RouteDecisionHandler {
             return .cancel
         }
 
-        if location.path == "/auth/kakao" {
+        if path == "/auth/kakao" {
             NativeKakaoSignInCoordinator.shared.start { callbackURL in
                 guard let callbackURL else {
                     authLogger.error("OAuthRouteDecisionHandler native Kakao flow returned no callback url")

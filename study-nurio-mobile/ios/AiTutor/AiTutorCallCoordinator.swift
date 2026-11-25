@@ -51,7 +51,16 @@ final class AiTutorCallCoordinator {
         }
 
         if activeCall != nil {
-            return activeJoinURL == endpoints.joinURL ? .alreadyActive : .busy
+            guard let activeJoinURL,
+                  let active = URLComponents(url: activeJoinURL, resolvingAgainstBaseURL: false),
+                  let requested = URLComponents(url: endpoints.joinURL, resolvingAgainstBaseURL: false) else {
+                return .busy
+            }
+            let sameCall = active.scheme?.lowercased() == requested.scheme?.lowercased() &&
+                active.host?.lowercased() == requested.host?.lowercased() &&
+                LocalePath.stripLocalePrefix(active.percentEncodedPath) == LocalePath.stripLocalePrefix(requested.percentEncodedPath) &&
+                active.percentEncodedQuery == requested.percentEncodedQuery
+            return sameCall ? .alreadyActive : .busy
         }
 
         guard let presenter, presenter.viewIfLoaded?.window != nil else {

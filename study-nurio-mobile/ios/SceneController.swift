@@ -26,7 +26,7 @@ enum AiPracticeNativePolicy {
             return false
         }
 
-        return components.percentEncodedPath.range(
+        return LocalePath.stripLocalePrefix(components.percentEncodedPath).range(
             of: sessionPathPattern,
             options: .regularExpression
         ) != nil
@@ -41,8 +41,9 @@ enum AiPracticeNativePolicy {
             return false
         }
 
+        let normalized = LocalePath.stripLocalePrefix(path)
         return [sessionPathPattern, placementSpeakingPathPattern].contains { pattern in
-            path.range(of: pattern, options: .regularExpression) != nil
+            normalized.range(of: pattern, options: .regularExpression) != nil
         }
     }
 

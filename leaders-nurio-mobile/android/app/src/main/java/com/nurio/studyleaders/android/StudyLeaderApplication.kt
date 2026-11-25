@@ -52,7 +52,7 @@ class StudyLeaderApplication : Application() {
             if (BuildConfig.DEBUG_LOGGING) HotwireLogLevel.DEBUG else HotwireLogLevel.NONE
         Hotwire.config.webViewDebuggingEnabled = BuildConfig.DEBUG
 
-        Hotwire.config.applicationUserAgentPrefix = "Nurio Study Leader Android"
+        Hotwire.config.applicationUserAgentPrefix = "Nurio Study Leader Android; NurioLocalePaths/1;"
 
         // Bridge components (sign-in-with-oauth, register-device-token) decode/encode
         // message JSON through Hotwire.config.jsonConverter. It is null by default in

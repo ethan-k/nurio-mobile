@@ -26,6 +26,13 @@ class AiPracticeNativePolicyTest {
     }
 
     @Test
+    fun `recognizes a locale prefixed practice session and trusts its microphone request`() {
+        val location = "$baseUrl/ko/practice/12"
+        assertTrue(AiPracticeNativePolicy.isSessionLocation(location))
+        assertTrue(AiPracticeNativePolicy.isTrustedMicrophoneRequest(baseUrl, location, baseUrl))
+    }
+
+    @Test
     fun `trusts microphone capture only on a configured-origin practice session`() {
         assertTrue(
             AiPracticeNativePolicy.isTrustedMicrophoneRequest(

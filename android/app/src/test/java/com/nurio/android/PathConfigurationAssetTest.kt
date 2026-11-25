@@ -13,6 +13,55 @@ import org.junit.Test
 
 class PathConfigurationAssetTest {
     @Test
+    fun `locale prefixes preserve bundled path configuration properties`() {
+        val asset = listOf(
+            File("src/main/assets/json/path-configuration.json"),
+            File("app/src/main/assets/json/path-configuration.json")
+        ).first(File::isFile)
+        val rules = Json.parseToJsonElement(asset.readText()).jsonObject.getValue("rules").jsonArray
+        val paths = listOf(
+            "/orders/new",
+            "/orders/new?event_id=12",
+            "/orders/12/payment_summary",
+            "/pass_packages/4/purchase",
+            "/pass_packages/4/payment_summary",
+            "/chat?lang=ko",
+            "/events/12/chat",
+            "/friendships/12/chat",
+            "/clubs/seoul/chat",
+            "/clubs/seoul/plans/9/chat",
+            "/korean-program/cohorts/3/chat",
+            "/new",
+            "/edit",
+            "/settings",
+        )
+        val patternsByRule = rules.associateWith { rule ->
+            rule.jsonObject.getValue("patterns").jsonArray.map { Regex(it.jsonPrimitive.content) }
+        }
+        fun propertiesFor(path: String) = rules.filter { rule ->
+            patternsByRule.getValue(rule).any { it.containsMatchIn(path) }
+        }.flatMap { rule ->
+            rule.jsonObject.getValue("properties").jsonObject.entries
+        }.associate { it.key to it.value }
+
+        for (path in paths) {
+            for (locale in listOf("en", "ko", "KO")) {
+                val prefixed = "/$locale$path"
+                assertEquals(prefixed, propertiesFor(path), propertiesFor(prefixed))
+            }
+        }
+        patternsByRule.values.flatten().filter { it.pattern.startsWith("^") }.forEach { pattern ->
+            val samples = paths.filter { pattern.containsMatchIn(it) }
+            assertTrue("Missing sample for ${pattern.pattern}", samples.isNotEmpty())
+            for (path in samples) {
+                for (locale in listOf("en", "ko", "KO")) {
+                    assertTrue("${pattern.pattern} must match /$locale$path", pattern.containsMatchIn("/$locale$path"))
+                }
+            }
+        }
+    }
+
+    @Test
     fun `bundled path configuration keeps the native sign-in destinations out of modals`() {
         val asset = listOf(
             File("src/main/assets/json/path-configuration.json"),

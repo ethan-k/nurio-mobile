@@ -5,6 +5,106 @@ import SwiftUI
 @testable import Nurio
 
 final class NurioTests: XCTestCase {
+    func testLocalePathStripsOnlyTheFirstLocaleSegment() {
+        let cases = [
+            ("/ko/events", "/events"),
+            ("/en", "/"),
+            ("/ko/", "/"),
+            ("/KO/events", "/events"),
+            ("/korean-program", "/korean-program"),
+            ("/kor/x", "/kor/x"),
+            ("/english", "/english"),
+            ("/events/ko", "/events/ko"),
+            ("/ko-kr/x", "/ko-kr/x"),
+            ("/Ko/x", "/Ko/x"),
+            ("/ko/en/x", "/en/x"),
+            ("/en?next=/ko#top", "/?next=/ko#top"),
+            ("/KO/events?lang=en#top", "/events?lang=en#top"),
+            ("/ko//x", "/x"),
+            ("/ko///x?next=//y#//top", "/x?next=//y#//top"),
+            ("//admin", "//admin"),
+            ("/events", "/events"),
+            ("", ""),
+        ]
+        for (path, expected) in cases {
+            XCTAssertEqual(LocalePath.stripLocalePrefix(path), expected, path)
+        }
+    }
+
+    func testLocalePrefixPreservesScopePolicy() {
+        let baseURL = URL(string: "https://nurio.kr")!
+        for path in ["/ko/admin", "/ko//admin", "/en/admin/x", "/ko/tutoring"] {
+            XCTAssertTrue(CustomerScopePolicy.isBlocked(URL(string: path, relativeTo: baseURL)!.absoluteURL, appHost: baseURL.host), path)
+        }
+        XCTAssertFalse(CustomerScopePolicy.isBlocked(baseURL.appendingPathComponent("ko/events"), appHost: baseURL.host))
+    }
+
+    func testLocalePrefixesPreserveBundledPathConfigurationProperties() throws {
+        let asset = try XCTUnwrap(
+            Bundle(for: AppDelegate.self).url(forResource: AppEnvironment.pathConfigurationResourceName, withExtension: "json")
+        )
+        let configuration = PathConfiguration(sources: [.file(asset)])
+        let paths = [
+            "/orders/new",
+            "/orders/new?event_id=12",
+            "/orders/12/payment_summary",
+            "/pass_packages/4/purchase",
+            "/pass_packages/4/payment_summary",
+            "/chat?lang=ko",
+            "/events/12/chat",
+            "/friendships/12/chat",
+            "/clubs/seoul/chat",
+            "/clubs/seoul/plans/9/chat",
+            "/korean-program/cohorts/3/chat",
+            "/new",
+            "/edit",
+            "/settings",
+        ]
+        let data = try Data(contentsOf: asset)
+        let json = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        let rules = try XCTUnwrap(json["rules"] as? [[String: Any]])
+        for pattern in rules.flatMap({ $0["patterns"] as? [String] ?? [] }) where pattern.hasPrefix("^") {
+            let regex = try NSRegularExpression(pattern: pattern)
+            func matches(_ path: String) -> Bool {
+                regex.firstMatch(in: path, range: NSRange(path.startIndex..., in: path)) != nil
+            }
+            let samples = paths.filter(matches)
+            XCTAssertFalse(samples.isEmpty, "Missing sample for \(pattern)")
+            for sample in samples {
+                for locale in ["en", "ko", "KO"] {
+                    XCTAssertTrue(matches("/\(locale)\(sample)"), pattern)
+                }
+            }
+        }
+        for path in paths {
+            let expected = configuration.properties(for: path)
+            for locale in ["en", "ko", "KO"] {
+                let prefixed = "/\(locale)\(path)"
+                XCTAssertEqual(configuration.properties(for: prefixed), expected, prefixed)
+            }
+        }
+    }
+
+    @MainActor
+    func testHotwireAdvertisesLocalePathSupport() {
+        let prefix = Hotwire.config.applicationUserAgentPrefix
+        XCTAssertTrue(prefix?.contains("NurioLocalePaths/1;") == true)
+    }
+
+    func testLocalePrefixedPushRoutesToTheSameScreen() {
+        let baseURL = URL(string: "https://nurio.kr")!
+        let visible = baseURL.appendingPathComponent("events/12/chat")
+        let push = ["path": "/ko/events/12/chat?lang=en#latest"]
+        XCTAssertTrue(PushNotificationRoute.isShowing(push, visibleURL: visible, baseURL: baseURL))
+        XCTAssertEqual(
+            PushNotificationRoute.destinationURL(from: push, baseURL: baseURL)?.absoluteString,
+            "https://nurio.kr/ko/events/12/chat?lang=en#latest"
+        )
+        XCTAssertNil(PushNotificationRoute.destinationURL(from: ["path": "/ko/admin"], baseURL: baseURL))
+        XCTAssertNil(PushNotificationRoute.destinationURL(from: ["path": "/ko//admin"], baseURL: baseURL))
+    }
+
+
     @MainActor
     func testWebViewPlaysVideoInlineSoTheQRScannerPreviewStaysOnThePage() {
         let webView = AppDelegate.makeWebView(configuration: WKWebViewConfiguration())

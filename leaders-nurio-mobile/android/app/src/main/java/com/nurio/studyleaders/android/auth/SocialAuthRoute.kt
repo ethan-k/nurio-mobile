@@ -1,5 +1,6 @@
 package com.nurio.studyleaders.android.auth
 
+import com.nurio.studyleaders.android.LocalePath
 import java.net.URI
 import java.net.URISyntaxException
 import java.util.Locale
@@ -51,7 +52,7 @@ data class SocialAuthRoute(
                     return null
                 }
 
-                val provider = SocialAuthProvider.fromPath(resolvedUri.rawPath) ?: return null
+                val provider = SocialAuthProvider.fromPath(LocalePath.strip(resolvedUri.rawPath)) ?: return null
                 SocialAuthRoute(provider, resolvedUri.toString())
             } catch (_: URISyntaxException) {
                 null

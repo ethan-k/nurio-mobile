@@ -11,7 +11,7 @@ enum LeaderScopePolicy {
         }
 
         let host = url.host?.lowercased() ?? ""
-        let path = url.path.lowercased()
+        let path = LocalePath.stripLocalePrefix(url.path).lowercased()
 
         guard let appHost, host == appHost else { return true }
 

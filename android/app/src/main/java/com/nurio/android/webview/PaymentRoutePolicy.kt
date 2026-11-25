@@ -1,15 +1,17 @@
 package com.nurio.android.webview
 
+import com.nurio.android.LocalePath
 internal object PaymentRoutePolicy {
     fun isCheckoutEntryPath(path: String): Boolean {
-        return path == "/orders/new" ||
-            path.endsWith("/payment_summary") ||
-            path.endsWith("/purchase") ||
-            EVENT_DETAIL_PATH.matches(path) ||
-            PASS_PACKAGE_PATH.matches(path)
+        val normalized = LocalePath.strip(path)
+        return normalized == "/orders/new" ||
+            normalized.endsWith("/payment_summary") ||
+            normalized.endsWith("/purchase") ||
+            EVENT_DETAIL_PATH.matches(normalized) ||
+            PASS_PACKAGE_PATH.matches(normalized)
     }
 
-    fun isPaymentCompletionPath(path: String): Boolean = path == "/payments/portone/complete"
+    fun isPaymentCompletionPath(path: String): Boolean = LocalePath.strip(path) == "/payments/portone/complete"
 
     fun shouldKeepPaymentPopupWebUrl(scheme: String?, paymentActive: Boolean): Boolean {
         return paymentActive && scheme?.lowercase() in WEB_SCHEMES

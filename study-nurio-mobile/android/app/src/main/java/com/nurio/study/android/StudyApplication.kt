@@ -41,7 +41,7 @@ class StudyApplication : Application() {
         Hotwire.config.debugLoggingEnabled = BuildConfig.DEBUG_LOGGING
         Hotwire.config.webViewDebuggingEnabled = BuildConfig.DEBUG
 
-        Hotwire.config.applicationUserAgentPrefix = "Nurio Study Android"
+        Hotwire.config.applicationUserAgentPrefix = "Nurio Study Android; NurioLocalePaths/1;"
 
         // Bridge components (sign-in-with-oauth, register-device-token) decode/encode
         // message JSON through Hotwire.config.jsonConverter. It is null by default, so

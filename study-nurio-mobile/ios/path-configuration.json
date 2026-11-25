@@ -82,7 +82,7 @@
     },
     {
       "patterns": [
-        "^/placement(?:[/?]|$)"
+        "^(?:/(?:[eE][nN]|[kK][oO]))?/placement(?:[/?]|$)"
       ],
       "properties": {
         "context": "default",
@@ -100,9 +100,9 @@
     },
     {
       "patterns": [
-        "^/chat(?:\\?.*)?$",
-        "^/study-groups/[^/]+/chat(?:[/?]|$)",
-        "^/study_group_admin/chats(?:[/?]|$)"
+        "^(?:/(?:[eE][nN]|[kK][oO]))?/chat(?:\\?.*)?$",
+        "^(?:/(?:[eE][nN]|[kK][oO]))?/study-groups/[^/]+/chat(?:[/?]|$)",
+        "^(?:/(?:[eE][nN]|[kK][oO]))?/study_group_admin/chats(?:[/?]|$)"
       ],
       "properties": {
         "pull_to_refresh_enabled": false

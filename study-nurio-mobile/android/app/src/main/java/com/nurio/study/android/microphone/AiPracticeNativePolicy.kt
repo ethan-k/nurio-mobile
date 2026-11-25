@@ -1,5 +1,6 @@
 package com.nurio.study.android.microphone
 
+import com.nurio.study.android.LocalePath
 import java.net.URI
 
 internal object AiPracticeNativePolicy {
@@ -9,12 +10,14 @@ internal object AiPracticeNativePolicy {
     fun isSessionLocation(location: String): Boolean {
         return runCatching { URI(location).rawPath }
             .getOrNull()
+            ?.let(LocalePath::strip)
             ?.matches(sessionPath) == true
     }
 
     private fun isMicrophonePageLocation(location: String): Boolean {
         val path = runCatching { URI(location).rawPath }.getOrNull() ?: return false
-        return path.matches(sessionPath) || path.matches(placementSpeakingPath)
+        val normalized = LocalePath.strip(path)
+        return normalized.matches(sessionPath) || normalized.matches(placementSpeakingPath)
     }
 
     fun isTrustedMicrophoneRequest(

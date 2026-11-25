@@ -1,5 +1,6 @@
 package com.nurio.studyleaders.android.routing
 
+import com.nurio.studyleaders.android.LocalePath
 import java.net.URI
 import java.util.Locale
 
@@ -16,7 +17,7 @@ internal object LeaderScopePolicy {
             if (scheme !in webSchemes) return false
             if (!sameOrigin(resolvedUri, appUri)) return true
 
-            val path = resolvedUri.path.orEmpty().lowercase(Locale.ROOT)
+            val path = LocalePath.strip(resolvedUri.path.orEmpty()).lowercase(Locale.ROOT)
             blockedPrefixes.any { prefix ->
                 path == prefix || path.startsWith("$prefix/")
             }

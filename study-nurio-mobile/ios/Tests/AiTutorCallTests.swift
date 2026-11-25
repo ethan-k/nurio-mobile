@@ -232,6 +232,27 @@ final class AiTutorCallTests: XCTestCase {
         XCTAssertTrue(launcher.launches.isEmpty)
     }
 
+    func testLocalizedJoinURLIdentifiesTheSameActiveCall() {
+        let launcher = AiTutorCallLauncherSpy()
+        let coordinator = AiTutorCallCoordinator(baseURL: baseURL, launcher: launcher)
+        let presenter = visiblePresenter()
+        let joinPath = "/practice/12/ai_tutor/join"
+
+        XCTAssertEqual(
+            coordinator.handleStart(startData(joinUrl: "\(joinPath)?attempt=1"), presenter: presenter),
+            .started
+        )
+        XCTAssertEqual(
+            coordinator.handleStart(startData(joinUrl: "/ko\(joinPath)?attempt=1"), presenter: presenter),
+            .alreadyActive
+        )
+        XCTAssertEqual(
+            coordinator.handleStart(startData(joinUrl: "/ko\(joinPath)?attempt=2"), presenter: presenter),
+            .busy
+        )
+        XCTAssertEqual(launcher.launches.count, 1)
+    }
+
     func testBridgeRepliesPresentedOnlyWhenNativeOwnsTheCall() throws {
         XCTAssertTrue(AiTutorCallComponent.shouldReplyPresented(to: .started))
         XCTAssertTrue(AiTutorCallComponent.shouldReplyPresented(to: .alreadyActive))

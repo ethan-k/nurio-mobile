@@ -31,7 +31,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             .file(Bundle.main.url(forResource: AppEnvironment.pathConfigurationResourceName, withExtension: "json")!)
         ])
 
-        Hotwire.config.applicationUserAgentPrefix = "Nurio Tutors iOS;"
+        Hotwire.config.applicationUserAgentPrefix = "Nurio Tutors iOS; NurioLocalePaths/1;"
         Hotwire.config.backButtonDisplayMode = .minimal
         Hotwire.config.showDoneButtonOnModals = true
 

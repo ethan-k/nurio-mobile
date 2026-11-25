@@ -1,5 +1,6 @@
 package com.nurio.android.routing
 
+import com.nurio.android.LocalePath
 import androidx.browser.customtabs.CustomTabColorSchemeParams
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.net.toUri
@@ -25,7 +26,7 @@ class OAuthRouteDecisionHandler : Router.RouteDecisionHandler {
 
         return startLocationUri.host == locationUri.host &&
             (locationUri.scheme?.lowercase() == "https" || locationUri.scheme?.lowercase() == "http") &&
-            oauthPaths.contains(locationUri.path)
+            oauthPaths.contains(LocalePath.strip(locationUri.path.orEmpty()))
     }
 
     override fun handle(

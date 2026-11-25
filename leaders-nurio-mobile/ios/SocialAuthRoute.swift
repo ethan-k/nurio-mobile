@@ -7,7 +7,7 @@ enum SocialAuthProvider: Equatable {
     case apple
 
     init?(path: String) {
-        switch path {
+        switch LocalePath.stripLocalePrefix(path) {
         case "/auth/google_oauth2":
             self = .google
         case "/auth/kakao":

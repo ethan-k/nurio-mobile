@@ -1,18 +1,13 @@
 package com.nurio.android.notifications
 
+import com.nurio.android.LocalePath
+import com.nurio.android.routing.CustomerScopePolicy
 import java.net.URI
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
 internal object NotificationRoute {
     const val REFRESH_QUERY_PARAMETER = "_native_refresh"
-
-    private val blockedPathPrefixes = listOf(
-        "/admin",
-        "/tutoring",
-        "/tutors",
-        "/study_group_admin",
-    )
 
     fun destination(path: String?, baseUrl: String): String? {
         val value = path?.trim()?.takeIf { it.isNotEmpty() } ?: return null
@@ -29,13 +24,7 @@ internal object NotificationRoute {
         val candidateHost = candidate.host?.lowercase() ?: return null
         if (candidateHost != baseHost && candidateHost != "www.$baseHost") return null
 
-        val normalizedPath = candidate.path.orEmpty().lowercase()
-        if (blockedPathPrefixes.any { prefix ->
-                normalizedPath == prefix || normalizedPath.startsWith("$prefix/")
-            }
-        ) {
-            return null
-        }
+        if (CustomerScopePolicy.isBlockedPath(candidate.path.orEmpty())) return null
 
         return if (candidateHost == "www.$baseHost") {
             URI(
@@ -65,7 +54,7 @@ internal object NotificationRoute {
     }
 
     private fun normalizedPath(uri: URI): String =
-        uri.path.orEmpty().trimEnd('/').ifEmpty { "/" }
+        LocalePath.strip(uri.path.orEmpty()).trimEnd('/').ifEmpty { "/" }
 
     fun refreshingDestination(destination: String, token: String): String {
         val fragment = destination.substringAfter('#', missingDelimiterValue = "")

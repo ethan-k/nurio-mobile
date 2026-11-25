@@ -31,7 +31,7 @@ enum NotificationDestination {
     }
 
     private static func normalizedPath(_ url: URL) -> String {
-        let path = url.path
+        let path = LocalePath.stripLocalePrefix(url.path)
         guard path.count > 1, path.hasSuffix("/") else { return path.isEmpty ? "/" : path }
         return String(path.dropLast())
     }
@@ -97,7 +97,7 @@ enum NotificationDestination {
     }
 
     private static func isBlocked(_ path: String) -> Bool {
-        let normalized = path.lowercased()
+        let normalized = LocalePath.stripLocalePrefix(path).lowercased()
         return blockedPrefixes.contains { prefix in
             normalized == prefix || normalized.hasPrefix("\(prefix)/")
         }

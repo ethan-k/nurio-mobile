@@ -12,6 +12,7 @@
 		A00000000000000000000003 /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000033 /* AppEnvironment.swift */; };
 		A00000000000000000000004 /* AppRouteCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000034 /* AppRouteCoordinator.swift */; };
 		A00000000000000000000005 /* StudyScopePolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000035 /* StudyScopePolicy.swift */; };
+		4560C8C23E3445EC99F08785 /* LocalePath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8958BD7AB41749E09B74253B /* LocalePath.swift */; };
 		A00000000000000000000006 /* NativeAuthCallback.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000036 /* NativeAuthCallback.swift */; };
 		A00000000000000000000007 /* OAuthSessionCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000037 /* OAuthSessionCoordinator.swift */; };
 		A00000000000000000000008 /* UIApplication+KeyWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00000000000000000000038 /* UIApplication+KeyWindow.swift */; };
@@ -73,6 +74,7 @@
 		A00000000000000000000033 /* AppEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppEnvironment.swift; sourceTree = "<group>"; };
 		A00000000000000000000034 /* AppRouteCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRouteCoordinator.swift; sourceTree = "<group>"; };
 		A00000000000000000000035 /* StudyScopePolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudyScopePolicy.swift; sourceTree = "<group>"; };
+		8958BD7AB41749E09B74253B /* LocalePath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalePath.swift; sourceTree = "<group>"; };
 		A00000000000000000000036 /* NativeAuthCallback.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeAuthCallback.swift; sourceTree = "<group>"; };
 		A00000000000000000000037 /* OAuthSessionCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAuthSessionCoordinator.swift; sourceTree = "<group>"; };
 		A00000000000000000000038 /* UIApplication+KeyWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIApplication+KeyWindow.swift"; sourceTree = "<group>"; };
@@ -196,6 +198,7 @@
 				A00000000000000000000048 /* NativeAppleSignInCoordinator.swift */,
 				A00000000000000000000034 /* AppRouteCoordinator.swift */,
 				A00000000000000000000035 /* StudyScopePolicy.swift */,
+				8958BD7AB41749E09B74253B /* LocalePath.swift */,
 				A00000000000000000000036 /* NativeAuthCallback.swift */,
 				A00000000000000000000037 /* OAuthSessionCoordinator.swift */,
 				A00000000000000000000038 /* UIApplication+KeyWindow.swift */,
@@ -467,6 +470,7 @@
 				A00000000000000000000003 /* AppEnvironment.swift in Sources */,
 				A00000000000000000000004 /* AppRouteCoordinator.swift in Sources */,
 				A00000000000000000000005 /* StudyScopePolicy.swift in Sources */,
+				4560C8C23E3445EC99F08785 /* LocalePath.swift in Sources */,
 				A00000000000000000000006 /* NativeAuthCallback.swift in Sources */,
 				A00000000000000000000007 /* OAuthSessionCoordinator.swift in Sources */,
 				A00000000000000000000008 /* UIApplication+KeyWindow.swift in Sources */,

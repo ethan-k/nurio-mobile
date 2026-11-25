@@ -13,7 +13,7 @@ enum StudyScopePolicy {
         }
 
         let host = url.host?.lowercased() ?? ""
-        let path = url.path.lowercased()
+        let path = LocalePath.stripLocalePrefix(url.path).lowercased()
 
         if host.hasPrefix("tutors.") {
             return true

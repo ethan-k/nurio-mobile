@@ -1,5 +1,6 @@
 package com.nurio.android.capture
 
+import com.nurio.android.LocalePath
 import java.net.URI
 
 internal object WebCapturePolicy {
@@ -15,7 +16,8 @@ internal object WebCapturePolicy {
 
         return requestedOrigin == trustedOrigin &&
             currentOrigin == trustedOrigin &&
-            runCatching { URI(currentLocation).rawPath }.getOrNull()?.matches(allowedPath) == true
+            runCatching { URI(currentLocation).rawPath }.getOrNull()
+                ?.let(LocalePath::strip)?.matches(allowedPath) == true
     }
 
     fun grantableResources(

@@ -24,6 +24,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Lifecycle
+import com.nurio.android.routing.CustomerScopePolicy
 import com.nurio.android.camera.CameraPermissionHost
 import com.nurio.android.capture.CapturePermissionRequestAction
 import com.nurio.android.capture.CapturePermissionRequestState
@@ -413,10 +414,7 @@ class MainActivity :
         val host = uri.host?.lowercase() ?: return false
         if (host != baseHost && host != "www.$baseHost") return false
 
-        val path = uri.path.orEmpty().lowercase()
-        return blockedPathPrefixes.none { prefix ->
-            path == prefix || path.startsWith("$prefix/")
-        }
+        return !CustomerScopePolicy.isBlockedPath(uri.path.orEmpty())
     }
 
     private fun normalizeAppUri(uri: Uri): Uri {
@@ -572,11 +570,5 @@ class MainActivity :
         private const val TAG = "MainActivity"
         private const val NOTIFICATION_PERMISSION_REQUEST_CODE = 1001
         private const val PAYMENT_RETURN_GRACE_PERIOD_MILLIS = 2_000L
-        private val blockedPathPrefixes = listOf(
-            "/admin",
-            "/tutoring",
-            "/tutors",
-            "/study_group_admin"
-        )
     }
 }

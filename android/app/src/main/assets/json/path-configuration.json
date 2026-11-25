@@ -106,7 +106,7 @@
     },
     {
       "patterns": [
-        "^/orders/new(?:\\?.*)?$"
+        "^(?:/(?:[eE][nN]|[kK][oO]))?/orders/new(?:\\?.*)?$"
       ],
       "properties": {
         "context": "default",
@@ -116,11 +116,11 @@
     },
     {
       "patterns": [
-        "^/chat(?:\\?.*)?$",
-        "^/events/\\d+/chat(?:[/?]|$)",
-        "^/friendships/\\d+/chat(?:[/?]|$)",
-        "^/clubs/[^/]+/(?:plans/\\d+/)?chat(?:[/?]|$)",
-        "^/korean-program/cohorts/\\d+/chat(?:[/?]|$)"
+        "^(?:/(?:[eE][nN]|[kK][oO]))?/chat(?:\\?.*)?$",
+        "^(?:/(?:[eE][nN]|[kK][oO]))?/events/\\d+/chat(?:[/?]|$)",
+        "^(?:/(?:[eE][nN]|[kK][oO]))?/friendships/\\d+/chat(?:[/?]|$)",
+        "^(?:/(?:[eE][nN]|[kK][oO]))?/clubs/[^/]+/(?:plans/\\d+/)?chat(?:[/?]|$)",
+        "^(?:/(?:[eE][nN]|[kK][oO]))?/korean-program/cohorts/\\d+/chat(?:[/?]|$)"
       ],
       "properties": {
         "pull_to_refresh_enabled": false

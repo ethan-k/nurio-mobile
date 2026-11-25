@@ -50,7 +50,7 @@ class NurioApplication : Application() {
         // fetch runs inside this WebView, so DeviceToken#user_agent records it.
         Hotwire.config.applicationUserAgentPrefix =
             "Nurio Android; NurioPaymentReturn/1; NurioImageCache/1; nurio-messaging-style/1; " +
-            "NurioApp/${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})"
+            "NurioApp/${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE}); NurioLocalePaths/1;"
 
         // Bridge components (sign-in-with-oauth, register-device-token) decode/encode
         // message JSON through Hotwire.config.jsonConverter. It is null by default, so

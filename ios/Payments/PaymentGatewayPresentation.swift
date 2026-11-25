@@ -105,7 +105,7 @@ final class PaymentGatewayPresentation {
     }
 
     nonisolated static func isCompletionURL(_ url: URL, baseURL: URL) -> Bool {
-        CheckoutNavigation.isSafeReloadURL(url, baseURL: baseURL) && url.path == "/payments/portone/complete"
+        CheckoutNavigation.isSafeReloadURL(url, baseURL: baseURL) && LocalePath.stripLocalePrefix(url.path) == "/payments/portone/complete"
     }
 
     func presentGateway(navigator: Navigator) {
